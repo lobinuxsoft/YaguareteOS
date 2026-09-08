@@ -75,5 +75,5 @@ jobs:
             exit 1
           fi
           echo "Found image: $tag"
-          skopeo copy "containers-storage:${tag}" \
+          buildah unshare skopeo copy "containers-storage:${tag}" \
             "docker://ghcr.io/${{ github.repository_owner }}/yaguareteos:test"

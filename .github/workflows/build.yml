@@ -1,216 +1,58 @@
-name: Build Anatase
+name: Build YaguareteOS (validation)
 
 on:
-  schedule:
-    - cron: "5 0 * * 1"
-  workflow_dispatch:
-    inputs:
-      refresh_cache:
-        description: Refresh Cache
-        required: false
-        type: boolean
-        default: false
-    #   arm:
-    #     description: Build the ARM image
-    #     required: false
-    #     type: boolean
-    #     default: false
+  workflow_dispatch: {}
   push:
     branches:
-      - main
       - master
-      - testing
     paths-ignore:
       - 'docs/**'
       - '.github/workflows/**'
       - '*.md'
       - 'LICENSE'
-      - 'COPYIRIGHT'
+      - 'COPYRIGHT'
       - '.gitignore'
 
 permissions:
-  contents: write
-  packages: write
-  id-token: write
-
-env:
-  LUDOS_CHANNEL: ${{ github.ref_name == 'testing' && 'testing' || 'rolling' }}
+  contents: read
 
 concurrency:
   group: build
-  queue: single
+  cancel-in-progress: true
 
 jobs:
-  x86:
-    name: Build x86_64
-    uses: ./.github/workflows/build-reusable.yml
-    with:
-      arch: x86_64
-      refresh_cache: ${{ github.event_name == 'workflow_dispatch' && inputs.refresh_cache || false }}
-      release_outputs: ${{ github.event_name != 'schedule' }}
-    secrets: inherit
-
-  # arm:
-  #   name: Build aarch64
-  #   if: ${{ inputs.arm }}
-  #   uses: ./.github/workflows/build-reusable.yml
-  #   with:
-  #     arch: aarch64
-  #   secrets: inherit
-
-  publish:
-    name: Publish multi-platform image
-    environment: prod
-    needs:
-      - x86
-      # - arm
-    if: >-
-      ${{
-        (!cancelled()) &&
-        github.event_name != 'schedule' &&
-        needs.x86.result == 'success' &&
-        needs.x86.outputs.images != '[]'
-        }}
+  build:
+    name: Build (single job, no publish)
     runs-on: ubuntu-26.04
-        # Add this later
-        # &&
-        # (needs.arm.result == 'success' || needs.arm.result == 'skipped')
-
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          fetch-depth: 100
-          token: ${{ secrets.ANATASE_READ }}
-          persist-credentials: false
           submodules: recursive
 
       - name: Install ludos
-        run: ./ludos/prepare.sh images
+        run: ./ludos/prepare.sh base
 
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-          create_credentials_file: true
-          token_format: access_token
-
-      - name: Resolve image version
-        id: image
-        env:
-          ARM_ENABLED: ${{ inputs.arm }}
+      - name: Free disk space
         run: |
-          version=$(skopeo inspect --no-tags \
-            docker://i.anatase.org/anatase:x86_64 \
-            | jq -r '.Labels["org.opencontainers.image.version"] // empty')
-          if [[ -z "$version" ]]; then
-            echo "x86_64 image has no version label" >&2
-            exit 1
-          fi
+          df -h
+          sudo swapoff -a
+          sudo rm -f /swapfile
+          shopt -s nullglob
+          printf '%s\0' /opt/PyPy /opt/az /opt/node/ /opt/pipx /opt/go /opt/Ruby \
+              /usr/lib/llvm-* /usr/local/julia* /usr/local/lib/android /usr/share/dotnet \
+              /usr/share/swift /usr/local/.ghcup /usr/lib/firefox /opt/google/chrome \
+              /opt/microsoft/msedge \
+              | sudo xargs -0 -n1 -P4 rm -rf
+          df -h
 
-          include_arm=false
-          if arm_info=$(skopeo inspect --no-tags \
-              docker://i.anatase.org/anatase:aarch64 2>/dev/null); then
-            include_arm=true
-            arm_version=$(jq -r \
-              '.Labels["org.opencontainers.image.version"] // empty' \
-              <<< "$arm_info")
-          elif [[ "$ARM_ENABLED" == "true" ]]; then
-            echo "The requested aarch64 image was not published" >&2
-            exit 1
-          fi
-
-          if [[ "$ARM_ENABLED" == "true" ]]; then
-            if [[ "$arm_version" != "$version" ]]; then
-              echo "Architecture image versions differ: x86_64=$version aarch64=$arm_version" >&2
-              exit 1
-            fi
-          fi
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "include_arm=$include_arm" >> "$GITHUB_OUTPUT"
-
-      - name: Generate changelog
-        run: |
-          if ! skopeo --override-arch amd64 inspect --no-tags \
-              "docker://i.anatase.org/anatase:$LUDOS_CHANNEL" \
-              > previous-channel.json; then
-            echo "No existing $LUDOS_CHANNEL image; skipping changelog"
-            : > changelog.md
-            exit 0
-          fi
-          skopeo inspect --no-tags \
-            docker://i.anatase.org/anatase:x86_64 \
-            > current-x86_64.json
-          venv/bin/python .github/changelog.py \
-            previous-channel.json current-x86_64.json \
-            --channel "$LUDOS_CHANNEL" > changelog.md
-
-      - name: Publish OCI image index
-        env:
-          INCLUDE_ARM: ${{ steps.image.outputs.include_arm }}
-          LUDOS_S3_API: ${{ secrets.LUDOS_S3_API }}
-          LUDOS_S3_KEY: ${{ secrets.LUDOS_S3_KEY }}
-          LUDOS_S3_SECRET: ${{ secrets.LUDOS_S3_SECRET }}
-          LUDOS_COSIGN_KEY: ${{ secrets.LUDOS_COSIGN_KEY }}
-          LUDOS_COSIGN_CERT: ${{ secrets.LUDOS_COSIGN_CERT }}
-        run: |
-          sources=(--source-tag x86_64)
-          tags=(--tag "$LUDOS_CHANNEL")
-          if [[ "$INCLUDE_ARM" == "true" ]]; then
-            sources+=(--source-tag aarch64)
-          fi
-          if [[ "$LUDOS_CHANNEL" == "rolling" ]]; then
-            tags+=(--tag latest)
-          fi
-          venv/bin/ludos registry oci index anatase \
-            "${tags[@]}" "${sources[@]}"
-
-      - name: Archive image manifest
-        env:
-          VERSION: ${{ steps.image.outputs.version }}
-          LUDOS_S3_API: ${{ secrets.LUDOS_S3_API }}
-          LUDOS_S3_KEY: ${{ secrets.LUDOS_S3_KEY }}
-          LUDOS_S3_SECRET: ${{ secrets.LUDOS_S3_SECRET }}
-          LUDOS_GPG_CERT: ${{ secrets.LUDOS_GPG_CERT }}
-          LUDOS_GPG_KEY: ${{ secrets.LUDOS_GPG_KEY }}
-        run: |
-          skopeo --override-arch amd64 inspect --no-tags \
-            "docker://i.anatase.org/anatase:$LUDOS_CHANNEL" \
-            > final-manifest.json
-          venv/bin/ludos registry file upload \
-            final-manifest.json \
-            "releases/anatase/$LUDOS_CHANNEL/$VERSION.json" \
-            "$VERSION.json" \
-            --sign
-
-      - name: Create GitHub prerelease
-        id: release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.image.outputs.version }}
-        run: |
-          channel_title="${LUDOS_CHANNEL^}"
-          release_tag="$VERSION"
-          if [[ "$LUDOS_CHANNEL" == "testing" ]]; then
-            release_tag="testing-$VERSION"
-          fi
-          gh release create "$release_tag" \
-            --target "$GITHUB_SHA" \
-            --title "$VERSION: $channel_title Release" \
-            --notes-file changelog.md \
-            --prerelease
-          release_url=$(gh release view "$release_tag" --json url --jq '.url')
-          echo "url=$release_url" >> "$GITHUB_OUTPUT"
-
-      - name: Announce prerelease on Discord
-        env:
-          DISCORD_ROLE_ID: ${{ secrets.DISCORD_ROLE_ROLLING }}
-          DISCORD_THREAD_ID: ${{ secrets.DISCORD_ROLLING_THREAD }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          RELEASE_URL: ${{ steps.release.outputs.url }}
-          VERSION: ${{ steps.image.outputs.version }}
-        run: |
-          .github/discord-notify.sh \
-            "$LUDOS_CHANNEL" "$VERSION" "$RELEASE_URL"
+      # NOTA: esto NO es el flujo de Anatase (matrix fan-out multi-job vía
+      # `ludos ci prepare`/`ludos ci seed`, coordinado por su bucket S3
+      # i.anatase.org). Ese mecanismo requiere la infraestructura S3 que
+      # decidimos no replicar (ver README/plan del fork). Este workflow solo
+      # valida que `ludos build` termine sin errores en un runner limpio, sin
+      # el problema de SELinux enforcing que bloquea el build local en
+      # Bazzite. Sin publish todavía -- artifacts locales al runner, se
+      # descartan al terminar el job.
+      - name: Build image
+        run: venv/bin/ludos build YaguareteOS.yml

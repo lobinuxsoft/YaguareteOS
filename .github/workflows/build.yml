@@ -55,8 +55,13 @@ jobs:
       # el problema de SELinux enforcing que bloquea el build local en
       # Bazzite. Sin publish todavía -- artifacts locales al runner, se
       # descartan al terminar el job.
-      - name: Build image
-        run: venv/bin/ludos build YaguareteOS.yml
+      # `ludos build` alone only composes the rootfs -- it does not produce
+      # a bootc-labeled (ostree.bootable) OCI image, which is why the first
+      # test here failed at `bootc switch` ("Target image does not have
+      # ostree.bootable label"). `ludos bootc create` runs the same card
+      # composition AND the bootc/rechunk encapsulation on top.
+      - name: Build bootc image
+        run: venv/bin/ludos bootc create YaguareteOS.yml
 
       # Push the freshly built local image to our own GHCR so it can be
       # pulled/bootc-switched from real hardware for testing. Plain push,
@@ -68,7 +73,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io \
             --username "${{ github.actor }}" --password-stdin
           tag=$(podman images --format '{{.Repository}}:{{.Tag}}' \
-            | grep -E '^localhost/images:f44-x86_64-YaguareteOS-' | head -1)
+            | grep -E '^localhost/(images|bootc):f44-x86_64-YaguareteOS-' | head -1)
           if [[ -z "$tag" ]]; then
             echo "Could not find the built image tag" >&2
             podman images >&2

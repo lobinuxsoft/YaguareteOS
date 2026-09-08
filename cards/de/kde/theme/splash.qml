@@ -37,7 +37,7 @@ Rectangle {
             anchors.centerIn: parent
 
             asynchronous: true
-            source: "images/anatase.svg"
+            source: "images/yaguarete.svg"
 
             sourceSize.width: size
             sourceSize.height: size

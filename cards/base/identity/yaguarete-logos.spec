@@ -1,0 +1,194 @@
+Name:		yaguarete-logos
+Summary:	YaguareteOS-related icons and pictures
+Version:	42.0.1
+Release:	1%{?dist}
+
+License:	LicenseRef-YaguareteOS-Logos
+Source0:	favicon.svg
+Source1:	borderless-onblack.svg
+Source2:	borderless-onwhite.svg
+Source3:	letterhead-onblack.svg
+Source4:	letterhead-onwhite.svg
+Source5:	COPYING
+Provides:	redhat-logos = %{version}-%{release}
+Provides:	gnome-logos = %{version}-%{release}
+Provides:	system-logos = %{version}-%{release}
+BuildArch:	noarch
+BuildRequires:	hardlink
+BuildRequires:	librsvg2-tools
+
+%description
+The yaguarete-logos package contains image files which incorporate the
+YaguareteOS trademarks (the "Marks"). This package and its content may not be
+distributed with anything but unmodified YaguareteOS images and images for
+personal and internal organisation use.
+
+%prep
+cp -p %{SOURCE5} COPYING
+
+%build
+builddir=%{_builddir}/%{name}-generated
+rm -rf "$builddir"
+mkdir -p "$builddir"/icons/hicolor/scalable/apps
+mkdir -p "$builddir"/icons/hicolor/scalable/places
+mkdir -p "$builddir"/pixmaps
+mkdir -p "$builddir"/plymouth/themes/spinner
+
+cp -p %{SOURCE0} "$builddir"/icons/hicolor/scalable/apps/yaguarete-logo-icon.svg
+cp -p %{SOURCE1} "$builddir"/icons/hicolor/scalable/apps/yaguarete-splash.svg
+cp -p %{SOURCE1} "$builddir"/icons/hicolor/scalable/apps/start-here.svg
+
+rsvg-convert -a -w 252 -h 252 -o "$builddir"/pixmaps/yaguarete-logo-sprite.png %{SOURCE0}
+rsvg-convert -a -w 252 -h 252 -o "$builddir"/pixmaps/system-logo-white.png %{SOURCE0}
+rsvg-convert -a -w 149 -h 43 -o "$builddir"/plymouth/themes/spinner/watermark.png %{SOURCE3}
+
+for size in 16 22 24 32 36 48 96 256 ; do
+  mkdir -p "$builddir"/icons/hicolor/${size}x${size}/apps
+  mkdir -p "$builddir"/icons/hicolor/${size}x${size}/places
+  rsvg-convert -a -w "$size" -h "$size" -o "$builddir"/icons/hicolor/${size}x${size}/apps/yaguarete-logo-icon.png %{SOURCE0}
+  rsvg-convert -a -w "$size" -h "$size" -o "$builddir"/icons/hicolor/${size}x${size}/places/start-here.png %{SOURCE1}
+done
+
+%install
+# Cockpit and KDE About System use these pixmaps.
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/pixmaps
+install -p -m 644 %{_builddir}/%{name}-generated/pixmaps/yaguarete-logo-sprite.png $RPM_BUILD_ROOT%{_datadir}/pixmaps/
+install -p -m 644 %{_builddir}/%{name}-generated/pixmaps/system-logo-white.png $RPM_BUILD_ROOT%{_datadir}/pixmaps/
+pushd $RPM_BUILD_ROOT%{_datadir}/pixmaps
+  ln -s yaguarete-logo-sprite.png fedora-logo-sprite.png
+popd
+
+# The Plymouth spinner theme logo bit.
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/plymouth/themes/spinner
+install -p -m 644 %{_builddir}/%{name}-generated/plymouth/themes/spinner/watermark.png $RPM_BUILD_ROOT%{_datadir}/plymouth/themes/spinner/watermark.png
+
+# Logo icons used by os-release LOGO.
+for size in 16x16 22x22 24x24 32x32 36x36 48x48 96x96 256x256 ; do
+  mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/$size/apps
+  install -p -m 644 %{_builddir}/%{name}-generated/icons/hicolor/$size/apps/yaguarete-logo-icon.png $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/$size/apps/
+  pushd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/$size/apps
+    ln -s yaguarete-logo-icon.png fedora-logo-icon.png
+  popd
+done
+
+# Plasma launcher icon.
+for i in 16 22 24 32 36 48 96 256 ; do
+  mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/${i}x${i}/places
+  install -p -m 644 %{_builddir}/%{name}-generated/icons/hicolor/${i}x${i}/places/start-here.png $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/${i}x${i}/places/
+done
+
+# Breeze launcher icons. Breeze is used on light surfaces, Breeze Dark is used
+# on dark surfaces.
+for i in 16 22 24 32 48 64 96 ; do
+  mkdir -p \
+    $RPM_BUILD_ROOT%{_datadir}/icons/breeze/places/${i} \
+    $RPM_BUILD_ROOT%{_datadir}/icons/breeze-dark/places/${i}
+  install -p -m 644 %{SOURCE2} $RPM_BUILD_ROOT%{_datadir}/icons/breeze/places/${i}/start-here.svg
+  pushd $RPM_BUILD_ROOT%{_datadir}/icons/breeze-dark/places/${i}
+    ln -s ../../../hicolor/scalable/apps/start-here.svg start-here.svg
+  popd
+done
+
+# Favicon path used by Cockpit's Fedora branding symlink.
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}
+pushd $RPM_BUILD_ROOT%{_sysconfdir}
+  ln -s %{_datadir}/icons/hicolor/16x16/apps/fedora-logo-icon.png favicon.png
+popd
+
+# Hicolor scalable launcher icon.
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps
+install -p -m 644 %{_builddir}/%{name}-generated/icons/hicolor/scalable/apps/yaguarete-logo-icon.svg $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps/
+install -p -m 644 %{_builddir}/%{name}-generated/icons/hicolor/scalable/apps/yaguarete-splash.svg $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps/
+pushd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps
+  ln -s yaguarete-logo-icon.svg fedora-logo-icon.svg
+  install -p -m 644 %{_builddir}/%{name}-generated/icons/hicolor/scalable/apps/start-here.svg .
+popd
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/places/
+pushd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/places/
+  ln -s ../apps/start-here.svg .
+popd
+
+# save some dup'd icons
+# Except in /boot. Because some people think it is fun to use VFAT for /boot.
+# hardlink is /usr/sbin/hardlink on Fedora <= 30 and /usr/bin/hardlink on F31+
+hardlink -vv %{buildroot}/usr
+
+%files
+%license COPYING
+%config(noreplace) %{_sysconfdir}/favicon.png
+%{_datadir}/plymouth/themes/spinner/
+%{_datadir}/pixmaps/yaguarete-logo-sprite.png
+%{_datadir}/pixmaps/fedora-logo-sprite.png
+%{_datadir}/pixmaps/system-logo-white.png
+%{_datadir}/icons/hicolor/*/apps/yaguarete-logo-icon.png
+%{_datadir}/icons/hicolor/*/apps/fedora-logo-icon.png
+%{_datadir}/icons/hicolor/*/places/start-here.png
+%{_datadir}/icons/hicolor/scalable/apps/yaguarete-logo-icon.svg
+%{_datadir}/icons/hicolor/scalable/apps/yaguarete-splash.svg
+%{_datadir}/icons/hicolor/scalable/apps/fedora-logo-icon.svg
+%{_datadir}/icons/hicolor/scalable/apps/start-here.svg
+%{_datadir}/icons/hicolor/scalable/places/start-here.svg
+%{_datadir}/icons/breeze/places/*/start-here.svg
+%{_datadir}/icons/breeze-dark/places/*/start-here.svg
+# we multi-own these directories, so as not to require the packages that
+# provide them, thereby dragging in excess dependencies.
+%dir %{_datadir}/icons/breeze/
+%dir %{_datadir}/icons/breeze/places/
+%dir %{_datadir}/icons/breeze/places/16/
+%dir %{_datadir}/icons/breeze/places/22/
+%dir %{_datadir}/icons/breeze/places/24/
+%dir %{_datadir}/icons/breeze/places/32/
+%dir %{_datadir}/icons/breeze/places/48/
+%dir %{_datadir}/icons/breeze/places/64/
+%dir %{_datadir}/icons/breeze/places/96/
+%dir %{_datadir}/icons/breeze-dark/
+%dir %{_datadir}/icons/breeze-dark/places/
+%dir %{_datadir}/icons/breeze-dark/places/16/
+%dir %{_datadir}/icons/breeze-dark/places/22/
+%dir %{_datadir}/icons/breeze-dark/places/24/
+%dir %{_datadir}/icons/breeze-dark/places/32/
+%dir %{_datadir}/icons/breeze-dark/places/48/
+%dir %{_datadir}/icons/breeze-dark/places/64/
+%dir %{_datadir}/icons/breeze-dark/places/96/
+%dir %{_datadir}/icons/hicolor/
+%dir %{_datadir}/icons/hicolor/16x16/
+%dir %{_datadir}/icons/hicolor/16x16/apps/
+%dir %{_datadir}/icons/hicolor/16x16/places/
+%dir %{_datadir}/icons/hicolor/22x22/
+%dir %{_datadir}/icons/hicolor/22x22/apps/
+%dir %{_datadir}/icons/hicolor/22x22/places/
+%dir %{_datadir}/icons/hicolor/24x24/
+%dir %{_datadir}/icons/hicolor/24x24/apps/
+%dir %{_datadir}/icons/hicolor/24x24/places/
+%dir %{_datadir}/icons/hicolor/32x32/
+%dir %{_datadir}/icons/hicolor/32x32/apps/
+%dir %{_datadir}/icons/hicolor/32x32/places/
+%dir %{_datadir}/icons/hicolor/36x36/
+%dir %{_datadir}/icons/hicolor/36x36/apps/
+%dir %{_datadir}/icons/hicolor/36x36/places/
+%dir %{_datadir}/icons/hicolor/48x48/
+%dir %{_datadir}/icons/hicolor/48x48/apps/
+%dir %{_datadir}/icons/hicolor/48x48/places/
+%dir %{_datadir}/icons/hicolor/96x96/
+%dir %{_datadir}/icons/hicolor/96x96/apps/
+%dir %{_datadir}/icons/hicolor/96x96/places/
+%dir %{_datadir}/icons/hicolor/256x256/
+%dir %{_datadir}/icons/hicolor/256x256/apps/
+%dir %{_datadir}/icons/hicolor/256x256/places/
+%dir %{_datadir}/icons/hicolor/scalable/
+%dir %{_datadir}/icons/hicolor/scalable/apps/
+%dir %{_datadir}/icons/hicolor/scalable/places/
+%dir %{_datadir}/plymouth/
+
+%package -n fedora-logos
+Summary:	Empty compatibility package for Fedora logo dependencies
+Requires:	%{name} = %{version}-%{release}
+BuildArch:	noarch
+
+%description -n fedora-logos
+This empty package exists to satisfy dependencies that require the Fedora
+logo package by name. The actual logo files are provided by yaguarete-logos.
+
+%files -n fedora-logos
+
+%changelog

@@ -7,6 +7,7 @@ build-deps:
   - findutils
   - rpm-build
   - rpmdevtools
+  - python3-pip
 
 packages:
   - fuse
@@ -30,6 +31,7 @@ files:
   - files/power-profiles-daemon.conf.in
   - files/power-profiles-daemon.dbus.xml.in
   - gamecontrollerdb.txt::https://raw.githubusercontent.com/mdqinc/SDL_GameControllerDB/refs/heads/master/gamecontrollerdb.txt
+  - hhd-vram.tar.gz
 
 specs:
   # - spec: git+https://github.com/hhd-dev/hhd:hhd.spec
@@ -53,7 +55,7 @@ postprocess: |
   set -eux
 
   install -dm0755 /usr/lib/systemd/system-preset
-  cat > /usr/lib/systemd/system-preset/80-anatase-hhd.preset <<'EOF'
+  cat > /usr/lib/systemd/system-preset/80-yaguarete-hhd.preset <<'EOF'
   enable hhd.service
   EOF
   systemctl preset hhd.service || true
@@ -68,6 +70,15 @@ postprocess: |
 
   # Add controller DB for hhd's external controller support
   install -Dm0644 /files/gamecontrollerdb.txt /usr/share/sdl/gamecontrollerdb.txt
+
+  # hhd-vram: moves the AMD APU firmware's UMA carveout from HHD's TDP tab.
+  # External plugin (hhd.plugins entry point), not a fork of hhd itself --
+  # ported from yaguarete_os's Decky plugin (the fix that IS shipping today).
+  tmpdir="$(mktemp -d)"
+  tar xzf /files/hhd-vram.tar.gz -C "$tmpdir"
+  pip install --prefix=/usr --no-build-isolation --no-deps "$tmpdir/hhd-vram"
+  rm -rf "$tmpdir"
+  python3 -c "import hhd_vram"
 
   # These paths conflict when the user installs ppd/tuned, so hhd cannot
   # provide them or it will cause issues. But we will not install ppd/tuned

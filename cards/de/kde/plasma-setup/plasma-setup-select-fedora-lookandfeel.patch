@@ -19,10 +19,10 @@ index 7c9d768..e6b2f05 100644
      // use plasma-apply-lookandfeel since it has logic for notifying the shell of changes
      if (usingDarkTheme) {
 -        QProcess::execute(u"plasma-apply-lookandfeel"_s, {QStringLiteral("--apply"), QStringLiteral("org.kde.breezedark.desktop")});
-+        QProcess::execute(u"plasma-apply-lookandfeel"_s, {QStringLiteral("--apply"), QStringLiteral("org.anatase.anatase.desktop")});
++        QProcess::execute(u"plasma-apply-lookandfeel"_s, {QStringLiteral("--apply"), QStringLiteral("org.yaguarete.desktop")});
      } else {
 -        QProcess::execute(u"plasma-apply-lookandfeel"_s, {QStringLiteral("--apply"), QStringLiteral("org.kde.breeze.desktop")});
-+        QProcess::execute(u"plasma-apply-lookandfeel"_s, {QStringLiteral("--apply"), QStringLiteral("org.anatase.anataselight.desktop")});
++        QProcess::execute(u"plasma-apply-lookandfeel"_s, {QStringLiteral("--apply"), QStringLiteral("org.yaguarete.desktop")});
      }
  
      m_usingDarkTheme = usingDarkTheme;

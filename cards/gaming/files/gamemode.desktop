@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Gamemode
 Comment=Gamemode session powered by Gamescope
-Exec=/usr/bin/anatase-gamemode-session
+Exec=/usr/bin/yaguarete-gamemode-session
 Type=Application
 DesktopNames=gamescope

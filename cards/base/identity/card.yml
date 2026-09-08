@@ -12,81 +12,84 @@ build-deps:
 
 files:
   - cockpit-branding.css
-  - fastfetch/logo.txt
   - fastfetch/fastfetch.jsonc
+  - desktop-backgrounds/yaguarete-wallpapers.tar.gz
 
 # Prevent env invalidating the build hash
 # do not readd: cockpit-branding.css
 hash: >
   @hash(
-    anatase-logos.spec,
+    yaguarete-logos.spec,
     COPYING,
     ./favicon.svg,
     ./borderless-onblack.svg,
     ./borderless-onwhite.svg,
     letterhead-onblack.svg,
     letterhead-onwhite.svg,
-    desktop-backgrounds
+    desktop-backgrounds/yaguarete-wallpapers.tar.gz
   )
 
 specs:
-  - spec: anatase-logos.spec
+  - spec: yaguarete-logos.spec
     files:
       - "*.svg"
       - COPYING
     packages:
-      - anatase-logos
+      - yaguarete-logos
       - fedora-logos
 
-  - spec: desktop-backgrounds/desktop-backgrounds.spec
-    files:
-      - "*.svg.in"
-      - palette-day
-      - palette-night
-    packages:
-      - desktop-backgrounds
-      - desktop-backgrounds-gnome
-      - desktop-backgrounds-kde
+# NOTA (rebase fase 3): el mecanismo de desktop-backgrounds de Anatase
+# renderiza SVGs parametricos (SVG.in + paleta day/night) a JXL multi-resolucion
+# via RPM. Nuestros wallpapers ya son arte terminado (17 sets, PNG/JPG), no
+# plantillas -- en vez de forzarlos a ese pipeline, se instalan directo como
+# paquetes Plasma simples en el postprocess de abajo (sin RPM).
 
 postprocess: |
   echo "OS Release file (/etc/os-release):"
   tee /usr/lib/os-release <<'EOF'
-  NAME="Anatase"
+  NAME="YaguareteOS"
   VERSION=""
   RELEASE_TYPE=stable
-  ID=anatase
+  ID=yaguarete
   ID_LIKE=fedora
   VERSION_ID=$releasever
   VERSION_CODENAME=""
-  PRETTY_NAME="Anatase"
-  ANSI_COLOR="1;38;2;248;221;11"
-  LOGO=anatase-logo-icon
+  PRETTY_NAME="YaguareteOS"
+  ANSI_COLOR="1;38;2;255;69;0"
+  LOGO=yaguarete-logo-icon
   CPE_NAME="cpe:/o:fedoraproject:fedora:$releasever"
-  DEFAULT_HOSTNAME="anatase"
-  HOME_URL="https://anatase.org/"
-  DOCUMENTATION_URL="https://docs.anatase.org/"
-  SUPPORT_URL="https://support.anatase.org/"
-  BUG_REPORT_URL="https://github.com/anatase-org/anatase/issues"
+  DEFAULT_HOSTNAME="yaguarete"
+  HOME_URL="https://github.com/lobinuxsoft/YaguareteOS"
+  DOCUMENTATION_URL="https://github.com/lobinuxsoft/YaguareteOS"
+  SUPPORT_URL="https://github.com/lobinuxsoft/YaguareteOS/issues"
+  BUG_REPORT_URL="https://github.com/lobinuxsoft/YaguareteOS/issues"
   # Steam reads these
-  VERSION_CODENAME="Anatase"
+  VERSION_CODENAME="YaguareteOS"
   BUILD_ID=""
   VARIANT_ID="original"
   EOF
-  echo "Anatase" > /etc/system-release
+  echo "YaguareteOS" > /etc/system-release
 
-  # Cockpit selects branding by os-release ID. Anatase uses ID=anatase, so give
+  # Cockpit selects branding by os-release ID. We use ID=yaguarete, so give
   # Cockpit and the Anaconda WebUI a matching branding directory.
   install -Dm0644 /files/cockpit-branding.css \
-      /usr/share/cockpit/branding/anatase/branding.css
+      /usr/share/cockpit/branding/yaguarete/branding.css
   ln -sfn ../../../pixmaps/system-logo-white.png \
-      /usr/share/cockpit/branding/anatase/logo.png
-  ln -sfn ../../../pixmaps/anatase-logo-sprite.png \
-      /usr/share/cockpit/branding/anatase/apple-touch-icon.png
+      /usr/share/cockpit/branding/yaguarete/logo.png
+  ln -sfn ../../../pixmaps/yaguarete-logo-sprite.png \
+      /usr/share/cockpit/branding/yaguarete/apple-touch-icon.png
   ln -sfn ../../../../../etc/favicon.png \
-      /usr/share/cockpit/branding/anatase/favicon.ico
+      /usr/share/cockpit/branding/yaguarete/favicon.ico
 
   # Fastfetch branding.
-  install -Dm0644 /files/fastfetch/logo.txt \
-      /usr/share/fastfetch/logos/anatase.txt
   install -Dm0644 /files/fastfetch/fastfetch.jsonc \
       /etc/xdg/fastfetch/config.jsonc
+
+  # Wallpapers: paquetes Plasma simples, sin pasar por RPM (ver nota arriba).
+  install -dm0755 /usr/share/wallpapers/yaguarete
+  tar xzf /files/desktop-backgrounds/yaguarete-wallpapers.tar.gz \
+      -C /usr/share/wallpapers/yaguarete
+  # TODO(rebase-fase-B/3): elegir wallpaper default vía el mecanismo real de
+  # Anatase (theme/defaults de la card KDE, no confirmado todavía cuál lee).
+  # yaguarete_os usaba un symlink a /usr/share/backgrounds/default.jxl -- eso
+  # es convención de Bazzite, no verificado que aplique acá.

@@ -92,7 +92,7 @@ postprocess: |
 
   # Disable last login from being shown in ssh connections
   install -dm0755 /etc/ssh/sshd_config.d
-  cat > /etc/ssh/sshd_config.d/80-anatase-lastlog.conf <<'EOF'
+  cat > /etc/ssh/sshd_config.d/80-yaguarete-lastlog.conf <<'EOF'
   PrintLastLog no
   EOF
-  chmod 0644 /etc/ssh/sshd_config.d/80-anatase-lastlog.conf
+  chmod 0644 /etc/ssh/sshd_config.d/80-yaguarete-lastlog.conf

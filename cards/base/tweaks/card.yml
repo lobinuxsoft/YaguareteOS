@@ -18,13 +18,13 @@ build-deps:
   - tar
 
 specs:
-  - spec: zsh/zsh-anatase.spec
+  - spec: zsh/zsh-yaguarete.spec
     files:
-      - anatase.sh
-      - anatase-logo-mono.svg
-      - patch-meslo-anatase.py
+      - yaguarete.sh
+      - yaguarete-logo-mono.svg
+      - patch-meslo-yaguarete.py
     packages:
-      - zsh-anatase
+      - zsh-yaguarete
 
 postprocess: |
   set -eux
@@ -43,18 +43,18 @@ postprocess: |
 
   # Various configs
   install -Dm0644 /files/sysctl.conf \
-      /usr/lib/sysctl.d/80-anatase.conf
+      /usr/lib/sysctl.d/80-yaguarete.conf
   install -Dm0644 /files/memlock.conf \
-      /etc/security/limits.d/80-anatase-memlock.conf
+      /etc/security/limits.d/80-yaguarete-memlock.conf
   install -Dm0644 /files/modules-load.conf \
-      /usr/lib/modules-load.d/80-anatase.conf
+      /usr/lib/modules-load.d/80-yaguarete.conf
 
   # Add zram and huge pages
   install -Dm0644 /files/zram-generator.conf \
       /etc/systemd/zram-generator.conf
   # https://github.com/systemd/systemd/issues/43015
   install -Dm0644 /files/systemd-zram-setup-reset.conf \
-      /usr/lib/systemd/system/systemd-zram-setup@.service.d/10-anatase-reset.conf
+      /usr/lib/systemd/system/systemd-zram-setup@.service.d/10-yaguarete-reset.conf
   install -Dm0644 /files/dev-hugepages1G.mount \
       /usr/lib/systemd/system/dev-hugepages1G.mount
 
@@ -65,7 +65,7 @@ postprocess: |
   # Load default SSH keys when the socket-activated user agent starts
   # Allows forwarding to spaces
   install -Dm0644 /files/ssh-agent.conf \
-      /usr/lib/systemd/user/ssh-agent.service.d/10-anatase-load-keys.conf
+      /usr/lib/systemd/user/ssh-agent.service.d/10-yaguarete-load-keys.conf
   # Skip automatic activation to avoid prompting for passwords on boot
   install -Dm0644 /files/plasma-core-ssh-agent.conf \
       /etc/systemd/user/plasma-core.target.d/ssh-agent.conf
@@ -73,7 +73,7 @@ postprocess: |
   {
       echo "enable ssh-agent.socket"
       echo "enable gpg-agent-extra.socket"
-  } > /usr/lib/systemd/user-preset/80-anatase-ssh-agent.preset
+  } > /usr/lib/systemd/user-preset/80-yaguarete-ssh-agent.preset
   systemctl --user --global preset \
       ssh-agent.socket \
       gpg-agent-extra.socket
@@ -86,11 +86,11 @@ postprocess: |
       /etc/profile.d/override-zsh.sh
 
   touch /etc/zshrc
-  if ! grep -qF "source /usr/share/anatase/zsh/anatase.sh" /etc/zshrc; then
+  if ! grep -qF "source /usr/share/yaguarete/zsh/yaguarete.sh" /etc/zshrc; then
       {
-          printf '\n%s\n' '# Source Anatase zsh defaults.'
-          printf '%s\n' 'if [ -r /usr/share/anatase/zsh/anatase.sh ]; then'
-          printf '%s\n' '    source /usr/share/anatase/zsh/anatase.sh'
+          printf '\n%s\n' '# Source YaguareteOS zsh defaults.'
+          printf '%s\n' 'if [ -r /usr/share/yaguarete/zsh/yaguarete.sh ]; then'
+          printf '%s\n' '    source /usr/share/yaguarete/zsh/yaguarete.sh'
           printf '%s\n' 'fi'
       } >> /etc/zshrc
   fi
@@ -115,9 +115,9 @@ postprocess: |
   # Fonts
   #
 
-  install -dm0755 /usr/share/fonts/anatase
+  install -dm0755 /usr/share/fonts/yaguarete
   if command -v fc-cache >/dev/null 2>&1; then
-      fc-cache -f /usr/share/fonts/anatase
+      fc-cache -f /usr/share/fonts/yaguarete
   fi
 
   #
@@ -152,7 +152,7 @@ postprocess: |
   install -Dm0644 /usr/share/ufw/iptables/user.rules /etc/ufw/lib/user.rules
   install -Dm0644 /usr/share/ufw/iptables/user6.rules /etc/ufw/lib/user6.rules
 
-  cat > /usr/lib/tmpfiles.d/anatase-ufw.conf <<'EOF'
+  cat > /usr/lib/tmpfiles.d/yaguarete-ufw.conf <<'EOF'
   L+ /var/lib/ufw - - - - /etc/ufw/lib
   EOF
 

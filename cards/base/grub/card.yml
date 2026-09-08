@@ -53,7 +53,7 @@ postprocess: |
         /usr/lib/bootupd/grub2-static/configs.d/40_grub_boot_otheros.cfg
 
     install -dm0755 /usr/lib/systemd/system-preset
-    cat > /usr/lib/systemd/system-preset/80-anatase-grub.preset <<'EOF'
+    cat > /usr/lib/systemd/system-preset/80-yaguarete-grub.preset <<'EOF'
     enable grub-boot-success.timer
     enable grub-boot-success.service
     enable grub-boot-extrafiles.service

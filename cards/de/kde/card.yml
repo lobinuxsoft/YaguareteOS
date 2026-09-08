@@ -199,12 +199,11 @@ specs:
       file: overrides.patch
 
 files:
-    - color-schemes/AnataseDark.colors
-    - color-schemes/AnataseLight.colors
-    - konsole/Anatase.profile
-    - konsole/AnataseDark.colorscheme
-    - kwallet/anatase-empty-password-kwallet
-    - kwallet/anatase-empty-password-kwallet.service
+    - color-schemes/YaguareteOS.colors
+    - konsole/YaguareteOS.profile
+    - konsole/YaguareteOS.colorscheme
+    - kwallet/yaguarete-empty-password-kwallet
+    - kwallet/yaguarete-empty-password-kwallet.service
     - theme/defaults
     - theme/splash-preview.png
     - theme/splash.qml
@@ -240,9 +239,12 @@ postprocess: |
     RequiredNotificationInterval=604800
     EOF
 
-    # Feature the Flatpaks published by Anatase in Discover's Editor's Choice
+    # TODO(rebase-fase-B): estos IDs son Flatpaks REALES hosteados por Anatase
+    # (org.anatase.*). Los dejamos así a propósito -- son apps que existen y
+    # funcionan hoy. Renombrarlos sin hostear nuestros propios Flatpaks bajo
+    # org.yaguarete.* rompe Discover (apuntaría a IDs que no existen).
     install -dm0755 /usr/share/discover
-    cat > /usr/share/discover/anatase-featured.json <<'EOF'
+    cat > /usr/share/discover/yaguarete-featured.json <<'EOF'
     [
         "appstream://org.anatase.Browser",
         "appstream://org.anatase.Steam",
@@ -256,12 +258,12 @@ postprocess: |
     EOF
     cat > /usr/share/discover/featuredurlrc <<'EOF'
     [Software]
-    FeaturedListingURL=file:///usr/share/discover/anatase-featured.json
+    FeaturedListingURL=file:///usr/share/discover/yaguarete-featured.json
     EOF
 
     # Keep Discover's update notifier out of the temporary first-run setup
     # session, while preserving the global update defaults for real users.
-    cat > /usr/lib/tmpfiles.d/zz-anatase-plasma-setup-discover.conf <<'EOF'
+    cat > /usr/lib/tmpfiles.d/zz-yaguarete-plasma-setup-discover.conf <<'EOF'
     # Disable Discover update checks in the ephemeral plasma-setup session.
     f /run/plasma-setup/.config/PlasmaDiscoverUpdates 0644 plasma-setup plasma-setup - [Global]\nUseUnattendedUpdates=false\nRequiredNotificationInterval=0
     f /run/plasma-setup/.config/autostart/org.kde.discover.notifier.desktop 0644 plasma-setup plasma-setup - [Desktop Entry]\nHidden=true
@@ -333,18 +335,18 @@ postprocess: |
 
     # If a user genuinely has no password, create a matching empty-password
     # KWallet before desktop apps can trigger the interactive first-use dialog.
-    install -Dm0755 /files/kwallet/anatase-empty-password-kwallet \
-        /usr/libexec/anatase-empty-password-kwallet
-    install -Dm0644 /files/kwallet/anatase-empty-password-kwallet.service \
-        /usr/lib/systemd/user/anatase-empty-password-kwallet.service
-    ln -snf ../anatase-empty-password-kwallet.service \
-        /usr/lib/systemd/user/plasma-workspace.target.wants/anatase-empty-password-kwallet.service
+    install -Dm0755 /files/kwallet/yaguarete-empty-password-kwallet \
+        /usr/libexec/yaguarete-empty-password-kwallet
+    install -Dm0644 /files/kwallet/yaguarete-empty-password-kwallet.service \
+        /usr/lib/systemd/user/yaguarete-empty-password-kwallet.service
+    ln -snf ../yaguarete-empty-password-kwallet.service \
+        /usr/lib/systemd/user/plasma-workspace.target.wants/yaguarete-empty-password-kwallet.service
 
     #
     # Fix VM graphics freezes when using GL on kwin
     #
 
-    cat > /usr/libexec/anatase-kwin-compose-environment <<'EOF'
+    cat > /usr/libexec/yaguarete-kwin-compose-environment <<'EOF'
     #!/bin/sh
     set -eu
 
@@ -376,39 +378,37 @@ postprocess: |
         printf 'KWIN_COMPOSE=Q\n'
     fi
     EOF
-    chmod 0755 /usr/libexec/anatase-kwin-compose-environment
-    ln -snf /usr/libexec/anatase-kwin-compose-environment \
-        /usr/lib/systemd/system-environment-generators/30-anatase-kwin-compose
-    ln -snf /usr/libexec/anatase-kwin-compose-environment \
-        /usr/lib/systemd/user-environment-generators/30-anatase-kwin-compose
+    chmod 0755 /usr/libexec/yaguarete-kwin-compose-environment
+    ln -snf /usr/libexec/yaguarete-kwin-compose-environment \
+        /usr/lib/systemd/system-environment-generators/30-yaguarete-kwin-compose
+    ln -snf /usr/libexec/yaguarete-kwin-compose-environment \
+        /usr/lib/systemd/user-environment-generators/30-yaguarete-kwin-compose
 
     #
     # Themes
     #
+    # NOTA: Anatase generaba un tema dark + uno light. YaguareteOS nunca tuvo
+    # variante light (ver YaguareteOS.colors del repo yaguarete_os) -- se
+    # colapsa a un solo tema dark, sin duplicar la lógica de arriba.
     lookandfeel_dir=/usr/share/plasma/look-and-feel
 
-    install -Dm0644 /files/color-schemes/AnataseDark.colors \
-        /usr/share/color-schemes/AnataseDark.colors
-    install -Dm0644 /files/color-schemes/AnataseLight.colors \
-        /usr/share/color-schemes/AnataseLight.colors
-    install -Dm0644 /files/konsole/AnataseDark.colorscheme \
-        /usr/share/konsole/AnataseDark.colorscheme
-    install -Dm0644 /files/konsole/Anatase.profile \
-        /usr/share/konsole/Anatase.profile
+    install -Dm0644 /files/color-schemes/YaguareteOS.colors \
+        /usr/share/color-schemes/YaguareteOS.colors
+    install -Dm0644 /files/konsole/YaguareteOS.colorscheme \
+        /usr/share/konsole/YaguareteOS.colorscheme
+    install -Dm0644 /files/konsole/YaguareteOS.profile \
+        /usr/share/konsole/YaguareteOS.profile
 
     rm -rf \
         "${lookandfeel_dir}/org.fedoraproject.fedora.desktop" \
         "${lookandfeel_dir}/org.fedoraproject.fedoradark.desktop" \
         "${lookandfeel_dir}/org.fedoraproject.fedoralight.desktop"
 
-    # Start from complete Breeze packages, then overlay the variant settings.
-    cp -a "${lookandfeel_dir}/org.kde.breeze.desktop" "${lookandfeel_dir}/org.anatase.anatase.desktop"
-    cp -a "${lookandfeel_dir}/org.kde.breeze.desktop" "${lookandfeel_dir}/org.anatase.anataselight.desktop"
+    # Start from a complete Breeze package, then overlay our variant settings.
+    cp -a "${lookandfeel_dir}/org.kde.breeze.desktop" "${lookandfeel_dir}/org.yaguarete.desktop"
+    cp -a "${lookandfeel_dir}/org.kde.breezedark.desktop"/. "${lookandfeel_dir}/org.yaguarete.desktop"
 
-    # Anatase defaults to dark, while anataselight uses Breeze.
-    cp -a "${lookandfeel_dir}/org.kde.breezedark.desktop"/. "${lookandfeel_dir}/org.anatase.anatase.desktop"
-
-    write_anatase_defaults() {
+    write_yaguarete_defaults() {
         theme_dir="${1}"
         color_scheme="${2}"
         icon_theme="${3}"
@@ -425,19 +425,12 @@ postprocess: |
             "${defaults_file}"
     }
 
-    write_anatase_defaults \
-        "${lookandfeel_dir}/org.anatase.anatase.desktop" \
-        AnataseDark \
+    write_yaguarete_defaults \
+        "${lookandfeel_dir}/org.yaguarete.desktop" \
+        YaguareteOS \
         breeze-dark \
-        org.anatase.anatase.desktop \
-        "190,166,40"
-    write_anatase_defaults \
-        "${lookandfeel_dir}/org.anatase.anataselight.desktop" \
-        AnataseLight \
-        breeze \
-        org.anatase.anatase.desktop \
-        "207,184,49"
-    #   /\ this is the dark default theme splash screen as they are the same
+        org.yaguarete.desktop \
+        "255,69,0"
 
     write_start_here_plasmoid_setup() {
         theme_dir="${1}"
@@ -454,28 +447,23 @@ postprocess: |
         done
     }
 
-    write_start_here_plasmoid_setup "${lookandfeel_dir}/org.anatase.anatase.desktop"
-    write_start_here_plasmoid_setup "${lookandfeel_dir}/org.anatase.anataselight.desktop"
+    write_start_here_plasmoid_setup "${lookandfeel_dir}/org.yaguarete.desktop"
 
-    write_anatase_splash() {
+    write_yaguarete_splash() {
         theme_dir="${1}"
         splash_dir="${theme_dir}/contents/splash"
         preview_dir="${theme_dir}/contents/previews"
 
         install -dm0755 "${splash_dir}/images"
-        install -m0644 /usr/share/icons/hicolor/scalable/apps/anatase-splash.svg \
-            "${splash_dir}/images/anatase.svg"
+        install -m0644 /usr/share/icons/hicolor/scalable/apps/yaguarete-splash.svg \
+            "${splash_dir}/images/yaguarete.svg"
         install -m0644 /files/theme/splash.qml "${splash_dir}/Splash.qml"
         install -Dm0644 /files/theme/splash-preview.png "${preview_dir}/splash.png"
     }
 
-    write_anatase_splash "${lookandfeel_dir}/org.anatase.anatase.desktop"
+    write_yaguarete_splash "${lookandfeel_dir}/org.yaguarete.desktop"
 
-    # For anataselight drop the splash as its the same
-    # write_anatase_splash "${lookandfeel_dir}/org.anatase.anataselight.desktop"
-    rm -rf /usr/share/plasma/look-and-feel/org.anatase.anataselight.desktop/contents/splash/
-
-    write_anatase_lookandfeel_metadata() {
+    write_yaguarete_lookandfeel_metadata() {
         id="${1}"
         name="${2}"
         description="${3}"
@@ -486,7 +474,7 @@ postprocess: |
         "KPlugin": {
             "Authors": [
                 {
-                    "Name": "Anatase"
+                    "Name": "YaguareteOS"
                 }
             ],
             "Category": "",
@@ -499,12 +487,11 @@ postprocess: |
     EOF
     }
 
-    write_anatase_lookandfeel_metadata "org.anatase.anatase" "Anatase" "Anatase theme"
-    write_anatase_lookandfeel_metadata "org.anatase.anataselight" "Anatase Light" "Anatase Light theme"
+    write_yaguarete_lookandfeel_metadata "org.yaguarete" "YaguareteOS" "YaguareteOS theme"
 
     # Make sure the default splash is ours
     sed -i -E \
-        's|<default>org\.kde\.breeze\.desktop</default>|<default>org.anatase.anatase.desktop</default>|' \
+        's|<default>org\.kde\.breeze\.desktop</default>|<default>org.yaguarete.desktop</default>|' \
         /usr/share/config.kcfg/splashscreensettings.kcfg
 
     # Apply our theme as a default
@@ -512,16 +499,16 @@ postprocess: |
     konsolerc=/etc/xdg/konsolerc
     ksplashrc=/usr/share/kde-settings/kde-profile/default/xdg/ksplashrc
 
-    kwriteconfig6 --file "${kdeglobals}" --group KDE --key LookAndFeelPackage org.anatase.anatase.desktop
-    kwriteconfig6 --file "${kdeglobals}" --group KDE --key DefaultDarkLookAndFeel org.anatase.anatase.desktop
-    kwriteconfig6 --file "${kdeglobals}" --group KDE --key DefaultLightLookAndFeel org.anatase.anataselight.desktop
+    kwriteconfig6 --file "${kdeglobals}" --group KDE --key LookAndFeelPackage org.yaguarete.desktop
+    kwriteconfig6 --file "${kdeglobals}" --group KDE --key DefaultDarkLookAndFeel org.yaguarete.desktop
+    kwriteconfig6 --file "${kdeglobals}" --group KDE --key DefaultLightLookAndFeel org.yaguarete.desktop
     kwriteconfig6 --file "${kdeglobals}" --group KDE --key ColorScheme --delete ''
-    kwriteconfig6 --file "${kdeglobals}" --group General --key AccentColor "190,166,40"
-    kwriteconfig6 --file "${kdeglobals}" --group General --key ColorScheme AnataseDark
+    kwriteconfig6 --file "${kdeglobals}" --group General --key AccentColor "255,69,0"
+    kwriteconfig6 --file "${kdeglobals}" --group General --key ColorScheme YaguareteOS
     kwriteconfig6 --file "${kdeglobals}" --group Icons --key Theme breeze-dark
-    kwriteconfig6 --file "${konsolerc}" --group "Desktop Entry" --key DefaultProfile Anatase.profile
+    kwriteconfig6 --file "${konsolerc}" --group "Desktop Entry" --key DefaultProfile YaguareteOS.profile
     kwriteconfig6 --file "${ksplashrc}" --group KSplash --key Engine KSplashQML
-    kwriteconfig6 --file "${ksplashrc}" --group KSplash --key Theme org.anatase.anatase.desktop
+    kwriteconfig6 --file "${ksplashrc}" --group KSplash --key Theme org.yaguarete.desktop
 
     # Plasma mobile
     # Removing this here is easier than in the package

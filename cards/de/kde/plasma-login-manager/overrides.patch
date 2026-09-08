@@ -62,17 +62,17 @@ index ad9d359fdb1b..445fddcfeb7a 100644
      <entry name="lookAndFeelPackage" key="LookAndFeelPackage" type="String">
        <label>Global look and feel</label>
 -      <default>org.kde.breeze.desktop</default>
-+      <default>org.anatase.anatase.desktop</default>
++      <default>org.yaguarete.desktop</default>
      </entry>
      <entry name="defaultLightLookAndFeel" key="DefaultLightLookAndFeel" type="String">
        <label>Global Look and Feel package, alternate</label>
 -      <default>org.kde.breeze.desktop</default>
-+      <default>org.anatase.anataselight.desktop</default>
++      <default>org.yaguarete.desktop</default>
      </entry>
      <entry name="defaultDarkLookAndFeel" key="DefaultDarkLookAndFeel" type="String">
        <label>Global Look and Feel package, alternate</label>
 -      <default>org.kde.breezedark.desktop</default>
-+      <default>org.anatase.anatase.desktop</default>
++      <default>org.yaguarete.desktop</default>
      </entry>
      <entry name="automaticLookAndFeel" key="AutomaticLookAndFeel" type="Bool">
        <label>Switch between dark and light global themes depending on time of day</label>

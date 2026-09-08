@@ -1,16 +1,8 @@
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
-    "logo": {
-        "type": "file",
-        "source": "/usr/share/fastfetch/logos/anatase.txt",
-        "color": {
-            "1": "@3",
-            "2": "@15",
-            "3": "@7",
-            "4": "reset_",
-            "5": "@3"
-        }
-    },
+    // TODO(rebase-fase-B/3): sin logo ASCII/sixel propio todavía -- Anatase
+    // usaba un "type: file" con arte propia; en vez de mostrar su silueta bajo
+    // otro nombre, se deja sin logo custom hasta tener arte jaguar convertida.
     "display": {
         "color": {
             "keys": "@3",

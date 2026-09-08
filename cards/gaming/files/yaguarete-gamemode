@@ -1,0 +1,348 @@
+#!/bin/bash
+
+if (( $# != 0 )); then
+    echo "Usage: ${0##*/}" >&2
+    exit 2
+fi
+
+#
+# Prepare Gamescope
+#
+
+# Plasma stores the keyboard configuration in kxkbrc, but Gamescope does not
+# read KDE configuration. Translate the enabled layout into the libxkbcommon
+# environment variables Gamescope consumes when it creates its keymap.
+kde_keyboard_layout=
+if command -v kreadconfig6 >/dev/null 2>&1 && \
+    [[ $(kreadconfig6 \
+        --file kxkbrc \
+        --group Layout \
+        --key Use \
+        --default false) = true ]]; then
+    kde_keyboard_layout=$(kreadconfig6 \
+        --file kxkbrc \
+        --group Layout \
+        --key LayoutList)
+fi
+
+# Avoid replacing libxkbcommon's defaults with an incomplete KDE config.
+if [[ -n $kde_keyboard_layout ]]; then
+    export XKB_DEFAULT_MODEL="$(kreadconfig6 \
+        --file kxkbrc \
+        --group Layout \
+        --key Model \
+        --default pc104)"
+    export XKB_DEFAULT_LAYOUT="$kde_keyboard_layout"
+    export XKB_DEFAULT_VARIANT="$(kreadconfig6 \
+        --file kxkbrc \
+        --group Layout \
+        --key VariantList)"
+    kde_keyboard_options=$(kreadconfig6 \
+        --file kxkbrc \
+        --group Layout \
+        --key Options)
+    # KDE's global layout shortcuts are not active outside Plasma.
+    export XKB_DEFAULT_OPTIONS="${kde_keyboard_options:-grp:win_space_toggle}"
+elif command -v busctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+    # When Plasma has no user override, use systemd-localed's system keymap.
+    system_keyboard_property() {
+        busctl --system --json=short get-property \
+            org.freedesktop.locale1 \
+            /org/freedesktop/locale1 \
+            org.freedesktop.locale1 \
+            "$1" 2>/dev/null | jq -r 'select(.type == "s") | .data'
+    }
+
+    system_keyboard_layout=$(system_keyboard_property X11Layout)
+    if [[ -n $system_keyboard_layout ]]; then
+        export XKB_DEFAULT_MODEL="$(system_keyboard_property X11Model)"
+        export XKB_DEFAULT_LAYOUT="$system_keyboard_layout"
+        export XKB_DEFAULT_VARIANT="$(system_keyboard_property X11Variant)"
+        system_keyboard_options=$(system_keyboard_property X11Options)
+        # KDE's global layout shortcuts are not active outside Plasma.
+        export XKB_DEFAULT_OPTIONS="${system_keyboard_options:-grp:win_space_toggle}"
+    fi
+fi
+
+# Create the runtime files used by Gamescope and MangoApp.
+tmpdir="$([[ -n ${XDG_RUNTIME_DIR+x} ]] && mktemp -p "$XDG_RUNTIME_DIR" -d -t gamescope.XXXXXXX)"
+socket="${tmpdir:+$tmpdir/startup.socket}"
+stats="${tmpdir:+$tmpdir/stats.pipe}"
+if [[ -z $tmpdir || -z ${XDG_RUNTIME_DIR+x} ]]; then
+    echo >&2 'Failed to find a runtime directory for the Gamescope session'
+    exit 1
+fi
+
+export SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS=0
+export GAMESCOPE_STATS="$stats"
+export MANGOHUD_CONFIGFILE="$tmpdir/mangohud.config"
+export GAMESCOPE_MODE_SAVE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/gamescope/modes.cfg"
+export GAMESCOPE_PATCHED_EDID_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/gamescope/edid.bin"
+
+mkdir -p \
+    "$(dirname "$GAMESCOPE_MODE_SAVE_FILE")" \
+    "$(dirname "$GAMESCOPE_PATCHED_EDID_FILE")"
+touch "$GAMESCOPE_MODE_SAVE_FILE" "$GAMESCOPE_PATCHED_EDID_FILE"
+echo "no_display" > "$MANGOHUD_CONFIGFILE"
+mkfifo -- "$socket" "$stats"
+
+# Make this the global Gamescope statistics session when no other instance owns
+# it.
+sessionlink="$XDG_RUNTIME_DIR/gamescope-stats"
+lockfile="$sessionlink.lck"
+exec 9>"$lockfile"
+if flock -n 9 && rm -f "$sessionlink" && ln -sf "$tmpdir" "$sessionlink"; then
+    echo >&2 "Claimed global Gamescope statistics session at $sessionlink"
+else
+    echo >&2 "Another Gamescope statistics session is already active"
+fi
+
+gamescope_args=(
+    --backend drm
+    --generate-drm-mode fixed
+    # Xwayland 0 hosts the Steam UI; Steam launches games on Xwayland 1 when
+    # STEAM_MULTIPLE_XWAYLANDS is enabled.
+    --xwayland-count 2
+    --default-touch-mode 4
+    --hide-cursor-delay 3000
+    --max-scale 2
+    --fade-out-duration 200
+    --cursor-scale-height 720
+    -e
+    -R "$socket"
+    -T "$stats"
+    -O '*',eDP-1
+)
+
+# Steam activates SteamOS Manager while its web UI is starting, then waits for
+# the daemon to finish probing the system. Start it now so that initialization
+# overlaps Gamescope and Steam startup instead of delaying the first UI window.
+systemctl --user start --no-block steamos-manager.service || true
+
+#
+# Prepare Steam
+#
+
+# Make Steam Runtime logging visible in the user journal.
+export SRT_LOG_TO_JOURNAL=1
+
+export HOMETEST_DESKTOP=1
+export HOMETEST_DESKTOP_SESSION=plasma
+
+export STEAM_MANGOAPP_PRESETS_SUPPORTED=1
+export STEAM_USE_MANGOAPP=1
+
+export STEAM_USE_DYNAMIC_VRS=1
+export RADV_FORCE_VRS_CONFIG_FILE="$(mktemp /tmp/radv_vrs.XXXXXXXX)"
+echo "1x1" > "$RADV_FORCE_VRS_CONFIG_FILE"
+
+export GAMESCOPE_NV12_COLORSPACE=k_EStreamColorspace_BT601
+export STEAM_GAMESCOPE_HDR_SUPPORTED=1
+export VKD3D_SWAPCHAIN_LATENCY_FRAMES=3
+export WINEDLLOVERRIDES=dxgi=n
+export STEAM_ENABLE_DYNAMIC_BACKLIGHT=1
+# We will probably not port this
+# export STEAM_ENABLE_FAN_CONTROL=1
+export STEAM_ENABLE_VOLUME_HANDLER=1
+export SRT_URLOPEN_PREFER_STEAM=1
+export STEAM_DISABLE_AUDIO_DEVICE_SWITCHING=1
+export STEAM_MULTIPLE_XWAYLANDS=1
+export STEAM_GAMESCOPE_DYNAMIC_FPSLIMITER=1
+export STEAM_GAMESCOPE_HAS_TEARING_SUPPORT=1
+export STEAM_GAMESCOPE_NIS_SUPPORTED=1
+export STEAM_GAMESCOPE_TEARING_SUPPORTED=1
+export STEAM_GAMESCOPE_VRR_SUPPORTED=1
+export STEAM_GAMESCOPE_DYNAMIC_REFRESH_IN_STEAM_SUPPORTED=0
+export STEAM_ENABLE_STATUS_LED_BRIGHTNESS=1
+export vk_xwayland_wait_ready=false
+# Let's not let steam get smart here
+# export STEAM_ALLOW_DRIVE_UNMOUNT=1
+# export STEAM_ALLOW_DRIVE_ADOPT=1
+export STEAM_DISABLE_MANGOAPP_ATOM_WORKAROUND=1
+export STEAM_MANGOAPP_HORIZONTAL_SUPPORTED=1
+export STEAM_GAMESCOPE_FANCY_SCALING_SUPPORT=1
+export STEAM_GAMESCOPE_COLOR_MANAGED=1
+export STEAM_GAMESCOPE_VIRTUAL_WHITE=1
+# CEC is TODO
+#export STEAM_ENABLE_CEC=1
+export STEAM_LAUNCH_WRAPPER_SCOPE=1
+export GAMESCOPE_DISPLAY_DISABLED=1
+
+export QT_QPA_PLATFORM_THEME=kde
+
+export ENABLE_GAMESCOPE_WSI=1
+export GAMESCOPE_LIMITER_FILE="$(mktemp "$tmpdir/gamescope-limiter.XXXXXXXX")"
+export XCURSOR_THEME=steam
+export XCURSOR_SCALE=256
+
+# HHD Support + Legion Go Dual DInput Support
+export SDL_GAMECONTROLLERCONFIG=$(cat <<-END
+060000000d0f00009601000000000000,Steam Controller (HHD),a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,leftx:a0,lefty:a1,rightx:a3,righty:a4,lefttrigger:a2,righttrigger:a5,paddle1:b13,paddle2:b12,paddle3:b15,paddle4:b14,misc1:b11,
+060035ea0d0f00009601000001000000,Steam Controller (HHD),a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,leftx:a0,lefty:a1,rightx:a3,righty:a4,lefttrigger:a2,righttrigger:a5,misc1:b11,
+060000000d0f00009601000002000000,Steam Controller (HHD),a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,leftx:a0,lefty:a1,rightx:a3,righty:a4,lefttrigger:a2,righttrigger:a5,paddle1:b13,paddle2:b12,misc1:b11,
+060035ea0d0f00009601000003000000,Steam Controller (HHD),a:b0,b:b1,x:b2,y:b3,back:b6,guide:b8,start:b7,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,leftx:a0,lefty:a1,rightx:a3,righty:a4,lefttrigger:a2,righttrigger:a5,paddle1:b13,paddle2:b12,paddle3:b15,paddle4:b14,misc1:b11,
+030022faef170000ed61000010010000,Legion Go Dual DInput,crc:fa22,platform:Linux,a:b0,b:b1,x:b2,y:b3,leftx:a0,lefty:a1,lefttrigger:b4,righttrigger:b5,back:b7,start:b6,steam:2,
+$SDL_GAMECONTROLLERCONFIG
+END
+)
+
+# Chromium uses GTK's cursor setting instead of XCURSOR_THEME.
+kwriteconfig6 \
+    --file gtk-3.0/settings.ini \
+    --group Settings \
+    --key gtk-cursor-theme-name \
+    steam
+
+board_name="$(cat /sys/class/dmi/id/board_name 2>/dev/null || true)"
+if [[ $board_name = Galileo ]]; then
+    export STEAM_DISPLAY_REFRESH_LIMITS=45,90
+    export STEAM_GAMESCOPE_FORCE_HDR_DEFAULT=1
+    export STEAM_GAMESCOPE_FORCE_OUTPUT_TO_HDR10PQ_DEFAULT=1
+elif [[ $board_name = Jupiter ]]; then
+    export STEAM_DISPLAY_REFRESH_LIMITS=40,60
+fi
+
+# The Steam Flatpak sees host data files below /run/host/share.
+export STEAM_UPDATEUI_PNG_BACKGROUND=/run/host/share/pixmaps/yaguarete-logo-sprite.png
+
+ulimit -n 524288
+
+gamescope_pid=
+steam_pid=
+cleanup() {
+    trap - EXIT HUP INT TERM
+
+    if [[ -n $steam_pid ]] && kill -0 "$steam_pid" 2>/dev/null; then
+        timeout 30s flatpak enter "$steam_pid" /bin/sh -c '
+            pid=
+            for comm in /proc/[0-9]*/comm; do
+                read -r name < "$comm" || continue
+                [ "$name" = steam ] || continue
+                pid=${comm#/proc/}
+                pid=${pid%/comm}
+                break
+            done
+            [ -n "$pid" ] || exit 0
+            kill -TERM "$pid"
+            while [ -r "/proc/$pid/stat" ] && read -r _ _ state _ < "/proc/$pid/stat"; do
+                [ "$state" != Z ] || break
+                sleep 0.1
+            done
+        ' || true
+    fi
+}
+trap cleanup EXIT
+trap 'exit 143' HUP INT TERM
+
+# Gamescope publishes the Xwayland and Wayland display names to its startup
+# socket. Steam must be launched separately with the environment Gamescope
+# reports, rather than as Gamescope's primary child.
+gamescope "${gamescope_args[@]}" &
+gamescope_pid=$!
+
+if ! read -r -t 30 response_x_display response_wl_display <> "$socket"; then
+    echo >&2 'Gamescope did not publish its display environment'
+    exit 1
+fi
+
+# Portal-launched applications use the game Xwayland display. Keep the standard
+# Wayland display empty so activated services do not connect to Gamescope.
+export DISPLAY=":$((${response_x_display#:} + 1))"
+dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY=
+
+# MangoApp, preflight, and Steam use the primary Xwayland display. Steam gets
+# the Gamescope Wayland socket through its dedicated environment variable.
+export DISPLAY="$response_x_display"
+unset WAYLAND_DISPLAY
+export GAMESCOPE_WAYLAND_DISPLAY="$response_wl_display"
+
+#
+# Parallel services
+#
+
+# Run EasyEffects without a window when its Flatpak is installed.
+if flatpak info com.github.wwmm.easyeffects >/dev/null 2>&1; then
+    echo "Launching EasyEffects for DSP control"
+    flatpak run --die-with-parent com.github.wwmm.easyeffects \
+        --service-mode --hide-window &
+fi
+
+# Allow udiskie to automount disks
+udiskie -c /usr/share/yaguarete/gamemode/yaguarete-gamemode-udiskie.yml \
+    -a -N -T -P &
+
+# Publish Steam's battery metrics for the lifetime of this Gamemode session.
+if [[ -x /usr/lib/vpower ]]; then
+    /usr/lib/vpower &
+fi
+
+# Enable mangohud and fix its path to work in flatpak
+while true; do
+    mangoapp
+    status=$?
+    echo >&2 "MangoApp exited with status $status; restarting"
+    sleep 10
+done &
+
+# Steam rewrites MangoApp's config in the Gamescope runtime directory. It also
+# asks Gamescope to write screenshots to a temporary path, then reads the
+# resulting file. Share both locations across the Flatpak sandbox boundary.
+steam_tmp_name=steam-tmp
+steam_tmp="$XDG_RUNTIME_DIR/$steam_tmp_name"
+install -d -m0700 "$steam_tmp"
+
+# Flatpak provides a read-only sysfs view and ignores filesystem overrides for
+# it. Bind writable sysfs controls at their canonical /sys/devices paths
+# instead.
+sysfs_bind_args=()
+for brightness_path in /sys/class/backlight/*/brightness; do
+    [[ -e $brightness_path ]] || continue
+    if exec {brightness_fd}<>"$brightness_path"; then
+        sysfs_bind_args+=(--bind-fd="$brightness_fd")
+    else
+        echo >&2 "Failed to open backlight brightness control: $brightness_path"
+    fi
+done
+
+for led_path in /sys/class/leds/valve-leds\[*\]; do
+    [[ -d $led_path ]] || continue
+    if exec {led_fd}<"$led_path"; then
+        sysfs_bind_args+=(--bind-fd="$led_fd")
+    else
+        echo >&2 "Failed to open Fremont LED controls: $led_path"
+    fi
+done
+
+#
+# Launch flatpak
+#
+
+# Keep the preflight blank screen visible while Steam starts on configured
+# systems. Installation and recovery flows remain synchronous.
+/usr/libexec/yaguarete-preflight || exit $?
+
+# So, using switcherooctl here makes it so we force the iGPU
+# This is soso from a power energy perspective. However, since steam does
+# not provide GPU controls we are kind of stuck here.
+switcherooctl launch flatpak run \
+        --socket=x11-passthrough \
+        "${sysfs_bind_args[@]}" \
+        --filesystem="xdg-run/$response_wl_display:ro" \
+        --filesystem="xdg-run/${tmpdir##*/}:rw" \
+        --filesystem="xdg-run/$steam_tmp_name:create" \
+        --filesystem="${GAMESCOPE_MODE_SAVE_FILE}:rw" \
+        --filesystem=/run/vpower:ro \
+        --env="TMPDIR=$steam_tmp" \
+        org.yaguarete.Steam \
+        -steamos3 \
+        -steampal \
+        -steamdeck \
+        -gamepadui &
+steam_pid=$!
+
+# Ending either half ends the session; the outer launcher then culls the
+# session cgroup.
+wait -n "$gamescope_pid" "$steam_pid"
+status=$?
+
+exit "$status"

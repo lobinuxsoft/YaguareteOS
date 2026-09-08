@@ -152,13 +152,13 @@ specs:
       name: xdg-desktop-portal-gamescope
 
 files:
-  - files/80-anatase-udev.rules
-  - files/anatase-gamemode
-  - files/anatase-gamemode-session
-  - files/anatase-gamemode-udiskie.yml
-  - files/anatase-gamemode.service
-  - files/anatase-flatpak-scope.conf
-  - files/anatase-preflight
+  - files/80-yaguarete-udev.rules
+  - files/yaguarete-gamemode
+  - files/yaguarete-gamemode-session
+  - files/yaguarete-gamemode-udiskie.yml
+  - files/yaguarete-gamemode.service
+  - files/yaguarete-flatpak-scope.conf
+  - files/yaguarete-preflight
   - files/gamemode.desktop
   - files/gamescope-portals.conf
   - files/steam-subscriber-agreement-qr.png
@@ -167,32 +167,32 @@ files:
   - files/return-to-gamemode
   - files/return-to-gamemode-helper
   - files/gamemode.svg
-  - files/org.anatase.return-to-gamemode.policy
+  - files/org.yaguarete.return-to-gamemode.policy
   - files/return-to-gamemode.desktop
 
 postprocess: |
   set -eux
 
-  install -Dm0644 /files/files/80-anatase-udev.rules \
-      /etc/udev/rules.d/80-anatase-udev.rules
-  install -Dm0755 /files/files/anatase-gamemode \
-      /usr/libexec/anatase-gamemode
-  install -Dm0755 /files/files/anatase-gamemode-session \
-      /usr/bin/anatase-gamemode-session
-  install -Dm0644 /files/files/anatase-gamemode-udiskie.yml \
-      /usr/share/anatase/gamemode/anatase-gamemode-udiskie.yml
-  install -Dm0644 /files/files/anatase-gamemode.service \
-      /usr/lib/systemd/user/anatase-gamemode.service
-  install -Dm0644 /files/files/anatase-flatpak-scope.conf \
-      /usr/lib/systemd/user/app-flatpak-.scope.d/10-anatase-gamemode.conf
-  install -Dm0755 /files/files/anatase-preflight \
-      /usr/libexec/anatase-preflight
+  install -Dm0644 /files/files/80-yaguarete-udev.rules \
+      /etc/udev/rules.d/80-yaguarete-udev.rules
+  install -Dm0755 /files/files/yaguarete-gamemode \
+      /usr/libexec/yaguarete-gamemode
+  install -Dm0755 /files/files/yaguarete-gamemode-session \
+      /usr/bin/yaguarete-gamemode-session
+  install -Dm0644 /files/files/yaguarete-gamemode-udiskie.yml \
+      /usr/share/yaguarete/gamemode/yaguarete-gamemode-udiskie.yml
+  install -Dm0644 /files/files/yaguarete-gamemode.service \
+      /usr/lib/systemd/user/yaguarete-gamemode.service
+  install -Dm0644 /files/files/yaguarete-flatpak-scope.conf \
+      /usr/lib/systemd/user/app-flatpak-.scope.d/10-yaguarete-gamemode.conf
+  install -Dm0755 /files/files/yaguarete-preflight \
+      /usr/libexec/yaguarete-preflight
   install -Dm0644 /files/files/gamemode.desktop \
       /usr/share/wayland-sessions/gamemode.desktop
   install -Dm0644 /files/files/gamescope-portals.conf \
       /usr/share/xdg-desktop-portal/gamescope-portals/gamescope-portals.conf
   install -Dm0644 /files/files/steam-subscriber-agreement-qr.png \
-      /usr/share/anatase/gamemode/steam-subscriber-agreement-qr.png
+      /usr/share/yaguarete/gamemode/steam-subscriber-agreement-qr.png
   install -Dm0755 /files/files/steam \
       /usr/bin/steam
 
@@ -202,14 +202,14 @@ postprocess: |
       /usr/libexec/return-to-gamemode-helper
   install -Dm0644 /files/files/gamemode.svg \
       /usr/share/icons/hicolor/scalable/apps/gamemode.svg
-  install -Dm0644 /files/files/org.anatase.return-to-gamemode.policy \
-      /usr/share/polkit-1/actions/org.anatase.return-to-gamemode.policy
+  install -Dm0644 /files/files/org.yaguarete.return-to-gamemode.policy \
+      /usr/share/polkit-1/actions/org.yaguarete.return-to-gamemode.policy
   install -Dm0644 /files/files/return-to-gamemode.desktop \
       /usr/share/applications/gamemode.desktop
 
   # Sanity check preflight
   python3 - <<'PY'
-  source = "/usr/libexec/anatase-preflight"
+  source = "/usr/libexec/yaguarete-preflight"
   with open(source, encoding="utf-8") as script:
       compile(script.read(), source, "exec")
   import cairo
@@ -240,24 +240,24 @@ postprocess: |
       /usr/lib/systemd/user/xdg-desktop-portal-holo.service
 
   bash -n \
-      /usr/libexec/anatase-gamemode \
+      /usr/libexec/yaguarete-gamemode \
       /usr/libexec/return-to-gamemode-helper \
-      /usr/bin/anatase-gamemode-session \
+      /usr/bin/yaguarete-gamemode-session \
       /usr/bin/return-to-gamemode \
       /usr/bin/steam
   udevadm verify --resolve-names=never \
-      /etc/udev/rules.d/80-anatase-udev.rules
+      /etc/udev/rules.d/80-yaguarete-udev.rules
   desktop-file-validate /usr/share/applications/gamemode.desktop
   python3 - <<'PY'
   import xml.etree.ElementTree as ET
-  ET.parse("/usr/share/polkit-1/actions/org.anatase.return-to-gamemode.policy")
+  ET.parse("/usr/share/polkit-1/actions/org.yaguarete.return-to-gamemode.policy")
   PY
-  grep -Fx 'Exec=/usr/bin/anatase-gamemode-session' \
+  grep -Fx 'Exec=/usr/bin/yaguarete-gamemode-session' \
       /usr/share/wayland-sessions/gamemode.desktop
   grep -Fx 'Exec=/usr/bin/return-to-gamemode' \
       /usr/share/applications/gamemode.desktop
   grep -Fx '      <allow_active>yes</allow_active>' \
-      /usr/share/polkit-1/actions/org.anatase.return-to-gamemode.policy
+      /usr/share/polkit-1/actions/org.yaguarete.return-to-gamemode.policy
   grep -Fx 'DesktopNames=gamescope' \
       /usr/share/wayland-sessions/gamemode.desktop
   grep -Fx 'UseIn=gamescope;' \
@@ -291,7 +291,7 @@ postprocess: |
           exit 7
           ;;
       steamos-select-branch)
-          # Anatase has no selectable OS update branches.
+          # YaguareteOS has no selectable OS update branches.
           exit 0
           ;;
       jupiter-check-support)
@@ -314,7 +314,7 @@ postprocess: |
   EOF
   chmod 0755 /usr/bin/steamos-polkit-helpers/dummy
 
-  # Steam hardcodes these paths. Anatase implements none of these SteamOS
+  # Steam hardcodes these paths. YaguareteOS implements none of these SteamOS
   # privileged helpers, so expose the dispatcher above for every known call.
   for helper in \
       jupiter-biosupdate \

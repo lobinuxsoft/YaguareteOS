@@ -60,6 +60,19 @@ jobs:
       # test here failed at `bootc switch` ("Target image does not have
       # ostree.bootable label"). `ludos bootc create` runs the same card
       # composition AND the bootc/rechunk encapsulation on top.
+      #
+      # `bootc create` needs the OCI-sourced cards (kernel, grub's sb-efi)
+      # already present in local storage -- unlike `ludos build`, it does
+      # NOT auto-pull them ("OCI image is not cached", confirmed locally).
+      # Pre-seed both under the plain local tag ludos expects.
+      - name: Pre-seed OCI-sourced cards
+        run: |
+          set -euo pipefail
+          podman pull ghcr.io/anatase-org/kernel:f44-x86_64
+          podman pull ghcr.io/anatase-org/sb-efi:f44-x86_64
+          podman tag ghcr.io/anatase-org/kernel:f44-x86_64 localhost/kernel:f44-x86_64
+          podman tag ghcr.io/anatase-org/sb-efi:f44-x86_64 localhost/sb-efi:f44-x86_64
+
       - name: Build bootc image
         run: venv/bin/ludos bootc create YaguareteOS.yml
 

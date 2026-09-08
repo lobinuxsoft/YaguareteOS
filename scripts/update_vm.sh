@@ -5,7 +5,7 @@ script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 repo_root=$(cd -- "${script_dir}/.." && pwd)
 cd "${repo_root}"
 
-MANIFEST=${MANIFEST:-anatase.yml}
+MANIFEST=${MANIFEST:-YaguareteOS.yml}
 manifest_image=${MANIFEST##*/}
 manifest_image=${manifest_image%.yml}
 manifest_image=${manifest_image%.yaml}

@@ -1,144 +1,72 @@
-<p align="center">
-  <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="cards/base/identity/letterhead-onblack.svg">
-    <source
-      media="(prefers-color-scheme: light)"
-      srcset="cards/base/identity/letterhead-onwhite.svg">
-    <img
-      src="cards/base/identity/letterhead-onwhite.svg"
-      alt="Anatase"
-      width="100%"
-      max-width="600px">
-  </picture>
-</p>
+# YaguareteOS
 
-# Anatase
-[![Discord for Support](https://img.shields.io/discord/1451243296688181342?logo=discord)](https://discord.com/invite/QSzseNYFMF)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
 
-Anatase is a second generation immutable image. Rewritten from scratch, it distills three years of learnings from Bazzite to form an image that is more secure, more maintainable, and more stable, while fixing compliance / security issues.
+YaguareteOS is an immutable, bootc-based image for handhelds, desktops, laptops, and HTPCs. It is a rebrand and fork of [Anatase](https://github.com/anatase-org/anatase) — this repository replaces Anatase's identity, branding, and defaults with YaguareteOS's own, per the permission Anatase's own license grants for exactly this ("fork Anatase and replace the identity card with your type and marks"). The underlying build mechanism (`ludos`, `cards/`, `chunks.yml`) is used as-is.
 
-From a user perspective, perhaps at first glance these do not mean much. So, let's boil it down to three axes.
+- **Smaller, more stable, and universal**. One image covers handhelds, desktops, laptops, HTPCs, and Nvidia devices. Installs and updates fast, without functionality loss.
+- **Compliance, Security, Provenance**. Packages are either sourced from Fedora or built in this repository, so fixes ship fast and no unaccounted changes sneak in.
+- **Handheld-first**: HHD (Handheld Daemon) ships natively — controller, TDP, and RGB support out of the box, unlike Bazzite 44+ which dropped it for InputPlumber/OpenGamepadUI.
+- **Argentine cultural identity** — Guaraní naming (Yaguareté), Spanish-first defaults, `es-AR` locale, native wallpapers. *Cultural*, not governmental.
 
- - **Smaller, more stable, and universal**. There is only one image to cover all handhelds, desktops, laptops, HTPCs, Nvidia devices*. The ISO is 2x smaller, the image is 2x smaller, and they both install / update much faster without functionality loss**. The ISO preinstalls a small set of (removable) applications, so you can open your PDFs and watch Youtube out of the box.
- - **Compliance, Security, Provenance**. Packages are either sourced from Fedora or built in this repository, ensuring fixes can be built in less than an hour, and no random changes are applied (important for both security and bugs).
- - **New Features**: All this allows for new exciting features, such as Spaces, a way to run multiple distributions at the same time, and universal **2X frame generation** in Gamemode for all games.
-
-The end result is an OS built to get out of your way. There are games to play, reels to doomscroll, and homework to do. Install it and browse, game, while installing your favorite apps. Your **PDFs open**, **Spotify works**, **tested recent drivers/kernel are installed for games and AI workloads**, and your new fancy handheld **has controller and TDP support**.
-
-*And a placeholder for a second future ARM one.
-
-**Compared to bazzite-deck-nvidia, the closest image with matching functionality as of 15/07/2026
+> **Estado (2026-09-08):** branding cosmético (logos, wallpapers, os-release,
+> KDE, Gamemode, zsh) ya rebrandeado — ver commit `d906fd6`. Sin build-test
+> todavía (`ludos build YaguareteOS.yml` nunca corrió sobre esto). Llaves de
+> firma propias (cosign, GPG, MOK) generadas pero no conectadas a
+> `ludos.yml`/`cards/base/atomic/card.yml` todavía. Publicación: build vía
+> `ludos` local, push/firma vía herramientas estándar (skopeo + `cosign sign
+> --key`) a un paquete GHCR propio, no el pipeline S3 propio de Anatase — ver
+> `cards/base/atomic/` para lo que sigue sin tocar (llaves, Flatpak runtime).
 
 ## Installation
 
-Grab the ISO from [here](https://downloads.anatase.org/iso/anatase.iso), then:
- - In Windows, use Rufus or Balena Etcher
- - In Anatase/Linux, ISO Image Writer
- - or your Ventoy USB
+*Pendiente: todavía no publicamos un ISO propio. Por ahora, para reproducir localmente:*
 
-Then, plug it in to your computer and start it. Installation is simple.
-
- - If you want to use encryption, specify a password during the encryption step. It is not possible to encrypt after installation.
- - If you want to dualboot, select the option to share your disk and how much space you want to use. Anatase will automatically configure the bootloader so that CMOS wipes do not forget Anatase.
-
-> [!WARNING]
-> NVIDIA GPUs from GTX 1000 generation and older (such as GTX 1080) are not currently supported.
+```bash
+ludos build YaguareteOS.yml
+```
 
 ### Secure boot
 
-If you wish to keep secure boot enabled, you will be faced with:
-
- - **Verification failed: (0x1A) Security Violation:** Press Enter for OK
- - **Press Any Key to perform MOK Management:** Press Enter
- - Select **Enroll key from disk** -> **ANATASE_KEY** -> **ANATASE-KEY-ENROLLME.der**
- - If you select **View key 0**, the fingerprint is **6A:18:4E:3F:50:82:6A:C2:C8:A8:65:CA:BD:D1:CD:8F:16:0A:4E:8D**
- - **Continue** -> **Enroll Key: Yes** -> **Reboot**
-
-After power failures, or your battery draining to 0, you might face the same screen. In this case, follow the same steps, where in this case **ANATASE_KEY** becomes **ANATASE_EFI**. Anatase automatically keeps a copy of its key in your disk in case this happens 😉
-
-These steps will become unnecessary once Anatase gets secureboot keys. Want that to happen sooner? **Share Anatase with your friends!**
+MOK CA propia generada (2026-09-08, cosign/GPG/MOK), todavía sin conectar al
+build. Hasta que eso esté armado, el procedimiento de enrolado sigue siendo
+el que documentaba Anatase (MOK Management al primer arranque), pero con
+llaves que van a cambiar antes de esto ser instalable de verdad.
 
 ## Overview
 > [!TIP]
-> Anatase uses three sessions. You can switch between them on the login screen, by opening the drop-down on the bottom left of the screen.
+> YaguareteOS uses three sessions. You can switch between them on the login screen, by opening the drop-down on the bottom left of the screen.
 >
 > To select a default one, in desktop mode **Settings** -> **Login Screen** -> **Automatically Log in ✔️ as user:** your user -> **with session:** your session
-> 
+>
 > **Do not tick "Login again immediately after logging off" or you will get stuck in Gamemode**
 
 ### Plasma Desktop
-Anatase uses KDE Plasma as for its desktop. It is performant, _feels_ like Windows, and is progressing rapidly with a core team of competent developers. Anatase preinstalls Ark (Archive Manager), Filelight (Disk Usage Analyzer), Kate (Text Editor), and Okular (Document Viewer), which come from KDE, so you can do basic tasks out of the box.
-
-![Anatase Plasma desktop](docs/kde1.png)
-
-![Anatase Plasma application launcher](docs/kde2.png)
+YaguareteOS uses KDE Plasma as its desktop. Preinstalls Ark (Archive Manager), Filelight (Disk Usage Analyzer), Kate (Text Editor), and Okular (Document Viewer).
 
 ### Plasma Mobile
-Anatase also offers Plasma Mobile for tablet-like devices, such as handhelds and two-in-ones (Asus Z13). While Plasma Mobile is still in its early days, it already feels great to use, and for its 20MB install size, it delivers a punch and is great for use in e.g., flights.
-
-Also shown, the Anatase Browser. A Chromium based browser with **working GPU acceleration**, **support for Spotify & 720p Netflix**, and **a built-in adblocker** that works great and updates with the system**. _Yes, having working GPU acceleration is a big deal in Linux._
-
-![Anatase Browser in Plasma Mobile](docs/mobile1.png)
-
-![Plasma Mobile application launcher](docs/mobile2.png)
-
-**Adblocker is based on UBOLite, a completely offline adblocker, and can be rebuilt on demand if the filter lists become outdated without delays from Chrome Store approval and delivered as a signed Flatpak.
+YaguareteOS also offers Plasma Mobile for tablet-like devices, such as handhelds and two-in-ones. Includes a Chromium based browser with working GPU acceleration, Spotify & 720p Netflix support, and a built-in adblocker.
 
 ### Gamemode
-Anatase also has a Gamemode that brings in elements from SteamOS as an optional addon. Compared to gaming in Plasma Desktop:
-
- * Gamemode is intuitive to touch
- * It uses less RAM than a Desktop session
- * Brings the game closer to the GPU, with advanced controls for VRR, Framerate, and HDR. 
- * New in Anatase: **Frame Generation (2X)**. After enabled, games are rendered at half of your target FPS and the other half is generated. Works in all games and with all anticheat!
- * Compared to SteamOS and Bazzite, it gets out of your way. There are proper lock and login screens so you can use this for your desktop or have multiple users, while also being able to set it to autolaunch on boot.
-
-![Anatase Gamemode performance controls](docs/gamemode.png)
+A SteamOS-style gaming session, gamescope + Steam (Flatpak) direct, with HHD for controller/TDP/RGB and a patched `steamos-manager` (Valve's own) as backend. Intuitive to touch, lighter than a full desktop session, with proper lock/login screens.
 
 ### Access the Linux world with Spaces
-You have your Linux preferences, you like specific distributions and their packages, or maybe you want to experiment and see what's the best one: Arch, Fedora, or Ubuntu? In Anatase, you do not have to choose. By typing `arch`, `fedora`, `ubuntu`, or `kali` in your terminal, it transforms to that distribution and gives you access to all its packages, both terminal and desktop ones.
-
-Everything is supported: Docker, VMs, browsers, Visual Studio code, hacking tools, partition managers, package managers, Tailscale, even snap. They integrate seamlessly with your desktop, supporting conveniences such as screen sharing, systemd services, and even your sudo password. Applications **appear in your task bar** as you install them.
-
-A permission system ensures you share only what you need: only your Downloads folder is shared by default, security devices such as USB Crypto wallets are blocked, and SELinux enforcement ensures your SSH and GPG keys remain safe. As attacks on Linux become more common, this provides a security boundary* to keep your system safe while accessing repositories such as the AUR.
-
-Below, you can see an Anatase system running the Shelly AUR package manager from Arch, Visual Studio Code in Fedora, nmap in Kali Linux, and Docker in Ubuntu, all at the same time! Even better, there is no performance overhead. Develop your way, just the way you are used to.
-
-And if you blow up the Space, because perhaps you [typed "Yes, do as I say!"](https://www.youtube.com/watch?v=siEIKFy1Q0I) or your agent decided to fix a problem [through unconventional means](https://www.theregister.com/ai-and-ml/2026/07/16/openai-admits-gpt-56-occasionally-deletes-files-but-its-an-honest-mistake/5274008), `spaces create <space>` will recreate it and you will be back to developing in 5 minutes. Your home is separate, with a Space accessing only the folders you choose to share, limiting the potential damage.
-
-![Spaces in Anatase, shown with Ubuntu running docker, Kali Linux running nmap, VS Code running in Fedora, and the Shelly AUR Store running in arch ](docs/spaces.png)
-
-Finally, you can `claude --dangerously-skip-permissions` and go to the bathroom in peace. Go ahead, install 50 AUR packages with 3 crypto miners*. It's ok if it breaks, your system will be fine. More information [here](https://github.com/anatase-org/spaces).
-
-*Spaces has not undergone a formal security review, so installing malware is unwise.
+Typing `arch`, `fedora`, `ubuntu`, or `kali` in a terminal switches to that distribution's packages, both terminal and desktop, with a permission system controlling what's shared with the host.
 
 ## Roadmap
- * Achieve SLSA3
-   * Port github attestations and use them verify CI images end-to-end
-   * Add SBOM support using a custom metadata format to record transient changes (new fedora packages, git+ repo pulls)
- * Build an arm image
-   * Begin with one handheld: Pocket Retroid 6, as it supports UEFI compatible booting from SD card without invasive changes
-   * Test on one UEFI ARM device (DGX Spark or laptop)
-   * Expand device coverage
- * Expand kernel to support TPM attestation for hibernation and initramfs verification
-   * Hibernation is currently forcibly disabled when secure boot is enabled to comply with secure boot requirements
-   * Use a TPM Policy from the current kernel to HMAC verify the hibernation image and block kernel takeovers
-   * The initramfs is not currently verified. Automatic unlock of encrypted hard disks through the TPM can be bypassed
-   * Sign the initramfs with an attached signature. Make the kernel extend an unused PCR depending on initramfs status, use that PCR as part of unlock policy and re-extend the PCR when exiting the initramfs
- * In the future, apply for Secureboot
+
+Inherited from Anatase's own mechanism, evaluated selectively for YaguareteOS's own needs (see project notes, not tracked here yet):
+ * Rebrand cards (identity, KDE theme, wallpapers, Plymouth) — **fase 3, en curso**
+ * Revive `hhd-vram` (GTT control) as a native HHD plugin — YaguareteOS already had this working before Bazzite dropped HHD
+ * Evaluate TDP write correctness on Strix Point APUs vs. our own validated clamping logic
+ * Everything else Anatase tracks upstream (SLSA3, ARM image, TPM attestation) — adopt as it lands, no divergence unless needed
 
 ## Contributing
 
-Anatase does not currently accept external contributions. You are welcome to post issues in the issue tracker, with suggestions or bug reports.
+YaguareteOS is a personal project; same policy as upstream Anatase — issues/suggestions welcome, no external contributions accepted at this time.
 
 ## License
 
-A copy of the files in this repository is provided to you under the terms of [GNU Affero General Public License v3.0 or later](LICENSE). Exceptions: `.patch` files carry the license of their respective project solely and files with an SDPX license header carry that license solely.
+A copy of the files in this repository is provided to you under the terms of [GNU Affero General Public License v3.0 or later](LICENSE). Exceptions: `.patch` files carry the license of their respective project solely, and files with an SPDX license header carry that license solely.
 
-You may reuse the Anatase mark when producing derived images or rehosting unmodified images that are for personal or internal organizational use. Otherwise, [fork](https://github.com/anatase-org/anatase/fork) Anatase and replace the identity card with your type and marks.
-
-**Non-legally binding TLDR:** Anatase is free software and under the terms of AGPLv3, you may freely adapt the software for your or your organization's (internal) needs without publishing your changes. The same applies to the mark. An example of internal use is your IT department installing Anatase on your laptop or you putting it on your son's laptop.
-
-Anatase is not currently at the stage where it can be pre-installed on devices.
+**Credits**: this repository is a fork of [Anatase](https://github.com/anatase-org/anatase) by Antheas Kapenekakis, used and modified under the terms of the AGPLv3. The `ludos` build tool is also his, vendored here as a submodule under the same license. YaguareteOS's own marks, branding, and configuration are separate from Anatase's identity, per the license terms Anatase itself grants for forks that replace the identity card.

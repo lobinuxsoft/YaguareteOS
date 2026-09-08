@@ -10,7 +10,7 @@ if [[ $# -gt 1 ]]; then
     exit 2
 fi
 
-MANIFEST=${MANIFEST:-anatase.yml}
+MANIFEST=${MANIFEST:-YaguareteOS.yml}
 VM_SSH=${VM_SSH:-vm}
 REMOTE_DIR=${REMOTE_DIR:-/var/tmp/anatase-flatpaks}
 

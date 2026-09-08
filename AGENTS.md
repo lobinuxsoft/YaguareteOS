@@ -2,9 +2,9 @@ This repository contains the source code for Anatase, a bootc based distribution
 
 Ludos uses podman and so will you for running containers for testing. It builds an `images:anatase` image that represents the final system and can be used run fedora / rpm / cargo commands.
 
-You can use `ludos build anatase.yml` to build the distribution. When the user posts an error, the full transaction will be in ./logs/ludos.log (or ludos.log.N if another run rotated it).
+You can use `ludos build YaguareteOS.yml` to build the distribution. When the user posts an error, the full transaction will be in ./logs/ludos.log (or ludos.log.N if another run rotated it).
 
-Anatase uses the concept of manifests and cards to build images. ./anatase.yml is the manifest which specifies which cards to use, and e.g., ./cards/base/scx/card.yml is a build card for scx. It lists the runtime dependencies of the packages, the build dependencies that cannot be automatically infered, the specs locations, and how to update them.
+YaguareteOS uses the concept of manifests and cards to build images. ./YaguareteOS.yml is the manifest which specifies which cards to use, and e.g., ./cards/base/scx/card.yml is a build card for scx. It lists the runtime dependencies of the packages, the build dependencies that cannot be automatically infered, the specs locations, and how to update them.
 
 Here are some other commands:
 ```bash
@@ -29,7 +29,7 @@ ludos patch apply cards/gaming/gamemode.yml:xserver
 # Build the card itself after adding patches (.yml or /card.yml suffix is optional)
 # and skip the image building, package resolution, and other cards
 # skip the spec at the end to build all of the card specs
-ludos build anatase.yml --card cards/gaming/gamemode:xserver
+ludos build YaguareteOS.yml --card cards/gaming/gamemode:xserver
 ```
 
 If your working tree changes, this is because the human reviewer is staging and committing, or modifying your changes as you go. Do not reimplement reverted changes unless you are told to or get confused because of this.

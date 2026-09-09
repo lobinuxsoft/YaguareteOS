@@ -119,20 +119,20 @@ postprocess: |
       /etc/xdg/fastfetch/config.jsonc
 
   # Wallpapers: paquetes Plasma simples, sin pasar por RPM (ver nota arriba).
+  # Plasma descubre cada KPackage como hijo DIRECTO de /usr/share/wallpapers
+  # (/usr/share/wallpapers/<id>/metadata.json) -- un nivel de anidado extra
+  # (.../wallpapers/yaguarete/<id>/...) los vuelve invisibles en el selector.
   # --no-same-owner: el tar conserva el UID/GID de quien lo armo (mi usuario
   # local, no root) -- sin esto, los archivos quedan owned por un UID de
   # usuario normal dentro de una imagen bootc, donde todo /usr debe ser root.
-  install -dm0755 /usr/share/wallpapers/yaguarete
   tar xzf /files/desktop-backgrounds/yaguarete-wallpapers.tar.gz \
       --no-same-owner --no-same-permissions \
-      -C /usr/share/wallpapers/yaguarete
-  chown -R root:root /usr/share/wallpapers/yaguarete
-  find /usr/share/wallpapers/yaguarete -type d -exec chmod 0755 {} +
-  find /usr/share/wallpapers/yaguarete -type f -exec chmod 0644 {} +
-  # TODO(rebase-fase-B/3): elegir wallpaper default vía el mecanismo real de
-  # Anatase (theme/defaults de la card KDE, no confirmado todavía cuál lee).
-  # yaguarete_os usaba un symlink a /usr/share/backgrounds/default.jxl -- eso
-  # es convención de Bazzite, no verificado que aplique acá.
+      -C /usr/share/wallpapers
+  for d in /usr/share/wallpapers/yaguarete_*; do
+      chown -R root:root "$d"
+      find "$d" -type d -exec chmod 0755 {} +
+      find "$d" -type f -exec chmod 0644 {} +
+  done
 
   # Plymouth: tema completo (30 frames de throbber + watermark 512x482),
   # portado tal cual del yaguarete_os viejo -- reemplaza el watermark.png de

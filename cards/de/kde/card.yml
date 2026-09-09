@@ -413,6 +413,7 @@ postprocess: |
         icon_theme="${3}"
         splash_theme="${4}"
         accent_color="${5}"
+        wallpaper="${6}"
         defaults_file="${theme_dir}/contents/defaults"
 
         install -m0644 /files/theme/defaults "${defaults_file}"
@@ -421,6 +422,7 @@ postprocess: |
             -e "s|@COLOR_SCHEME@|${color_scheme}|g" \
             -e "s|@ICON_THEME@|${icon_theme}|g" \
             -e "s|@SPLASH_THEME@|${splash_theme}|g" \
+            -e "s|@WALLPAPER@|${wallpaper}|g" \
             "${defaults_file}"
     }
 
@@ -429,7 +431,15 @@ postprocess: |
         YaguareteOS \
         breeze-dark \
         org.yaguarete.desktop \
-        "255,69,0"
+        "255,69,0" \
+        yaguarete_02
+
+    # Lock screen: mismo wallpaper que usaba yaguarete_os por defecto.
+    install -dm0755 /etc/xdg
+    cat > /etc/xdg/kscreenlockerrc <<'EOF'
+[Greeter][Wallpaper][org.kde.image][General]
+Image=/usr/share/wallpapers/yaguarete_02/
+EOF
 
     write_start_here_plasmoid_setup() {
         theme_dir="${1}"

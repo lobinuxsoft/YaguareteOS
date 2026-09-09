@@ -12,7 +12,7 @@ Theme=@ICON_THEME@
 name=default
 
 [Wallpaper]
-Image=Default
+Image=@WALLPAPER@
 
 [kcminputrc][Mouse]
 cursorTheme=breeze_cursors

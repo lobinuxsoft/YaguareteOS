@@ -35,6 +35,8 @@ repos:
     priority: 10
     releasever: $releasever
     basearch: $arch
+  - repo: vscode
+    priority: 20
 
 bootstrap: cards/bootstrap.yml
 

@@ -14,54 +14,40 @@ packages:
   - code
 
 files:
-  - yaguarete-apps/emu-helpers.sh
-  - yaguarete-apps/Justfile
-  - yaguarete-apps/ujust
-  - yaguarete-apps/09-yaguarete-firacode-dir.conf
-  - yaguarete-apps/just/yryvu.just
-  - yaguarete-apps/just/tatu.just
-  - yaguarete-apps/just/eden.just
-  - yaguarete-apps/just/claude-code.just
-  - yaguarete-apps/just/antigravity-ide.just
-  - yaguarete-apps/just/antigravity-cli.just
-  - yaguarete-apps/just/local-ai.just
-  - yaguarete-apps/just/shell.just
-  - yaguarete-apps/just/emudeck.just
-  - yaguarete-apps/just/decky.just
-  - yaguarete-apps/shell/kitty.conf
-  - yaguarete-apps/shell/p10k.zsh
-  - yaguarete-apps/shell/zshrc
+  - yaguarete-apps-files/emu-helpers.sh
+  - yaguarete-apps-files/Justfile
+  - yaguarete-apps-files/ujust
+  - yaguarete-apps-files/09-yaguarete-firacode-dir.conf
+  - yaguarete-apps-files/just/yryvu.just
+  - yaguarete-apps-files/just/tatu.just
+  - yaguarete-apps-files/just/eden.just
+  - yaguarete-apps-files/just/claude-code.just
+  - yaguarete-apps-files/just/antigravity-ide.just
+  - yaguarete-apps-files/just/antigravity-cli.just
+  - yaguarete-apps-files/just/local-ai.just
+  - yaguarete-apps-files/just/shell.just
+  - yaguarete-apps-files/just/emudeck.just
+  - yaguarete-apps-files/just/decky.just
+  - yaguarete-apps-files/shell/kitty.conf
+  - yaguarete-apps-files/shell/p10k.zsh
+  - yaguarete-apps-files/shell/zshrc
 
 postprocess: |
   set -eux
 
-  # Microsoft's VS Code repo -- packages: list above (`code`) needs it
-  # registered before dnf5 resolves it.
-  rpm --import https://packages.microsoft.com/keys/microsoft.asc
-  cat > /etc/yum.repos.d/vscode.repo <<'EOF'
-  [code]
-  name=Visual Studio Code
-  baseurl=https://packages.microsoft.com/yumrepos/vscode
-  enabled=1
-  autorefresh=1
-  type=rpm-md
-  gpgcheck=1
-  gpgkey=https://packages.microsoft.com/keys/microsoft.asc
-  EOF
-
-  install -Dm0755 /files/yaguarete-apps/emu-helpers.sh /usr/libexec/yaguarete/emu-helpers.sh
-  install -Dm0644 /files/yaguarete-apps/Justfile /usr/share/yaguarete/Justfile
-  install -Dm0755 /files/yaguarete-apps/ujust /usr/bin/ujust
+  install -Dm0755 /files/yaguarete-apps-files/emu-helpers.sh /usr/libexec/yaguarete/emu-helpers.sh
+  install -Dm0644 /files/yaguarete-apps-files/Justfile /usr/share/yaguarete/Justfile
+  install -Dm0755 /files/yaguarete-apps-files/ujust /usr/bin/ujust
 
   install -dm0755 /usr/share/yaguarete/just
-  for f in /files/yaguarete-apps/just/*.just; do
+  for f in /files/yaguarete-apps-files/just/*.just; do
       install -Dm0644 "$f" "/usr/share/yaguarete/just/$(basename "$f")"
   done
 
   install -dm0755 /usr/share/yaguarete/shell
-  install -Dm0644 /files/yaguarete-apps/shell/kitty.conf /usr/share/yaguarete/shell/kitty.conf
-  install -Dm0644 /files/yaguarete-apps/shell/p10k.zsh /usr/share/yaguarete/shell/p10k.zsh
-  install -Dm0644 /files/yaguarete-apps/shell/zshrc /usr/share/yaguarete/shell/zshrc
+  install -Dm0644 /files/yaguarete-apps-files/shell/kitty.conf /usr/share/yaguarete/shell/kitty.conf
+  install -Dm0644 /files/yaguarete-apps-files/shell/p10k.zsh /usr/share/yaguarete/shell/p10k.zsh
+  install -Dm0644 /files/yaguarete-apps-files/shell/zshrc /usr/share/yaguarete/shell/zshrc
 
   # FiraCode Nerd Font (ligatures for kitty, Nerd Font glyphs for
   # Powerlevel10k). Version + checksum pinned -- bump both together.
@@ -80,7 +66,7 @@ postprocess: |
   rm -f "$firacode_tmp" "${firacode_dest}/README.md"
   chmod 0644 "${firacode_dest}"/*
 
-  install -Dm0644 /files/yaguarete-apps/09-yaguarete-firacode-dir.conf \
+  install -Dm0644 /files/yaguarete-apps-files/09-yaguarete-firacode-dir.conf \
       /usr/share/fontconfig/conf.avail/09-yaguarete-firacode-dir.conf
   ln -sf ../../../usr/share/fontconfig/conf.avail/09-yaguarete-firacode-dir.conf \
       /etc/fonts/conf.d/09-yaguarete-firacode-dir.conf

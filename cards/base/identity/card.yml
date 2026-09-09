@@ -14,7 +14,37 @@ files:
   - cockpit-branding.css
   - fastfetch/fastfetch.jsonc
   - plymouth/yaguarete.plymouth
-  - "plymouth/*.png"
+  - plymouth/watermark.png
+  - plymouth/throbber-0001.png
+  - plymouth/throbber-0002.png
+  - plymouth/throbber-0003.png
+  - plymouth/throbber-0004.png
+  - plymouth/throbber-0005.png
+  - plymouth/throbber-0006.png
+  - plymouth/throbber-0007.png
+  - plymouth/throbber-0008.png
+  - plymouth/throbber-0009.png
+  - plymouth/throbber-0010.png
+  - plymouth/throbber-0011.png
+  - plymouth/throbber-0012.png
+  - plymouth/throbber-0013.png
+  - plymouth/throbber-0014.png
+  - plymouth/throbber-0015.png
+  - plymouth/throbber-0016.png
+  - plymouth/throbber-0017.png
+  - plymouth/throbber-0018.png
+  - plymouth/throbber-0019.png
+  - plymouth/throbber-0020.png
+  - plymouth/throbber-0021.png
+  - plymouth/throbber-0022.png
+  - plymouth/throbber-0023.png
+  - plymouth/throbber-0024.png
+  - plymouth/throbber-0025.png
+  - plymouth/throbber-0026.png
+  - plymouth/throbber-0027.png
+  - plymouth/throbber-0028.png
+  - plymouth/throbber-0029.png
+  - plymouth/throbber-0030.png
   - desktop-backgrounds/yaguarete-wallpapers.tar.gz
 
 # Prevent env invalidating the build hash

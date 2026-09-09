@@ -437,9 +437,9 @@ postprocess: |
     # Lock screen: mismo wallpaper que usaba yaguarete_os por defecto.
     install -dm0755 /etc/xdg
     cat > /etc/xdg/kscreenlockerrc <<'EOF'
-[Greeter][Wallpaper][org.kde.image][General]
-Image=/usr/share/wallpapers/yaguarete_02/
-EOF
+    [Greeter][Wallpaper][org.kde.image][General]
+    Image=/usr/share/wallpapers/yaguarete_02/
+    EOF
 
     write_start_here_plasmoid_setup() {
         theme_dir="${1}"

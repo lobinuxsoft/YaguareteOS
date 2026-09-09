@@ -1,10 +1,10 @@
 [Unit]
-Description=Anatase Gamemode Session
+Description=YaguareteOS Gamemode Session
 After=flatpak-portal.service flatpak-session-helper.service xdg-desktop-portal.service
 
 [Service]
 Type=exec
-ExecStart=/usr/libexec/anatase-gamemode
+ExecStart=/usr/libexec/yaguarete-gamemode
 SuccessExitStatus=143
 KillMode=mixed
 Slice=session.slice

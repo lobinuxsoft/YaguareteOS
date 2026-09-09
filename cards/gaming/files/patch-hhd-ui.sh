@@ -27,7 +27,7 @@
 #        - swap the inline default distro SVG for the yaguareté-jaguar SVG
 #          (asset shipped at /files/files/hhd-ui-yaguarete-logo.svg).
 #        - sed the default/hhd-blue hex codes to orange (`#FF4500` family).
-#   4. Repack the asar, drop the extracted dir at /opt/hhd-ui-yaguarete/,
+#   4. Repack the asar, drop the extracted dir at /usr/lib/hhd-ui-yaguarete/,
 #      and replace /usr/bin/hhd-ui with a wrapper script that execs the
 #      dir's AppRun. Replacing the dir (instead of repacking the AppImage
 #      with appimagetool) avoids a runtime-init bug that appimagetool's
@@ -140,15 +140,17 @@ sed -i 's/hue-rotate(200deg)/hue-rotate(320deg)/g; s/hue-rotate(202deg)/hue-rota
 log "repacking asar"
 npx --yes @electron/asar pack app-extracted/ squashfs-root/resources/app.asar
 
-log "deploying extracted bundle to /opt/hhd-ui-yaguarete and replacing /usr/bin/hhd-ui with wrapper"
-mkdir -p /var/opt
-rm -rf /opt/hhd-ui-yaguarete
-mv squashfs-root /opt/hhd-ui-yaguarete
-chmod -R a+rX /opt/hhd-ui-yaguarete
+log "deploying extracted bundle to /usr/lib/hhd-ui-yaguarete and replacing /usr/bin/hhd-ui with wrapper"
+# NOT /opt: on this bootc/ostree base /opt is a symlink to /var/opt, and
+# /var content written during the build is runtime state -- it never ships
+# in the final image. /usr is the only build-time tree that persists.
+rm -rf /usr/lib/hhd-ui-yaguarete
+mv squashfs-root /usr/lib/hhd-ui-yaguarete
+chmod -R a+rX /usr/lib/hhd-ui-yaguarete
 rm -f "$HHD_UI_BIN"
 cat > "$HHD_UI_BIN" <<'WRAPPER'
 #!/bin/bash
-exec /opt/hhd-ui-yaguarete/AppRun "$@"
+exec /usr/lib/hhd-ui-yaguarete/AppRun "$@"
 WRAPPER
 chmod +x "$HHD_UI_BIN"
 

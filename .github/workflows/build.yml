@@ -80,18 +80,24 @@ jobs:
       # pulled/bootc-switched from real hardware for testing. Plain push,
       # no cosign signing yet (that needs the key wired in as a secret --
       # tracked separately, not needed to boot-test).
+      #
+      # The bootc-labeled, rechunked result of `bootc create` is NOT the
+      # "images:*" podman tag (that's the pre-rechunk rootfs, still missing
+      # ostree.bootable -- confirmed the hard way against real hardware).
+      # It's exported as a plain OCI-layout directory under
+      # ./cache/oci/<name>/, per ludos/src/ludos/bootc.py's
+      # _export_rechunked_oci. Push THAT via `skopeo copy oci:<dir>`.
       - name: Push image to GHCR for hardware testing
         run: |
           set -euo pipefail
           echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io \
             --username "${{ github.actor }}" --password-stdin
-          tag=$(podman images --format '{{.Repository}}:{{.Tag}}' \
-            | grep -E '^localhost/(images|bootc):f44-x86_64-YaguareteOS-' | head -1)
-          if [[ -z "$tag" ]]; then
-            echo "Could not find the built image tag" >&2
-            podman images >&2
+          oci_dir=$(find ./cache/oci -mindepth 1 -maxdepth 1 -type d | head -1)
+          if [[ -z "$oci_dir" ]]; then
+            echo "Could not find the rechunked OCI export under ./cache/oci" >&2
+            find ./cache/oci >&2 || true
             exit 1
           fi
-          echo "Found image: $tag"
-          buildah unshare skopeo copy "containers-storage:${tag}" \
+          echo "Found rechunked OCI export: $oci_dir"
+          buildah unshare skopeo copy "oci:${oci_dir}:latest" \
             "docker://ghcr.io/${{ github.repository_owner }}/yaguareteos:test"

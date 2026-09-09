@@ -12,6 +12,10 @@ packages:
   - zsh
   - kitty
   - code
+  - jq
+  - unzip
+  - binutils
+  - git
 
 files:
   - yaguarete-apps-files/emu-helpers.sh
@@ -71,3 +75,48 @@ postprocess: |
   ln -sf ../../../usr/share/fontconfig/conf.avail/09-yaguarete-firacode-dir.conf \
       /etc/fonts/conf.d/09-yaguarete-firacode-dir.conf
   fc-cache -f
+
+  # Bake the AppImage/curl-based tools into /etc/skel so every account
+  # created from this image has them from the start, matching Anatase's
+  # own pre-installed apps. /etc ships in the image; $HOME and /opt do
+  # not (bootc discards /var and its /var/roothome-backed /root at
+  # build time), so both are redirected here instead of their runtime
+  # defaults. `yes |` answers each recipe's inspect-then-run confirm
+  # prompt; `|| true` keeps one flaky upstream endpoint from failing the
+  # whole image. EmuDeck/Decky need a real display session for their own
+  # GUI installers and can't run headless -- ujust-only. local-ai pulls a
+  # multi-GB model that does not belong in the base image -- ujust-only.
+  # yaguarete-setup-shell changes the login shell of "the current user",
+  # which does not exist yet at build time -- ujust-only for that reason
+  # alone, the dotfiles it would drop are already staged above.
+  install -dm0755 /etc/skel
+  yg_skel_env=(
+      env -i
+      PATH=/usr/bin:/usr/sbin
+      HOME=/etc/skel
+      XDG_DATA_HOME=/etc/skel/.local/share
+      XDG_CONFIG_HOME=/etc/skel/.config
+      XDG_BIN_HOME=/etc/skel/.local/bin
+      YAGUARETE_APPS_DIR=/etc/skel/Applications
+      YAGUARETE_OPT_DIR=/usr/lib/yaguarete-opt
+  )
+
+  # antigravity-ide needs real root (it uses sudo for /opt file ops,
+  # which is a same-user no-op here since we already are root).
+  "${yg_skel_env[@]}" bash -c '
+      yes | just --justfile /usr/share/yaguarete/Justfile install-antigravity-ide || true
+  '
+
+  # Everything else here runs unprivileged -- Claude Code's own installer
+  # explicitly refuses root ("$HOME would resolve to root's"), and running
+  # the rest the same way keeps this batch behaving like a real user's
+  # first login instead of root's.
+  useradd --no-create-home --shell /bin/bash yaguarete-skel-build
+  chown -R yaguarete-skel-build:yaguarete-skel-build /etc/skel
+  runuser -u yaguarete-skel-build -- "${yg_skel_env[@]}" bash -c '
+      for r in install-yryvu install-tatu install-eden install-claude-code install-antigravity-cli; do
+          yes | just --justfile /usr/share/yaguarete/Justfile "$r" || true
+      done
+  '
+  userdel yaguarete-skel-build
+  chown -R root:root /etc/skel

@@ -333,7 +333,7 @@ switcherooctl launch flatpak run \
         --filesystem="${GAMESCOPE_MODE_SAVE_FILE}:rw" \
         --filesystem=/run/vpower:ro \
         --env="TMPDIR=$steam_tmp" \
-        org.yaguarete.Steam \
+        org.anatase.Steam \
         -steamos3 \
         -steampal \
         -steamdeck \

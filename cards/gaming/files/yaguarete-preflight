@@ -7,7 +7,7 @@ import re
 import subprocess
 import sys
 
-APP_ID = "org.yaguarete.Steam"
+APP_ID = "org.anatase.Steam"
 
 
 def steam_installed(run=subprocess.run):
@@ -702,7 +702,7 @@ class Preflight(Gtk.Application):
                     "--system",
                     "--assumeyes",
                     "--noninteractive",
-                    "yaguarete",
+                    "anatase",
                     APP_ID,
                 ],
                 flags,

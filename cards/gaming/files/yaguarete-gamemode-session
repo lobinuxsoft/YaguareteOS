@@ -31,7 +31,7 @@ wait "$!"
 status=$?
 
 systemctl --user stop "$service" 2>/dev/null || true
-flatpak kill org.yaguarete.Steam || true
+flatpak kill org.anatase.Steam || true
 
 # Teardown services that use the overrides after Gamemode has stopped.
 systemctl --user stop \

@@ -246,7 +246,6 @@ postprocess: |
     install -dm0755 /usr/share/discover
     cat > /usr/share/discover/yaguarete-featured.json <<'EOF'
     [
-        "appstream://org.anatase.Browser",
         "appstream://org.anatase.Steam",
         "appstream://org.anatase.ArchiveManager",
         "appstream://org.anatase.DiskUsageAnalyzer",

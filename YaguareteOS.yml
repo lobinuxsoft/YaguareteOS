@@ -82,8 +82,6 @@ flatpaks:
   - flatpaks/kcalc
   - flatpaks/okular
   - flatpaks/steam
-  - flatpaks/browser
-  - flatpaks/adblocker
 
 installer:
   ostree: True
@@ -98,9 +96,6 @@ installer:
         - org.anatase.TextEditor
         - org.anatase.Calculator
         - org.anatase.DocumentViewer
-        # Codecs, sigh, but this is for end users
-        - org.anatase.Browser
-        - org.anatase.Browser.Adblocker
       installer:
 
   files:

@@ -181,6 +181,11 @@ packages:
   - plymouth
   - plymouth-system-theme
 
+  # Browser. Anatase ships its own Chromium build as a Flatpak instead
+  # (flatpaks/browser, dropped here) -- plain Firefox RPM instead, no
+  # from-source Chromium build, no dependency on their Flatpak runtime.
+  - firefox
+
 postprocess: |
   set -eux
 

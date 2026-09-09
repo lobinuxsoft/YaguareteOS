@@ -32,7 +32,7 @@ jobs:
           submodules: recursive
 
       - name: Install ludos
-        run: ./ludos/prepare.sh base
+        run: ./ludos/prepare.sh images
 
       - name: Free disk space
         run: |

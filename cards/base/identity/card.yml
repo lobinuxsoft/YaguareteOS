@@ -13,38 +13,7 @@ build-deps:
 files:
   - cockpit-branding.css
   - fastfetch/fastfetch.jsonc
-  - plymouth/yaguarete.plymouth
   - plymouth/watermark.png
-  - plymouth/throbber-0001.png
-  - plymouth/throbber-0002.png
-  - plymouth/throbber-0003.png
-  - plymouth/throbber-0004.png
-  - plymouth/throbber-0005.png
-  - plymouth/throbber-0006.png
-  - plymouth/throbber-0007.png
-  - plymouth/throbber-0008.png
-  - plymouth/throbber-0009.png
-  - plymouth/throbber-0010.png
-  - plymouth/throbber-0011.png
-  - plymouth/throbber-0012.png
-  - plymouth/throbber-0013.png
-  - plymouth/throbber-0014.png
-  - plymouth/throbber-0015.png
-  - plymouth/throbber-0016.png
-  - plymouth/throbber-0017.png
-  - plymouth/throbber-0018.png
-  - plymouth/throbber-0019.png
-  - plymouth/throbber-0020.png
-  - plymouth/throbber-0021.png
-  - plymouth/throbber-0022.png
-  - plymouth/throbber-0023.png
-  - plymouth/throbber-0024.png
-  - plymouth/throbber-0025.png
-  - plymouth/throbber-0026.png
-  - plymouth/throbber-0027.png
-  - plymouth/throbber-0028.png
-  - plymouth/throbber-0029.png
-  - plymouth/throbber-0030.png
   - desktop-backgrounds/yaguarete-wallpapers.tar.gz
   - files/00-amdgpu-simpledrm.toml
 
@@ -60,7 +29,7 @@ hash: >
     letterhead-onblack.svg,
     letterhead-onwhite.svg,
     desktop-backgrounds/yaguarete-wallpapers.tar.gz,
-    plymouth/yaguarete.plymouth
+    plymouth/watermark.png
   )
 
 specs:
@@ -135,18 +104,13 @@ postprocess: |
       find "$d" -type f -exec chmod 0644 {} +
   done
 
-  # Plymouth: tema completo (30 frames de throbber + watermark 512x482),
-  # portado tal cual del yaguarete_os viejo -- reemplaza el watermark.png de
-  # 149x43 del tema "spinner" que traía Anatase (mecanismo minimalista sin
-  # texto, ver reference_anatase_distro_eval). "two-step" es el modulo
-  # Plymouth por defecto de Fedora, ya presente en la imagen base.
-  install -dm0755 /usr/share/plymouth/themes/yaguarete
-  install -Dm0644 /files/plymouth/yaguarete.plymouth \
-      /usr/share/plymouth/themes/yaguarete/yaguarete.plymouth
-  for f in /files/plymouth/*.png; do
-      install -Dm0644 "$f" "/usr/share/plymouth/themes/yaguarete/$(basename "$f")"
-  done
-  plymouth-set-default-theme yaguarete
+  # Plymouth: yaguarete_os no arma un tema propio -- pisa directo el
+  # watermark.png (149x43) del tema "spinner" de Fedora, ya presente en la
+  # imagen base. El texto "YaguareteOS" y el ícono van dibujados como
+  # píxeles dentro de esa misma imagen, no renderizados por Plymouth.
+  install -Dm0644 /files/plymouth/watermark.png \
+      /usr/share/plymouth/themes/spinner/watermark.png
+  plymouth-set-default-theme spinner
 
   # Sin esto el initramfs heredado de la base no recoge el cambio de tema y
   # el arranque temprano sigue mostrando el default -- yaguarete_os viejo

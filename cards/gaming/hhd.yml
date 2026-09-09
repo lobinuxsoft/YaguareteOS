@@ -30,8 +30,6 @@ files:
   - files/hhd-modprobe.conf
   - files/power-profiles-daemon.conf.in
   - files/power-profiles-daemon.dbus.xml.in
-  - files/patch-hhd-ui.sh
-  - files/hhd-ui-yaguarete-logo.svg
   - gamecontrollerdb.txt::https://raw.githubusercontent.com/mdqinc/SDL_GameControllerDB/refs/heads/master/gamecontrollerdb.txt
   - hhd-vram.tar.gz
 
@@ -73,11 +71,10 @@ postprocess: |
   # Add controller DB for hhd's external controller support
   install -Dm0644 /files/gamecontrollerdb.txt /usr/share/sdl/gamecontrollerdb.txt
 
-  # hhd-ui branding: HHD_DISTRO=yaguarete (files/hhd.conf) alone falls back
-  # to hhd-ui's generic theme -- theme.tsx has no matching case. Patch the
-  # Electron AppImage's bundled asset+palette directly instead (see script
-  # header). Non-fatal: warns and exits 0 if upstream's bundle layout moved.
-  bash /files/files/patch-hhd-ui.sh
+  # hhd-ui branding: theme.tsx has no "yaguarete" case (falls back to the
+  # generic gold theme), but `blood_orange` already exists with hue-rotates
+  # tuned close to our brand -- same choice yaguarete_os made on Bazzite.
+  # See files/hhd.conf (HHD_DISTRO=blood_orange).
 
   # hhd-vram: moves the AMD APU firmware's UMA carveout from HHD's TDP tab.
   # External plugin (hhd.plugins entry point), not a fork of hhd itself --

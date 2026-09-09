@@ -46,6 +46,7 @@ files:
   - plymouth/throbber-0029.png
   - plymouth/throbber-0030.png
   - desktop-backgrounds/yaguarete-wallpapers.tar.gz
+  - files/00-amdgpu-simpledrm.toml
 
 # Prevent env invalidating the build hash
 # do not readd: cockpit-branding.css
@@ -154,3 +155,10 @@ postprocess: |
   dracut --no-hostonly --kver "$qualified_kernel" --reproducible --zstd -v \
       --add ostree -f "/usr/lib/modules/$qualified_kernel/initramfs.img"
   chmod 0600 "/usr/lib/modules/$qualified_kernel/initramfs.img"
+
+  # SimpleDRM->amdgpu handoff mid-boot corrupts the Plymouth frame on this
+  # hardware (garbled image, or stuck on a plain grey framebuffer). Same
+  # fix bootc's own nvidia card uses for the equivalent nvidia-drm handoff.
+  install -dm0755 /usr/lib/bootc/kargs.d
+  install -Dm0644 /files/files/00-amdgpu-simpledrm.toml \
+      /usr/lib/bootc/kargs.d/00-amdgpu-simpledrm.toml

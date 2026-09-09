@@ -1,0 +1,8 @@
+# SimpleDRM (UEFI generic framebuffer) hands off to amdgpu mid-boot on this
+# hardware, producing a garbled/noisy frame during the switch and sometimes
+# leaving Plymouth stuck on a plain grey framebuffer with no theme rendered.
+# Same fix bootc's own nvidia driver integration uses for the analogous
+# nvidia-drm handoff (initcall_blacklist=simpledrm_platform_driver_init):
+# never register simpledrm, so amdgpu is the only KMS device from boot.
+kargs = ["initcall_blacklist=simpledrm_platform_driver_init"]
+match-architectures = ["x86_64"]

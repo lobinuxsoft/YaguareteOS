@@ -1,0 +1,13 @@
+# YaguareteOS — per-user app installers, run via `ujust <recipe>`.
+# Each imported file is independently portable bash; see its own header.
+
+import '/usr/share/yaguarete/just/yryvu.just'
+import '/usr/share/yaguarete/just/tatu.just'
+import '/usr/share/yaguarete/just/eden.just'
+import '/usr/share/yaguarete/just/claude-code.just'
+import '/usr/share/yaguarete/just/antigravity-ide.just'
+import '/usr/share/yaguarete/just/antigravity-cli.just'
+import '/usr/share/yaguarete/just/local-ai.just'
+import '/usr/share/yaguarete/just/shell.just'
+import '/usr/share/yaguarete/just/emudeck.just'
+import '/usr/share/yaguarete/just/decky.just'

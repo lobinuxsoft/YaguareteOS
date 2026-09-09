@@ -1,0 +1,6 @@
+#!/bin/bash
+# Minimal ujust wrapper: run our own recipe set, or list them with no args.
+if [ "$#" -eq 0 ]; then
+    exec just --justfile /usr/share/yaguarete/Justfile --list
+fi
+exec just --justfile /usr/share/yaguarete/Justfile "$@"

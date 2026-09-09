@@ -1,0 +1,87 @@
+version: 1
+
+# Per-user app installers ported from yaguarete_os's yafti wizard (Bazzite).
+# Anatase has no `ujust`/rpm-ostree/yafti equivalent, so this card vendors
+# the portable subset directly: our own tools' AppImage/curl installers,
+# plus EmuDeck and Decky Loader's own official installers (not Bazzite's
+# wrapper around them, which we don't have the source for). Everything
+# here writes to $HOME at runtime -- nothing here needs a reboot.
+
+packages:
+  - just
+  - zsh
+  - kitty
+  - code
+
+files:
+  - yaguarete-apps/emu-helpers.sh
+  - yaguarete-apps/Justfile
+  - yaguarete-apps/ujust
+  - yaguarete-apps/09-yaguarete-firacode-dir.conf
+  - yaguarete-apps/just/yryvu.just
+  - yaguarete-apps/just/tatu.just
+  - yaguarete-apps/just/eden.just
+  - yaguarete-apps/just/claude-code.just
+  - yaguarete-apps/just/antigravity-ide.just
+  - yaguarete-apps/just/antigravity-cli.just
+  - yaguarete-apps/just/local-ai.just
+  - yaguarete-apps/just/shell.just
+  - yaguarete-apps/just/emudeck.just
+  - yaguarete-apps/just/decky.just
+  - yaguarete-apps/shell/kitty.conf
+  - yaguarete-apps/shell/p10k.zsh
+  - yaguarete-apps/shell/zshrc
+
+postprocess: |
+  set -eux
+
+  # Microsoft's VS Code repo -- packages: list above (`code`) needs it
+  # registered before dnf5 resolves it.
+  rpm --import https://packages.microsoft.com/keys/microsoft.asc
+  cat > /etc/yum.repos.d/vscode.repo <<'EOF'
+  [code]
+  name=Visual Studio Code
+  baseurl=https://packages.microsoft.com/yumrepos/vscode
+  enabled=1
+  autorefresh=1
+  type=rpm-md
+  gpgcheck=1
+  gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+  EOF
+
+  install -Dm0755 /files/yaguarete-apps/emu-helpers.sh /usr/libexec/yaguarete/emu-helpers.sh
+  install -Dm0644 /files/yaguarete-apps/Justfile /usr/share/yaguarete/Justfile
+  install -Dm0755 /files/yaguarete-apps/ujust /usr/bin/ujust
+
+  install -dm0755 /usr/share/yaguarete/just
+  for f in /files/yaguarete-apps/just/*.just; do
+      install -Dm0644 "$f" "/usr/share/yaguarete/just/$(basename "$f")"
+  done
+
+  install -dm0755 /usr/share/yaguarete/shell
+  install -Dm0644 /files/yaguarete-apps/shell/kitty.conf /usr/share/yaguarete/shell/kitty.conf
+  install -Dm0644 /files/yaguarete-apps/shell/p10k.zsh /usr/share/yaguarete/shell/p10k.zsh
+  install -Dm0644 /files/yaguarete-apps/shell/zshrc /usr/share/yaguarete/shell/zshrc
+
+  # FiraCode Nerd Font (ligatures for kitty, Nerd Font glyphs for
+  # Powerlevel10k). Version + checksum pinned -- bump both together.
+  NERD_FONTS_VERSION="3.5.0"
+  FIRACODE_TAR_SHA256="32226dc81bb30ea421cdc49ba2134b93c2b43096992c829504a3004d2537420d"
+  firacode_tmp="/tmp/FiraCode.tar.xz"
+  firacode_dest="/usr/share/fonts/firacode-nerd-fonts"
+
+  curl -fsSL \
+      "https://github.com/ryanoasis/nerd-fonts/releases/download/v${NERD_FONTS_VERSION}/FiraCode.tar.xz" \
+      -o "$firacode_tmp"
+  echo "${FIRACODE_TAR_SHA256}  ${firacode_tmp}" | sha256sum --check --strict
+
+  mkdir -p "$firacode_dest"
+  tar -xJf "$firacode_tmp" -C "$firacode_dest" --no-same-owner
+  rm -f "$firacode_tmp" "${firacode_dest}/README.md"
+  chmod 0644 "${firacode_dest}"/*
+
+  install -Dm0644 /files/yaguarete-apps/09-yaguarete-firacode-dir.conf \
+      /usr/share/fontconfig/conf.avail/09-yaguarete-firacode-dir.conf
+  ln -sf ../../../usr/share/fontconfig/conf.avail/09-yaguarete-firacode-dir.conf \
+      /etc/fonts/conf.d/09-yaguarete-firacode-dir.conf
+  fc-cache -f

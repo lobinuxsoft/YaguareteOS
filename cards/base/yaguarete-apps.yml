@@ -111,6 +111,7 @@ postprocess: |
       XDG_BIN_HOME=/etc/skel/.local/bin
       YAGUARETE_APPS_DIR=/etc/skel/Applications
       YAGUARETE_OPT_DIR=/usr/lib/yaguarete-opt
+      YAGUARETE_BIN_DIR=/usr/bin
   )
 
   # antigravity-ide needs real root (it uses sudo for /opt file ops,

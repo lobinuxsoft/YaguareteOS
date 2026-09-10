@@ -133,13 +133,17 @@ install-antigravity-ide:
     if [[ ! -x "$launcher_final" ]]; then
         launcher_final=$(sudo find "$YG_OPT_DIR/antigravity" -type f -name "$(basename "$exec_target")" -executable -print -quit 2>/dev/null)
     fi
-    sudo ln -sf "$launcher_final" /usr/local/bin/antigravity
-    yg_ok "Symlinked /usr/local/bin/antigravity → $launcher_final"
+    # /usr/local is also a symlink to /var on bootc (same reason as
+    # $YG_OPT_DIR) -- writable at runtime, but discarded like /opt if this
+    # recipe runs during an image build instead of on a live system.
+    bin_dir="${YAGUARETE_BIN_DIR:-/usr/local/bin}"
+    sudo ln -sf "$launcher_final" "$bin_dir/antigravity"
+    yg_ok "Symlinked $bin_dir/antigravity → $launcher_final"
 
-    # Patch + install the .desktop (Exec= now points to /usr/local/bin/antigravity
+    # Patch + install the .desktop (Exec= now points at $bin_dir/antigravity
     # so it survives future layout shuffles inside /opt/antigravity).
     mkdir -p "$YG_DESKTOP_DIR"
-    sed "s|^Exec=.*|Exec=/usr/local/bin/antigravity %F|" "$desktop_src" > "$YG_DESKTOP_DIR/antigravity.desktop"
+    sed "s|^Exec=.*|Exec=$bin_dir/antigravity %F|" "$desktop_src" > "$YG_DESKTOP_DIR/antigravity.desktop"
 
     # Icon: prefer /pixmaps/, fall back to hicolor, fall back to any
     # antigravity.{png,svg} outside the app's internal resources/ (which
@@ -173,7 +177,7 @@ remove-antigravity-ide:
     yg_confirm "Continue?" || { yg_info "Aborted."; exit 0; }
 
     sudo rm -rf "$YG_OPT_DIR/antigravity"
-    sudo rm -f /usr/local/bin/antigravity
+    sudo rm -f "${YAGUARETE_BIN_DIR:-/usr/local/bin}/antigravity"
     rm -f "$YG_DESKTOP_DIR/antigravity.desktop"
     rm -f "$YG_ICON_DIR"/antigravity.{png,svg}
     yg_refresh_desktop_db

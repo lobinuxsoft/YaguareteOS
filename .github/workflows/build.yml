@@ -74,7 +74,7 @@ jobs:
           podman tag ghcr.io/anatase-org/sb-efi:f44-x86_64 localhost/sb-efi:f44-x86_64
 
       - name: Build bootc image
-        run: venv/bin/ludos bootc create YaguareteOS.yml
+        run: venv/bin/ludos bootc create --force YaguareteOS.yml
 
       # Push the freshly built local image to our own GHCR so it can be
       # pulled/bootc-switched from real hardware for testing. Plain push,

@@ -90,9 +90,21 @@ postprocess: |
   # which does not exist yet at build time -- ujust-only for that reason
   # alone, the dotfiles it would drop are already staged above.
   install -dm0755 /etc/skel
+
+  # Neither sudo nor runuser/su can open a PAM session in this build
+  # sandbox (no logind here) -- pam_open_session fails outright for both.
+  # Swap sudo for a same-user no-op (we are already root when it runs)
+  # and drop privileges with setpriv instead of runuser, which changes
+  # UID/GID directly and never touches PAM.
+  install -dm0755 /tmp/build-sudo-shim
+  cat > /tmp/build-sudo-shim/sudo <<'EOF'
+  #!/bin/bash
+  exec "$@"
+  EOF
+  chmod +x /tmp/build-sudo-shim/sudo
+
   yg_skel_env=(
       env -i
-      PATH=/usr/bin:/usr/sbin
       HOME=/etc/skel
       XDG_DATA_HOME=/etc/skel/.local/share
       XDG_CONFIG_HOME=/etc/skel/.config
@@ -102,8 +114,8 @@ postprocess: |
   )
 
   # antigravity-ide needs real root (it uses sudo for /opt file ops,
-  # which is a same-user no-op here since we already are root).
-  "${yg_skel_env[@]}" bash -c '
+  # shimmed to a no-op above since we already are root).
+  "${yg_skel_env[@]}" PATH=/tmp/build-sudo-shim:/usr/bin:/usr/sbin bash -c '
       yes | just --justfile /usr/share/yaguarete/Justfile install-antigravity-ide || true
   '
 
@@ -113,10 +125,12 @@ postprocess: |
   # first login instead of root's.
   useradd --no-create-home --shell /bin/bash yaguarete-skel-build
   chown -R yaguarete-skel-build:yaguarete-skel-build /etc/skel
-  runuser -u yaguarete-skel-build -- "${yg_skel_env[@]}" bash -c '
-      for r in install-yryvu install-tatu install-eden install-claude-code install-antigravity-cli; do
-          yes | just --justfile /usr/share/yaguarete/Justfile "$r" || true
-      done
-  '
+  setpriv --reuid=yaguarete-skel-build --regid=yaguarete-skel-build --init-groups -- \
+      "${yg_skel_env[@]}" PATH=/usr/bin:/usr/sbin bash -c '
+          for r in install-yryvu install-tatu install-eden install-claude-code install-antigravity-cli; do
+              yes | just --justfile /usr/share/yaguarete/Justfile "$r" || true
+          done
+      '
   userdel yaguarete-skel-build
+  rm -rf /tmp/build-sudo-shim
   chown -R root:root /etc/skel

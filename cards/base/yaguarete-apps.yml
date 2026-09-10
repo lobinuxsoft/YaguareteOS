@@ -134,4 +134,34 @@ postprocess: |
       '
   userdel yaguarete-skel-build
   rm -rf /tmp/build-sudo-shim
+
+  # These recipes resolve $YG_APPS_DIR (= $HOME/Applications) at bake time
+  # and write that literal path into the .desktop's Exec= line -- correct
+  # for a real per-user run, wrong here since useradd copies skel files
+  # verbatim into the new account's home without rewriting their content.
+  # Defer $HOME resolution to actual launch time instead.
+  for desktop in /etc/skel/.local/share/applications/*.desktop; do
+      [ -f "$desktop" ] || continue
+      appimage=$(grep -o '/etc/skel/Applications/[^ "]*' "$desktop" | head -1) || true
+      [ -n "$appimage" ] || continue
+      rel="${appimage#/etc/skel/Applications/}"
+      sed -i "s|^Exec=.*|Exec=sh -c 'exec \"\$HOME/Applications/${rel}\" \"\$@\"' sh %f|" "$desktop"
+  done
+
+  # Same class of bug, different shape: Claude Code's own installer
+  # symlinks its launcher with an absolute /etc/skel/... target (e.g.
+  # ~/.local/bin/claude -> /etc/skel/.local/share/claude/versions/X.Y.Z),
+  # which is just as wrong once copied into a real home. Any symlink
+  # under skel pointing back into skel itself gets the same treatment,
+  # not just this one known case.
+  find /etc/skel -type l | while read -r link; do
+      target=$(readlink "$link")
+      case "$target" in
+          /etc/skel/*)
+              rel=$(realpath --relative-to="$(dirname "$link")" "$target")
+              ln -sfn "$rel" "$link"
+              ;;
+      esac
+  done
+
   chown -R root:root /etc/skel

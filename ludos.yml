@@ -1,22 +1,11 @@
 version: 1
 
-name: Anatase
+name: YaguareteOS
 
-ci:
-  registry: ghcr.io/anatase-org
-
-oci:
-  cosign:
-    registry: https://i.anatase.org/
-    identity: cosign.anatase.org
-    verify: cards/base/atomic/keys/anatase-cosign-root.pem
-
-flatpaks:
-  images:
-    uri: https://flatpaks.anatase.org/icons/
-    s3: icons/
-    overlay: ./flatpaks/overlay.png
-  gpg:
-    identity: https://flatpaks.anatase.org/
-    lookaside: gpg
-    verify: ./cards/base/atomic/keys/anatase-gpg.pub.asc
+# Anatase's own flatpaks/oci/cosign config lived here (S3-backed icon host,
+# KMS-signed cosign chain) -- none of it is read by `ludos build`/`bootc
+# create` (only by `ludos registry`/`upload` commands, which this project
+# does not run: publishing goes through GHCR + our own classic Flatpak
+# repo instead, see reference_flatpak_classic_repo_no_s3). Left out
+# entirely rather than kept as dead config pointing at anatase-org's real
+# infrastructure.

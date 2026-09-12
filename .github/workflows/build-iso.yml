@@ -1,45 +1,35 @@
-name: Build Anatase ISO
+name: Build YaguareteOS ISO
 
 on:
-  workflow_dispatch:
-    inputs:
-      draft:
-        description: Skip ISO Upload
-        required: false
-        type: boolean
-        default: false
+  workflow_dispatch: {}
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: build-iso
+  cancel-in-progress: true
 
 jobs:
   iso:
-    name: Build x86_64 ISO
+    name: Build x86_64 installer ISO
     runs-on: ubuntu-26.04
-    environment: "prod"
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 1
-          token: ${{ secrets.ANATASE_READ }}
-          persist-credentials: false
           submodules: recursive
 
       - name: Install ludos
         run: ./ludos/prepare.sh images
 
-      - name: Save Storage Space
+      # Same disk-clearing step build.yml uses -- ISOs pack the whole
+      # rootfs into one file, no rechunking to fall back on if space runs out.
+      - name: Free disk space
         run: |
-          echo Saving space due to insufficient size
-          df -h
-          sudo swapoff -a
-          sudo rm -f /swapfile
+          sudo swapoff -a || true
+          sudo rm -f /swapfile || true
           shopt -s nullglob
           printf '%s\0' /opt/PyPy /opt/az /opt/node/ /opt/pipx /opt/go /opt/Ruby \
               /usr/lib/llvm-* /usr/local/julia* /usr/local/lib/android /usr/share/dotnet \
@@ -48,57 +38,27 @@ jobs:
               | sudo xargs -0 -n1 -P4 rm -rf
           df -h
 
-      - name: Resolve stable image
-        id: image
+      # Reuses the already-built, already-tested image from build.yml
+      # instead of rebuilding the OS from scratch for the ISO.
+      - name: Build installer ISO
         run: |
-          stable_ref=docker://i.anatase.org/anatase:stable
-          podman pull --quiet "$stable_ref"
-          digest=$(podman image inspect i.anatase.org/anatase:stable \
-            --format '{{.Digest}}')
+          venv/bin/ludos bootc installer YaguareteOS.yml \
+            docker://ghcr.io/lobinuxsoft/yaguareteos:test
 
-          image_ref="docker://i.anatase.org/anatase@${digest}"
-          image_info=$(skopeo inspect --no-tags "$image_ref")
-
-          version=$(jq -r \
-            '.Labels["org.opencontainers.image.version"] // empty' \
-            <<< "$image_info")
-          if [[ -z "$version" ]]; then
-            echo "Stable image has no version label" >&2
+      - name: Locate ISO output
+        id: iso
+        run: |
+          iso_path=$(find ./cache/iso -name '*.iso' -print -quit)
+          if [ -z "$iso_path" ]; then
+            echo "No .iso found under ./cache/iso" >&2
+            find ./cache/iso >&2 || true
             exit 1
           fi
+          echo "path=$iso_path" >> "$GITHUB_OUTPUT"
 
-          echo "ref=$image_ref" >> "$GITHUB_OUTPUT"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-
-      - name: Build ISO
-        env:
-          SOURCE_REF: ${{ steps.image.outputs.ref }}
-        run: venv/bin/ludos bootc installer anatase.yml "$SOURCE_REF"
-
-      - name: Authenticate to Google Cloud
-        if: ${{ !inputs.draft }}
-        id: auth
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-          create_credentials_file: true
-          token_format: access_token
-
-      - name: Set up Google Cloud SDK
-        if: ${{ !inputs.draft }}
-        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
-
-      - name: Upload ISO
-        if: ${{ !inputs.draft }}
-        env:
-          VERSION: ${{ steps.image.outputs.version }}
-          LUDOS_S3_API: ${{ secrets.LUDOS_S3_API }}
-          LUDOS_S3_KEY: ${{ secrets.LUDOS_S3_KEY }}
-          LUDOS_S3_SECRET: ${{ secrets.LUDOS_S3_SECRET }}
-          LUDOS_GPG_KEY: ${{ secrets.LUDOS_GPG_KEY }}
-          LUDOS_GPG_CERT: ${{ secrets.LUDOS_GPG_CERT }}
-        run: |
-          venv/bin/ludos registry file upload \
-            ./cache/iso/anatase-f44-x86_64/installer.iso \
-            iso/anatase.iso "anatase-${VERSION}.iso" --sign
+          name: YaguareteOS-installer-iso
+          path: ${{ steps.iso.outputs.path }}
+          retention-days: 7

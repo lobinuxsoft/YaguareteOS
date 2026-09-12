@@ -90,9 +90,9 @@ passwd -d anatase || true
 install -dm0755 -o anatase -g anatase /home/anatase
 install -Dm0755 -o anatase -g anatase /files/installer/anatase-webui.desktop \
     /home/anatase/Desktop/anatase-webui.desktop
-install -Dm0644 -o anatase -g anatase /files/installer/anatase-face.png \
+install -Dm0644 -o anatase -g anatase /files/installer/yaguarete-face.png \
     /home/anatase/.face
-install -Dm0644 /files/installer/anatase-face.png \
+install -Dm0644 /files/installer/yaguarete-face.png \
     /var/lib/AccountsService/icons/anatase
 install -dm0755 /var/lib/AccountsService/users
 cat > /var/lib/AccountsService/users/anatase <<'EOF'

@@ -2,14 +2,6 @@
 %global __brp_strip %{nil}
 %global __brp_ldconfig %{nil}
 %define _build_id_links none
-# Driver 615.71.09 ships libnvidia-fmdrv/imex (Fabric Manager, IMEX --
-# multi-GPU datacenter features, irrelevant to a single consumer GPU).
-# Declaring them in %files hit a path-resolution mismatch that survived
-# two direct fixes (see cards/drivers/nvidia commit history); downgrading
-# "installed but unpackaged" from fatal to a warning is the standard RPM
-# escape hatch for exactly this, and skipping two datacenter-only libs
-# is harmless here.
-%define _unpackaged_files_terminate_build 0
 
 # systemd 248+
 %if 0%{?rhel} == 8
@@ -17,7 +9,7 @@
 %endif
 
 Name:           nvidia-driver
-Version:        610.57.04
+Version:        615.71.09
 Release:        1%{?dist}
 Summary:        NVIDIA's proprietary display driver for NVIDIA graphic cards
 Epoch:          3
@@ -151,6 +143,18 @@ Conflicts:      xorg-x11-drv-nvidia
 The NVIDIA X.org X11 driver and associated components.
 %endif
 
+%package -n libnvidia-fmdrv
+Summary:        Fabric Manager API versioning and compatibility layer
+
+%description -n libnvidia-fmdrv
+Fabric Manager API versioning and compatibility layer.
+
+%package -n libnvidia-imex
+Summary:        IMEX API versioning and a compatibility layer.
+
+%description -n libnvidia-imex
+IMEX API versioning and a compatibility layer
+
 %endif
  
 %prep
@@ -243,7 +247,7 @@ install -p -m 0755 -D nvidia.icd %{buildroot}%{_sysconfdir}/OpenCL/vendors/nvidi
 
 # Binaries
 mkdir -p %{buildroot}%{_bindir}
-install -p -m 0755 nvidia-{bug-report.sh,debugdump,smi,cuda-mps-control,cuda-mps-server,ngx-updater,powerd} %{buildroot}%{_bindir}
+install -p -m 0755 nvidia-{bug-report.sh,debugdump,smi,cuda-mps-control,cuda-mps-server,networking-bug-report.py,ngx-updater,powerd} %{buildroot}%{_bindir}
 
 # Man pages
 mkdir -p %{buildroot}%{_mandir}/man1/
@@ -357,6 +361,7 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_systemd_util_dir}/system-preset/70-nvidia-driver.preset
 %{_unitdir}/nvidia-powerd.service
 %{_bindir}/nvidia-bug-report.sh
+%{_bindir}/nvidia-networking-bug-report.py
 %{_bindir}/nvidia-powerd
 %{_datadir}/dbus-1/system.d/nvidia-dbus.conf
 %{_datadir}/nvidia/nvidia-powerd
@@ -366,6 +371,9 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-gpucomp.so.%{version}
 %{_libdir}/libnvidia-ml.so.1
 %{_libdir}/libnvidia-ml.so.%{version}
+%ifarch aarch64
+%{_libdir}/libnvidia-rmapi-tegra.so.%{version}
+%endif
 
 %files libs
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json
@@ -455,7 +463,22 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-fbc.so.1
 %{_libdir}/libnvidia-fbc.so.%{version}
 
+%ifarch x86_64 aarch64
+
+%files -n libnvidia-fmdrv
+%{_libdir}/libnvidia-fmdrv.so.1
+%{_libdir}/libnvidia-fmdrv.so.%{version}
+
+%files -n libnvidia-imex
+%{_libdir}/libnvidia-imex.so.1
+%{_libdir}/libnvidia-imex.so.%{version}
+
+%endif
+
 %changelog
+* Thu Sep 10 2026 Simone Caronni <negativo17@gmail.com> - 3:615.71.09-1
+- Update to 615.71.09.
+
 * Fri Aug 07 2026 Simone Caronni <negativo17@gmail.com> - 3:610.57.04-1
 - Update to 610.57.04.
 

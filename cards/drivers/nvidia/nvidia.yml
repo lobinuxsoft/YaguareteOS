@@ -161,6 +161,8 @@ specs:
         - nvidia-driver-cuda-libs
         - nvidia-driver-common
         - libnvidia-fbc
+        - libnvidia-fmdrv
+        - libnvidia-imex
         - xorg-x11-nvidia
       x86_64:
         - nvidia-driver
@@ -169,6 +171,8 @@ specs:
         - nvidia-driver-cuda-libs
         - nvidia-driver-common
         - libnvidia-fbc
+        - libnvidia-fmdrv
+        - libnvidia-imex
         - xorg-x11-nvidia
         - nvidia-driver-libs.i686
         - nvidia-driver-cuda-libs.i686

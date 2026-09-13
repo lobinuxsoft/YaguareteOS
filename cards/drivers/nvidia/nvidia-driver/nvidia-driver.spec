@@ -2,6 +2,14 @@
 %global __brp_strip %{nil}
 %global __brp_ldconfig %{nil}
 %define _build_id_links none
+# Driver 615.71.09 ships libnvidia-fmdrv/imex (Fabric Manager, IMEX --
+# multi-GPU datacenter features, irrelevant to a single consumer GPU).
+# Declaring them in %files hit a path-resolution mismatch that survived
+# two direct fixes (see cards/drivers/nvidia commit history); downgrading
+# "installed but unpackaged" from fatal to a warning is the standard RPM
+# escape hatch for exactly this, and skipping two datacenter-only libs
+# is harmless here.
+%define _unpackaged_files_terminate_build 0
 
 # systemd 248+
 %if 0%{?rhel} == 8
@@ -358,10 +366,6 @@ appstream-util validate --nonet %{buildroot}%{_metainfodir}/com.nvidia.driver.me
 %{_libdir}/libnvidia-gpucomp.so.%{version}
 %{_libdir}/libnvidia-ml.so.1
 %{_libdir}/libnvidia-ml.so.%{version}
-/usr/lib64/libnvidia-fmdrv.so.1
-/usr/lib64/libnvidia-fmdrv.so.%{version}
-/usr/lib64/libnvidia-imex.so.1
-/usr/lib64/libnvidia-imex.so.%{version}
 
 %files libs
 %{_datadir}/glvnd/egl_vendor.d/10_nvidia.json

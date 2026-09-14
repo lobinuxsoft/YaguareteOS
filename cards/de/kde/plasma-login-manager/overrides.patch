@@ -11,7 +11,7 @@ Interim solution even so
  1 file changed, 1 insertion(+), 21 deletions(-)
 
 diff --git a/src/daemon/DaemonApp.cpp b/src/daemon/DaemonApp.cpp
-index f2171ad30601..d8a99efbb611 100644
+index f2171ad3..d8a99efb 100644
 --- a/src/daemon/DaemonApp.cpp
 +++ b/src/daemon/DaemonApp.cpp
 @@ -92,27 +92,7 @@ bool DaemonApp::tryLockFirstLogin()
@@ -54,7 +54,7 @@ Subject: use our theme, not breeze light
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/src/frontend/startkde/lookandfeelsettings.kcfg b/src/frontend/startkde/lookandfeelsettings.kcfg
-index ad9d359fdb1b..445fddcfeb7a 100644
+index ad9d359f..cb659be8 100644
 --- a/src/frontend/startkde/lookandfeelsettings.kcfg
 +++ b/src/frontend/startkde/lookandfeelsettings.kcfg
 @@ -7,15 +7,15 @@
@@ -87,7 +87,7 @@ Subject: catch sighup so plasmalogin does not crash
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/src/helper/HelperApp.cpp b/src/helper/HelperApp.cpp
-index 61553d39e07c..acaacb9ac37d 100644
+index 61553d39..acaacb9a 100644
 --- a/src/helper/HelperApp.cpp
 +++ b/src/helper/HelperApp.cpp
 @@ -44,9 +44,10 @@ HelperApp::HelperApp(int &argc, char **argv)
@@ -119,7 +119,7 @@ Subject: make controller presses translate to enter to attempt a login
  create mode 100644 src/frontend/greeter/controllerinput.h
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 52af3b61b437..b03e19e22845 100644
+index 160989f6..35fc0eeb 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -58,6 +58,8 @@ pkg_check_modules(SYSTEMD REQUIRED "systemd")
@@ -132,7 +132,7 @@ index 52af3b61b437..b03e19e22845 100644
      pkg_get_variable(SYSTEMD_SYSTEM_UNIT_DIR systemd systemdsystemunitdir)
  endif()
 diff --git a/src/frontend/greeter/CMakeLists.txt b/src/frontend/greeter/CMakeLists.txt
-index be8ea32e05d1..ce3c2602f590 100644
+index be8ea32e..ce3c2602 100644
 --- a/src/frontend/greeter/CMakeLists.txt
 +++ b/src/frontend/greeter/CMakeLists.txt
 @@ -10,6 +10,7 @@ set(LOGIN_GREETER_SRCS
@@ -153,7 +153,7 @@ index be8ea32e05d1..ce3c2602f590 100644
  ecm_finalize_qml_module(plasma-login-greeter)
 diff --git a/src/frontend/greeter/controllerinput.cpp b/src/frontend/greeter/controllerinput.cpp
 new file mode 100644
-index 000000000000..fbe369067138
+index 00000000..fbe36906
 --- /dev/null
 +++ b/src/frontend/greeter/controllerinput.cpp
 @@ -0,0 +1,92 @@
@@ -251,7 +251,7 @@ index 000000000000..fbe369067138
 +}
 diff --git a/src/frontend/greeter/controllerinput.h b/src/frontend/greeter/controllerinput.h
 new file mode 100644
-index 000000000000..fda3933dc244
+index 00000000..fda3933d
 --- /dev/null
 +++ b/src/frontend/greeter/controllerinput.h
 @@ -0,0 +1,25 @@
@@ -281,7 +281,7 @@ index 000000000000..fda3933dc244
 +    QList<int> m_deviceFds;
 +};
 diff --git a/src/frontend/greeter/main.cpp b/src/frontend/greeter/main.cpp
-index 699e2ad0c39a..ecd71d3f5ccc 100644
+index 699e2ad0..ecd71d3f 100644
 --- a/src/frontend/greeter/main.cpp
 +++ b/src/frontend/greeter/main.cpp
 @@ -7,9 +7,11 @@
@@ -345,7 +345,7 @@ Subject: support one-shot autologin overrides
  2 files changed, 70 insertions(+), 3 deletions(-)
 
 diff --git a/src/daemon/Display.cpp b/src/daemon/Display.cpp
-index 92feddb249b0..d9dfbe254966 100644
+index 92feddb2..d9dfbe25 100644
 --- a/src/daemon/Display.cpp
 +++ b/src/daemon/Display.cpp
 @@ -18,6 +18,7 @@
@@ -456,7 +456,7 @@ index 92feddb249b0..d9dfbe254966 100644
          } else {
              return handleAutologinFailure();
 diff --git a/src/daemon/Display.h b/src/daemon/Display.h
-index bdfa1cd35f0b..ec2af1571de1 100644
+index bdfa1cd3..ec2af157 100644
 --- a/src/daemon/Display.h
 +++ b/src/daemon/Display.h
 @@ -82,6 +82,7 @@ private:

@@ -25,10 +25,15 @@ Source13:       plasmalogin.conf
 # upstream patches
 
 # VirtualTerminal: replace unconditional VT takeover with a bounded wait
-Patch0:         https://invent.kde.org/plasma/plasma-login-manager/-/merge_requests/170.patch
+# Vendored instead of fetched live: this points at an open KDE merge
+# request, whose diff is mutable upstream and drifted out of sync with
+# this source tarball after Fedora's own build (confirmed reproducible
+# with a fresh download of both).
+Patch0:         170.patch
 
 # Add support for unlocking oo7 wallets on login
-Patch1:         https://invent.kde.org/plasma/plasma-login-manager/-/merge_requests/200.patch
+# Vendored instead of fetched live, same reason as Patch0 above.
+Patch1:         200.patch
 
 # proposed patches
 # Add this here so we do not diff on updates

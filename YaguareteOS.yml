@@ -5,7 +5,7 @@ env:
   prefix: ""
   tag: $prefix$version$dist
 
-name: YaguareteOS
+name: Yaguarete
 releasever: $releasever
 distro: f$releasever-$arch
 tag: $tag

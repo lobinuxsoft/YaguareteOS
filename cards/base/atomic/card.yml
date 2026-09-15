@@ -80,7 +80,7 @@ specs:
       file: overrides.patch
 
 files:
-  - keys/anatase-mok-ca.crt
+  - keys/yaguarete-mok-ca.crt
   - keys/anatase-gpg.pub.asc
   - keys/anatase-cosign-root.pem
   - containers/anatase-registries.yaml
@@ -364,9 +364,9 @@ postprocess: |
     # Add our key to the image
     mkdir -p /usr/lib/ludos/efi
     openssl x509 \
-        -in /files/keys/anatase-mok-ca.crt \
+        -in /files/keys/yaguarete-mok-ca.crt \
         -outform DER \
-        -out /usr/lib/ludos/efi/ANATASE-KEY-ENROLLME.der
+        -out /usr/lib/ludos/efi/YAGUARETE-KEY-ENROLLME.der
 
     # bootupd installs EFI payloads from /usr/lib/efi. Keep the source tree
     # aligned with the Anatase bootloader path instead of inheriting Fedora's

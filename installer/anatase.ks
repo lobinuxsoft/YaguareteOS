@@ -108,7 +108,7 @@ efi_device="$(findfs "$efi_spec")"
 mount "$efi_device" "$target_efi"
 trap 'umount "$target_efi"' EXIT
 
-install -m0644 /usr/lib/ludos/efi/ANATASE-KEY-ENROLLME.der "$target_efi/"
+install -m0644 /usr/lib/ludos/efi/YAGUARETE-KEY-ENROLLME.der "$target_efi/"
 read -r efi_parent efi_part < <(lsblk --nodeps -nro PKNAME,PARTN "$efi_device")
 [ -n "$efi_parent" ] && [ -n "$efi_part" ]
 [ -f "$target_efi/EFI/anatase/shimx64.efi" ]

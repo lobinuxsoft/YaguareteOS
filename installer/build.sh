@@ -56,20 +56,20 @@ sed -i \
 
 # Add Installer user and skeleton
 install -Dm0644 /files/installer/anatase.ks \
-    /usr/share/anatase-installer/anatase.ks
+    /usr/share/yaguarete-installer/anatase.ks
 install -Dm0644 /files/installer/anatase.ks \
     /usr/share/anaconda/interactive-defaults.ks
 install -Dm0755 /files/installer/anatase-webui.desktop \
     /etc/skel/Desktop/anatase-webui.desktop
 for size in 16 22 24 32 36 48 96 256; do
     icon_dir="/usr/share/icons/hicolor/${size}x${size}/apps"
-    if [ -f "${icon_dir}/anatase-logo-icon.png" ]; then
-        ln -snf anatase-logo-icon.png \
+    if [ -f "${icon_dir}/yaguarete-logo-icon.png" ]; then
+        ln -snf yaguarete-logo-icon.png \
             "${icon_dir}/org.fedoraproject.AnacondaInstaller.png"
     fi
 done
-if [ -f /usr/share/icons/hicolor/scalable/apps/anatase-logo-icon.svg ]; then
-    ln -snf anatase-logo-icon.svg \
+if [ -f /usr/share/icons/hicolor/scalable/apps/yaguarete-logo-icon.svg ]; then
+    ln -snf yaguarete-logo-icon.svg \
         /usr/share/icons/hicolor/scalable/apps/org.fedoraproject.AnacondaInstaller.svg
 fi
 if command -v gtk-update-icon-cache >/dev/null; then
@@ -80,29 +80,29 @@ if ! getent group wheel >/dev/null; then
     groupadd wheel
 fi
 install -dm0755 /var/spool/mail
-if id -u anatase >/dev/null 2>&1; then
-    usermod --append --groups wheel --shell /usr/bin/bash anatase
+if id -u yaguarete >/dev/null 2>&1; then
+    usermod --append --groups wheel --shell /usr/bin/bash yaguarete
 else
-    useradd --create-home --comment Anatase --shell /usr/bin/bash --groups wheel anatase
+    useradd --create-home --comment YaguareteOS --shell /usr/bin/bash --groups wheel yaguarete
 fi
-usermod --comment Anatase anatase
-passwd -d anatase || true
-install -dm0755 -o anatase -g anatase /home/anatase
-install -Dm0755 -o anatase -g anatase /files/installer/anatase-webui.desktop \
-    /home/anatase/Desktop/anatase-webui.desktop
-install -Dm0644 -o anatase -g anatase /files/installer/yaguarete-face.png \
-    /home/anatase/.face
+usermod --comment YaguareteOS yaguarete
+passwd -d yaguarete || true
+install -dm0755 -o yaguarete -g yaguarete /home/yaguarete
+install -Dm0755 -o yaguarete -g yaguarete /files/installer/anatase-webui.desktop \
+    /home/yaguarete/Desktop/anatase-webui.desktop
+install -Dm0644 -o yaguarete -g yaguarete /files/installer/yaguarete-face.png \
+    /home/yaguarete/.face
 install -Dm0644 /files/installer/yaguarete-face.png \
-    /var/lib/AccountsService/icons/anatase
+    /var/lib/AccountsService/icons/yaguarete
 install -dm0755 /var/lib/AccountsService/users
-cat > /var/lib/AccountsService/users/anatase <<'EOF'
+cat > /var/lib/AccountsService/users/yaguarete <<'EOF'
 [User]
-RealName=Anatase
-Icon=/var/lib/AccountsService/icons/anatase
+RealName=YaguareteOS
+Icon=/var/lib/AccountsService/icons/yaguarete
 EOF
 
 install -Dm0644 /files/installer/anaconda.conf \
-    /etc/anaconda/conf.d/90-anatase-installer.conf
+    /etc/anaconda/conf.d/90-yaguarete-installer.conf
 
 # Anaconda's automatic partitioning reuses an existing ESP if one is present on
 # the selected boot disk. This can cause losing the boot option if the bios resets
@@ -197,16 +197,16 @@ fi
 # Enable user
 cat > /etc/plasmalogin.conf <<'EOF'
 [Autologin]
-User=anatase
+User=yaguarete
 Session=plasma.desktop
 Relogin=true
 EOF
 
 install -dm0755 /etc/polkit-1/rules.d
-cat > /etc/polkit-1/rules.d/49-anatase-liveinst.rules <<'EOF'
+cat > /etc/polkit-1/rules.d/49-yaguarete-liveinst.rules <<'EOF'
 polkit.addRule(function(action, subject) {
     if (action.id == "org.fedoraproject.pkexec.liveinst" &&
-        subject.user == "anatase" &&
+        subject.user == "yaguarete" &&
         subject.active === true &&
         subject.local === true) {
         return polkit.Result.YES;

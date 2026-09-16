@@ -8,7 +8,7 @@ source /usr/libexec/grub-boot-remount
 trap remount_boot_ro EXIT
 
 if [ ! -d "$payload" ]; then
-    echo "missing Anatase EFI payload directory: $payload" >&2
+    echo "missing YaguareteOS EFI payload directory: $payload" >&2
     exit 1
 fi
 

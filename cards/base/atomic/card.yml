@@ -369,23 +369,23 @@ postprocess: |
         -out /usr/lib/ludos/efi/YAGUARETE-KEY-ENROLLME.der
 
     # bootupd installs EFI payloads from /usr/lib/efi. Keep the source tree
-    # aligned with the Anatase bootloader path instead of inheriting Fedora's
-    # vendor directory.
+    # aligned with the YaguareteOS bootloader path instead of inheriting
+    # Fedora's vendor directory.
     for efi_dir in /usr/lib/efi/*/*/EFI; do
         [ -d "${efi_dir}" ] || continue
         if [ -d "${efi_dir}/fedora" ]; then
-            rm -rf "${efi_dir}/anatase"
-            mv "${efi_dir}/fedora" "${efi_dir}/anatase"
+            rm -rf "${efi_dir}/yaguarete"
+            mv "${efi_dir}/fedora" "${efi_dir}/yaguarete"
         fi
     done
 
     # The shim fallback CSV is UTF-16LE and still uses Fedora for its boot
     # entry label and description after the vendor directory is renamed.
-    for boot_csv in /usr/lib/efi/*/*/EFI/anatase/BOOT*.CSV; do
+    for boot_csv in /usr/lib/efi/*/*/EFI/yaguarete/BOOT*.CSV; do
         [ -f "${boot_csv}" ] || continue
         boot_csv_tmp="${boot_csv}.tmp"
         iconv -f UTF-16 -t UTF-8 "${boot_csv}" |
-            sed 's/Fedora/Anatase/g' |
+            sed 's/Fedora/YaguareteOS/g' |
             iconv -f UTF-8 -t UTF-16 > "${boot_csv_tmp}"
         chmod --reference="${boot_csv}" "${boot_csv_tmp}"
         mv "${boot_csv_tmp}" "${boot_csv}"
@@ -393,7 +393,7 @@ postprocess: |
 
     # Allow forcing bootupd to update efi by bumping dist
     dist=1
-    install -d "/usr/lib/efi/anatase/${dist}/EFI"
+    install -d "/usr/lib/efi/yaguarete/${dist}/EFI"
 
     if command -v bootupctl >/dev/null; then
         bootupctl backend generate-update-metadata || true
@@ -405,7 +405,7 @@ postprocess: |
     [Service]
     ExecStart=/usr/bin/bootupctl migrate-static-grub-config
     EOF
-    cat > /usr/lib/systemd/system-preset/80-anatase-bootupd.preset <<'EOF'
+    cat > /usr/lib/systemd/system-preset/80-yaguarete-bootupd.preset <<'EOF'
     enable bootloader-update.service
     EOF
     systemctl preset bootloader-update.service || true
@@ -414,4 +414,4 @@ postprocess: |
     # the physical root entry in /etc/fstab. Preserve remount processing for
     # other eligible filesystems without leaving the system degraded.
     install -Dm0644 /files/systemd-remount-fs.conf \
-        /usr/lib/systemd/system/systemd-remount-fs.service.d/10-anatase.conf
+        /usr/lib/systemd/system/systemd-remount-fs.service.d/10-yaguarete.conf

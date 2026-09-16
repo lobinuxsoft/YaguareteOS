@@ -1,3 +1,5 @@
 docker:
   i.anatase.org:
     use-sigstore-attachments: true
+  ghcr.io:
+    use-sigstore-attachments: true

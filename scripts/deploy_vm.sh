@@ -228,9 +228,9 @@ parted -s "${loop}" mkpart root btrfs 2562MiB 100%
 partprobe "${loop}" || true
 udevadm settle || true
 
-mkfs.vfat -F32 -n ANATASE_EFI "${loop}p2"
-mkfs.ext4 -F -L ANATASE_BOOT "${loop}p3"
-mkfs.btrfs -f -L ANATASE_DISK "${loop}p4"
+mkfs.vfat -F32 -n YAGUARE_EFI "${loop}p2"
+mkfs.ext4 -F -L YAGUARETE_BOOT "${loop}p3"
+mkfs.btrfs -f -L YAGUARETE_DISK "${loop}p4"
 
 mount "${loop}p4" "${mnt}"
 mkdir -p "${mnt}/boot"
@@ -239,7 +239,7 @@ mkdir -p "${mnt}/boot/efi"
 mount "${loop}p2" "${mnt}/boot/efi"
 
 ostree admin init-fs --modern "${mnt}"
-ostree admin stateroot-init --sysroot="${mnt}" anatase
+ostree admin stateroot-init --sysroot="${mnt}" yaguarete
 ostree --repo="${mnt}/ostree/repo" pull-local /ludos/ostree "${OSTREE_REF}"
 
 root_uuid=$(blkid -s UUID -o value "${loop}p4")
@@ -248,7 +248,7 @@ esp_uuid=$(blkid -s UUID -o value "${loop}p2")
 
 ostree admin deploy \
     --sysroot="${mnt}" \
-    --os=anatase \
+    --os=yaguarete \
     --karg-none \
     --karg="root=UUID=${root_uuid}" \
     --karg=rw \
@@ -256,7 +256,7 @@ ostree admin deploy \
     --karg=rhgb \
     "${OSTREE_REF}"
 
-deployment=$(find "${mnt}/ostree/deploy/anatase/deploy" -maxdepth 1 -type d -name "*.0" | head -n1)
+deployment=$(find "${mnt}/ostree/deploy/yaguarete/deploy" -maxdepth 1 -type d -name "*.0" | head -n1)
 if [ -z "${deployment}" ]; then
     echo "No OSTree deployment was created" >&2
     exit 1
@@ -285,7 +285,7 @@ if [ -d /usr/lib/ludos/efi ]; then
 fi
 cp -R --no-preserve=links /usr/lib/efi/shim/*/EFI/. "${mnt}/boot/efi/EFI/"
 cp -R --no-preserve=links /usr/lib/efi/grub2/*/EFI/. "${mnt}/boot/efi/EFI/"
-efi_vendor=anatase
+efi_vendor=yaguarete
 install -d -m 0755 "${mnt}/boot/efi/EFI/BOOT" "${mnt}/boot/efi/EFI/${efi_vendor}"
 if [ -d "${mnt}/boot/efi/EFI/fedora" ]; then
     cp -R --no-preserve=links "${mnt}/boot/efi/EFI/fedora/." "${mnt}/boot/efi/EFI/${efi_vendor}/"

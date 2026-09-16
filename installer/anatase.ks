@@ -1,10 +1,10 @@
-# Kickstart defaults for the interactive Anatase installer.
+# Kickstart defaults for the interactive YaguareteOS installer.
 
 #
 # Installer
 #
 
-ostreesetup --osname="anatase" --remote="anatase" --url="file:///ostree/repo" --ref="os" --nogpg
+ostreesetup --osname="yaguarete" --remote="yaguarete" --url="file:///ostree/repo" --ref="os" --nogpg
 
 %post --erroronfail --nochroot --interpreter=/usr/bin/bash --log=/tmp/anaconda-ostree-layer.log
 set -euo pipefail
@@ -57,7 +57,7 @@ for container_ref in "${container_refs[@]}"; do
 done
 ostree --repo="${target_repo}" summary --update
 
-deployment_root="/mnt/sysimage/ostree/deploy/anatase/deploy"
+deployment_root="/mnt/sysimage/ostree/deploy/yaguarete/deploy"
 shopt -s nullglob
 origin_files=("${deployment_root}"/*.origin)
 if [ "${#origin_files[@]}" -eq 0 ]; then
@@ -111,10 +111,10 @@ trap 'umount "$target_efi"' EXIT
 install -m0644 /usr/lib/ludos/efi/YAGUARETE-KEY-ENROLLME.der "$target_efi/"
 read -r efi_parent efi_part < <(lsblk --nodeps -nro PKNAME,PARTN "$efi_device")
 [ -n "$efi_parent" ] && [ -n "$efi_part" ]
-[ -f "$target_efi/EFI/anatase/shimx64.efi" ]
+[ -f "$target_efi/EFI/yaguarete/shimx64.efi" ]
 command -v efibootmgr >/dev/null
 efibootmgr --create --disk "/dev/$efi_parent" --part "$efi_part" \
-    --loader '\EFI\anatase\shimx64.efi' --label Anatase
+    --loader '\EFI\yaguarete\shimx64.efi' --label YaguareteOS
 %end
 
 #
@@ -168,9 +168,9 @@ label_mount() {
     esac
 }
 
-label_mount /mnt/sysimage/boot/efi ANATASE_EFI
-label_mount /mnt/sysimage/boot ANATASE_BOOT
-label_mount /mnt/sysimage ANATASE_DISK
+label_mount /mnt/sysimage/boot/efi YAGUARE_EFI
+label_mount /mnt/sysimage/boot YAGUARETE_BOOT
+label_mount /mnt/sysimage YAGUARETE_DISK
 %end
 
 #
@@ -185,7 +185,7 @@ if [ ! -d "$flatpak_source" ]; then
 fi
 
 deployment="$(ostree rev-parse --repo=/mnt/sysimage/ostree/repo ostree/0/1/0)"
-deploy_dir="/mnt/sysimage/ostree/deploy/anatase/deploy/${deployment}.0"
+deploy_dir="/mnt/sysimage/ostree/deploy/yaguarete/deploy/${deployment}.0"
 
 if [ -z "$deploy_dir" ] || [ ! -d "$deploy_dir" ]; then
     echo "failed to find installed OSTree deployment for ${deployment}" >&2

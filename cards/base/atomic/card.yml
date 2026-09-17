@@ -81,6 +81,7 @@ specs:
 
 files:
   - keys/yaguarete-mok-ca.crt
+  - keys/yaguarete-cosign.pub
   - keys/anatase-gpg.pub.asc
   - keys/anatase-cosign-root.pem
   - containers/anatase-registries.yaml
@@ -169,6 +170,8 @@ postprocess: |
         /usr/share/anatase/keys/anatase-gpg.pub.asc
     install -Dm0644 /files/keys/anatase-cosign-root.pem \
         /usr/share/anatase/keys/anatase-cosign-root.pem
+    install -Dm0644 /files/keys/yaguarete-cosign.pub \
+        /usr/share/yaguarete/keys/yaguarete-cosign.pub
     install -Dm0644 /files/containers/anatase-registries.yaml \
         /etc/containers/registries.d/anatase.yaml
     install -Dm0644 /files/containers/anatase-default-policy.json \

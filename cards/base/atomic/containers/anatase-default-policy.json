@@ -18,6 +18,15 @@
                     "type": "sigstoreSigned"
                 }
             ],
+            "ghcr.io/lobinuxsoft/yaguareteos": [
+                {
+                    "keyPath": "/usr/share/yaguarete/keys/yaguarete-cosign.pub",
+                    "signedIdentity": {
+                        "type": "matchRepository"
+                    },
+                    "type": "sigstoreSigned"
+                }
+            ],
             "": [
                 {
                     "type": "insecureAcceptAnything"

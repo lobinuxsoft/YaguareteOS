@@ -77,9 +77,26 @@ jobs:
         run: venv/bin/ludos bootc create --force --version "$(date -u +%Y%m%d)" YaguareteOS.yml
 
       # Push the freshly built local image to our own GHCR so it can be
-      # pulled/bootc-switched from real hardware for testing. Plain push,
-      # no cosign signing yet (that needs the key wired in as a secret --
-      # tracked separately, not needed to boot-test).
+      # pulled/bootc-switched from real hardware for testing, signed with our
+      # own cosign key so installed systems can eventually verify updates
+      # (see cards/base/atomic/containers/anatase-default-policy.json's
+      # ghcr.io/lobinuxsoft/yaguareteos entry).
+      #
+      # This MUST be `skopeo copy --sign-by-sigstore-private-key`, not
+      # `cosign sign`: cosign v3's default `sign` command pushes a
+      # vnd.dev.sigstore.bundle attachment that containers-image's
+      # sigstoreSigned policy verifier does not read. skopeo's own sigstore
+      # signing flag produces the format the policy actually consumes --
+      # confirmed by round-tripping both a positive (signed image passes)
+      # and negative (unsigned image gets rejected) test against real GHCR
+      # with this exact policy.json before wiring it here.
+      #
+      # use-sigstore-attachments must be enabled for ghcr.io on the WRITE
+      # side too (not just the installed system's read side) or skopeo
+      # refuses with "writing sigstore attachments is disabled by
+      # configuration" -- the runner's default registries.d doesn't have it,
+      # so pass an explicit one via --registries.d instead of relying on
+      # anything already on the runner.
       #
       # The bootc-labeled, rechunked result of `bootc create` is NOT the
       # "images:*" podman tag (that's the pre-rechunk rootfs, still missing
@@ -87,7 +104,10 @@ jobs:
       # It's exported as a plain OCI-layout directory under
       # ./cache/oci/<name>/, per ludos/src/ludos/bootc.py's
       # _export_rechunked_oci. Push THAT via `skopeo copy oci:<dir>`.
-      - name: Push image to GHCR for hardware testing
+      - name: Push and sign image on GHCR for hardware testing
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
           set -euo pipefail
           echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io \
@@ -99,5 +119,22 @@ jobs:
             exit 1
           fi
           echo "Found rechunked OCI export: $oci_dir"
-          buildah unshare skopeo copy "oci:${oci_dir}:latest" \
+
+          cosign_key=$(mktemp)
+          cosign_pass=$(mktemp)
+          registries_d=$(mktemp -d)
+          trap 'rm -rf "${cosign_key}" "${cosign_pass}" "${registries_d}"' EXIT
+          printf '%s' "${COSIGN_PRIVATE_KEY}" > "${cosign_key}"
+          printf '%s' "${COSIGN_PASSWORD}" > "${cosign_pass}"
+          cat > "${registries_d}/ghcr.yaml" <<'EOF'
+          docker:
+            ghcr.io:
+              use-sigstore-attachments: true
+          EOF
+
+          buildah unshare skopeo copy \
+            --registries.d "${registries_d}" \
+            --sign-by-sigstore-private-key "${cosign_key}" \
+            --sign-passphrase-file "${cosign_pass}" \
+            "oci:${oci_dir}:latest" \
             "docker://ghcr.io/${{ github.repository_owner }}/yaguareteos:test"

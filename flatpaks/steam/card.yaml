@@ -1,9 +1,9 @@
 version: 1
 
 flatpak:
-  id: org.anatase.Steam
-  command: anatase-steam
-  rename-author: "%s (packaged by Anatase)"
+  id: org.yaguarete.Steam
+  command: yaguarete-steam
+  rename-author: "%s (packaged by YaguareteOS)"
   rename-desktop-file: steam.desktop
   rename-appdata-file: com.valvesoftware.Steam.metainfo.xml
   rename-icon: steam
@@ -28,7 +28,7 @@ flatpak:
     --filesystem=xdg-config/MangoHud:ro
     --filesystem=/run/udev:ro
     --filesystem=xdg-run/speech-dispatcher:ro
-    --filesystem=xdg-run/anatase-steam:create
+    --filesystem=xdg-run/yaguarete-steam:create
     --filesystem=/mnt
     --filesystem=/media
     --filesystem=/run/media
@@ -63,7 +63,7 @@ flatpak:
     --unset-env=SDL_VIDEODRIVER
     --env=DBUS_FATAL_WARNINGS=0
     --env=SSL_CERT_DIR=/etc/ssl/certs
-    # From Flathub Steam, trimmed for Anatase's local runtime layout
+    # From Flathub Steam, trimmed for YaguareteOS's local runtime layout
     --env=STEAM_EXTRA_COMPAT_TOOLS_PATHS=/app/share/steam/compatibilitytools.d
     --env=PATH=/app/bin:/usr/bin
     --env=PROTON_DEBUG_DIR=/var/tmp
@@ -87,23 +87,23 @@ flatpak:
     --system-talk-name=org.bluez
 
 files:
-  - files/anatase-steam
-  - files/anatase-fossilize-replay-wrapper
-  - files/anatase-steam-applications.py
-  - files/anatase-add-to-steam
+  - files/yaguarete-steam
+  - files/yaguarete-fossilize-replay-wrapper
+  - files/yaguarete-steam-applications.py
+  - files/yaguarete-add-to-steam
   - files/hrun
   - files/flatpak
-  - files/anatase-steam-reaper.c
-  - files/test-anatase-steam-applications.py
-  - files/test-anatase-add-to-steam.py
-  - files/test-anatase-fossilize-replay-wrapper.py
+  - files/yaguarete-steam-reaper.c
+  - files/test-yaguarete-steam-applications.py
+  - files/test-yaguarete-add-to-steam.py
+  - files/test-yaguarete-fossilize-replay-wrapper.py
   - files/dbus-send
   - files/steamos-session-select
-  - files/anatase-boot.webm
-  - files/anatase-suspend.webm
+  - files/yaguarete-boot.webm
+  - files/yaguarete-suspend.webm
   - files/registry.vdf
-  - files/org.anatase.Steam.Silent.desktop
-  - files/org.anatase.Steam.kickeractions.desktop
+  - files/org.yaguarete.Steam.Silent.desktop
+  - files/org.yaguarete.Steam.kickeractions.desktop
 
 build-deps:
   - rpm-build
@@ -137,7 +137,7 @@ postprocess: |-
   desktop_file="app/share/applications/steam.desktop"
   if [ -f "$desktop_file" ]; then
       sed -i \
-          -e 's|/usr/bin/steam|/app/bin/anatase-steam|g' \
+          -e 's|/usr/bin/steam|/app/bin/yaguarete-steam|g' \
           "$desktop_file"
           # -e '/^PrefersNonDefaultGPU=/d' \
           # -e '/^X-KDE-RunOnDiscreteGpu=/d' \
@@ -153,32 +153,32 @@ postprocess: |-
   fi
 
   mkdir -p app/bin app/share/steam/compatibilitytools.d
-  install -Dm0644 files/anatase-boot.webm \
-      app/share/anatase/steam/movies/anatase-boot.webm
-  install -Dm0644 files/anatase-suspend.webm \
-      app/share/anatase/steam/movies/anatase-suspend.webm
+  install -Dm0644 files/yaguarete-boot.webm \
+      app/share/yaguarete/steam/movies/yaguarete-boot.webm
+  install -Dm0644 files/yaguarete-suspend.webm \
+      app/share/yaguarete/steam/movies/yaguarete-suspend.webm
   install -Dm0644 files/registry.vdf \
-      app/share/anatase/steam/registry.vdf
-  install -Dm0644 files/org.anatase.Steam.Silent.desktop \
-      app/share/applications/org.anatase.Steam.Silent.desktop
+      app/share/yaguarete/steam/registry.vdf
+  install -Dm0644 files/org.yaguarete.Steam.Silent.desktop \
+      app/share/applications/org.yaguarete.Steam.Silent.desktop
   ln -snf /bin/true app/bin/steamdeps
   if [ -x /usr/bin/cmp ]; then
       cp -f /usr/bin/cmp app/bin/cmp
   fi
-  install -Dm0755 files/anatase-steam app/bin/anatase-steam
-  install -Dm0755 files/anatase-fossilize-replay-wrapper \
-      app/libexec/anatase-fossilize-replay-wrapper
-  install -Dm0755 files/anatase-steam-applications.py \
-      app/libexec/anatase-steam-applications
-  install -Dm0755 files/anatase-add-to-steam \
-      app/bin/anatase-add-to-steam
-  install -Dm0644 files/org.anatase.Steam.kickeractions.desktop \
-      app/share/plasma/kickeractions/org.anatase.Steam.desktop
+  install -Dm0755 files/yaguarete-steam app/bin/yaguarete-steam
+  install -Dm0755 files/yaguarete-fossilize-replay-wrapper \
+      app/libexec/yaguarete-fossilize-replay-wrapper
+  install -Dm0755 files/yaguarete-steam-applications.py \
+      app/libexec/yaguarete-steam-applications
+  install -Dm0755 files/yaguarete-add-to-steam \
+      app/bin/yaguarete-add-to-steam
+  install -Dm0644 files/org.yaguarete.Steam.kickeractions.desktop \
+      app/share/plasma/kickeractions/org.yaguarete.Steam.desktop
   install -Dm0755 files/hrun app/bin/hrun
   install -Dm0755 files/flatpak app/bin/flatpak
   cc -O2 -Wall -Wextra -Werror \
-      files/anatase-steam-reaper.c \
-      -o app/libexec/anatase-steam-reaper
+      files/yaguarete-steam-reaper.c \
+      -o app/libexec/yaguarete-steam-reaper
 
   # Translate Steam's legacy power-management D-Bus calls to login1.
   install -Dm0755 files/dbus-send app/bin/dbus-send
@@ -189,18 +189,18 @@ postprocess: |-
   # Add branch-select if the os provides it
   ln -s /usr/bin/steamos-polkit-helpers/steamos-select-branch app/bin/steamos-select-branch
 
-  bash -n app/bin/anatase-steam
-  bash -n app/bin/anatase-add-to-steam
-  bash -n app/libexec/anatase-fossilize-replay-wrapper
+  bash -n app/bin/yaguarete-steam
+  bash -n app/bin/yaguarete-add-to-steam
+  bash -n app/libexec/yaguarete-fossilize-replay-wrapper
   bash -n app/bin/hrun
   bash -n app/bin/flatpak
   bash -n app/bin/dbus-send
   bash -n app/bin/steamos-session-select
-  ANATASE_STEAM_APPLICATIONS=files/anatase-steam-applications.py \
-  ANATASE_STEAM_HRUN=files/hrun \
-  ANATASE_STEAM_REAPER=files/anatase-steam-reaper.c \
-      python3 files/test-anatase-steam-applications.py
-  ANATASE_FOSSILIZE_REPLAY_WRAPPER=files/anatase-fossilize-replay-wrapper \
-      python3 files/test-anatase-fossilize-replay-wrapper.py
-  ANATASE_ADD_TO_STEAM=files/anatase-add-to-steam \
-      python3 files/test-anatase-add-to-steam.py
+  YAGUARETE_STEAM_APPLICATIONS=files/yaguarete-steam-applications.py \
+  YAGUARETE_STEAM_HRUN=files/hrun \
+  YAGUARETE_STEAM_REAPER=files/yaguarete-steam-reaper.c \
+      python3 files/test-yaguarete-steam-applications.py
+  YAGUARETE_FOSSILIZE_REPLAY_WRAPPER=files/yaguarete-fossilize-replay-wrapper \
+      python3 files/test-yaguarete-fossilize-replay-wrapper.py
+  YAGUARETE_ADD_TO_STEAM=files/yaguarete-add-to-steam \
+      python3 files/test-yaguarete-add-to-steam.py

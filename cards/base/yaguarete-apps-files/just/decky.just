@@ -4,7 +4,7 @@
 # github.com/SteamDeckHomebrew/decky-loader (verified against the repo
 # directly). Decky injects into Steam over its CEF remote-debugging port
 # at runtime -- it does not care which Steam build is running (native,
-# Flathub, or our own org.anatase.Steam), only that Steam is installed
+# Flathub, or our own org.yaguarete.Steam), only that Steam is installed
 # and gets restarted afterwards.
 
 _decky_install_url := "https://github.com/SteamDeckHomebrew/decky-installer/releases/latest/download/install_release.sh"

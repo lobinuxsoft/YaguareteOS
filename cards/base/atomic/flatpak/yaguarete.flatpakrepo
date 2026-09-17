@@ -1,0 +1,7 @@
+[Flatpak Repo]
+Title=YaguareteOS
+Url=https://lobinuxsoft.github.io/YaguareteOS-flatpaks/
+Homepage=https://github.com/lobinuxsoft/YaguareteOS
+Comment=YaguareteOS's own Flatpak apps
+Description=Apps built and published by the YaguareteOS project, replacing the Anatase-hosted versions with our own identity
+GPGKey=@gpg@

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-anatase_sandbox_data_home="${XDG_DATA_HOME:-$HOME/.var/app/org.anatase.Steam/data}"
+yaguarete_sandbox_data_home="${XDG_DATA_HOME:-$HOME/.var/app/org.yaguarete.Steam/data}"
 steam_home="$HOME"
 
 # We are in a flatpak, we do not have
@@ -15,7 +15,7 @@ unset QT_PLUGIN_PATH
 
 # Give expensive Vulkan pipelines enough time to compile before Fossilize
 # discards the worker and retries its range from the last progress marker.
-export FOSSILIZE_REPLAY_WRAPPER="${FOSSILIZE_REPLAY_WRAPPER:-/app/libexec/anatase-fossilize-replay-wrapper}"
+export FOSSILIZE_REPLAY_WRAPPER="${FOSSILIZE_REPLAY_WRAPPER:-/app/libexec/yaguarete-fossilize-replay-wrapper}"
 
 flatpak_info=
 for candidate in "${FLATPAK_INFO:-}" /.flatpak-info /run/flatpak-info; do
@@ -57,17 +57,17 @@ fi
 # Skip OOTB by using a baked registry.vdf with values set to 1
 registry="$steam_home/.steam/registry.vdf"
 if [[ ! -e $registry ]] && mkdir -p "${registry%/*}"; then
-    cp /app/share/anatase/steam/registry.vdf "$registry"
+    cp /app/share/yaguarete/steam/registry.vdf "$registry"
 fi
 
-# Install Anatase's Steam Game Mode startup and suspend overrides.
-# If Decky Animation Changer is installed, remove any Anatase overrides.
+# Install YaguareteOS's Steam Game Mode startup and suspend overrides.
+# If Decky Animation Changer is installed, remove any YaguareteOS overrides.
 animation_changer=false
 if [[ -f "$steam_home/homebrew/plugins/SDH-AnimationChanger/main.py" ]]; then
     animation_changer=true
 fi
-boot_movie=/app/share/anatase/steam/movies/anatase-boot.webm
-suspend_movie=/app/share/anatase/steam/movies/anatase-suspend.webm
+boot_movie=/app/share/yaguarete/steam/movies/yaguarete-boot.webm
+suspend_movie=/app/share/yaguarete/steam/movies/yaguarete-suspend.webm
 movies_dir="${XDG_DATA_HOME:-$HOME/.local/share}/Steam/config/uioverrides/movies"
 if mkdir -p "$movies_dir"; then
     startup_movies=(
@@ -107,20 +107,20 @@ if mkdir -p "$movies_dir"; then
     done
 fi
 
-anatase_runtime_root="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/anatase-steam"
+yaguarete_runtime_root="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/yaguarete-steam"
 if mkdir -p \
-        "$anatase_runtime_root/applications" \
-        "$anatase_runtime_root/icons" \
-        "$anatase_runtime_root/bin"; then
+        "$yaguarete_runtime_root/applications" \
+        "$yaguarete_runtime_root/icons" \
+        "$yaguarete_runtime_root/bin"; then
     chmod 0700 \
-        "$anatase_runtime_root" \
-        "$anatase_runtime_root/applications" \
-        "$anatase_runtime_root/icons" \
-        "$anatase_runtime_root/bin"
-    export ANATASE_STEAM_SANDBOX_DATA_HOME="$anatase_sandbox_data_home"
-    export XDG_DATA_DIRS="$anatase_runtime_root:${XDG_DATA_DIRS:-/app/share:/usr/share}"
-    /app/libexec/anatase-steam-applications \
-        >"$anatase_runtime_root/rewrite.log" 2>&1 </dev/null &
+        "$yaguarete_runtime_root" \
+        "$yaguarete_runtime_root/applications" \
+        "$yaguarete_runtime_root/icons" \
+        "$yaguarete_runtime_root/bin"
+    export YAGUARETE_STEAM_SANDBOX_DATA_HOME="$yaguarete_sandbox_data_home"
+    export XDG_DATA_DIRS="$yaguarete_runtime_root:${XDG_DATA_DIRS:-/app/share:/usr/share}"
+    /app/libexec/yaguarete-steam-applications \
+        >"$yaguarete_runtime_root/rewrite.log" 2>&1 </dev/null &
 fi
 
 notification_pid=

@@ -8,7 +8,7 @@ import urllib.parse
 from pathlib import Path
 
 
-SCRIPT = Path(os.environ.get("ANATASE_ADD_TO_STEAM", "anatase-add-to-steam"))
+SCRIPT = Path(os.environ.get("YAGUARETE_ADD_TO_STEAM", "yaguarete-add-to-steam"))
 
 
 class AddToSteamTests(unittest.TestCase):
@@ -33,13 +33,13 @@ class AddToSteamTests(unittest.TestCase):
             env = os.environ.copy()
             env.update(
                 {
-                    "ANATASE_ADD_TO_STEAM_MARKER": str(marker),
-                    "ANATASE_STEAM_COMMAND": "/usr/bin/echo",
+                    "YAGUARETE_ADD_TO_STEAM_MARKER": str(marker),
+                    "YAGUARETE_STEAM_COMMAND": "/usr/bin/echo",
                     "XDG_RUNTIME_DIR": str(runtime),
                 }
             )
 
-            shortcut = runtime / "anatase-steam/add-to-steam/My Game.desktop"
+            shortcut = runtime / "yaguarete-steam/add-to-steam/My Game.desktop"
             encoded_path = urllib.parse.quote_plus(str(shortcut))
             for argument in (source.as_uri(), str(source)):
                 with self.subTest(argument=argument):

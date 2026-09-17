@@ -6,7 +6,7 @@ import subprocess
 import urllib.parse
 
 
-STEAM_FLATPAK_ID = "org.anatase.Steam"
+STEAM_FLATPAK_ID = "org.yaguarete.Steam"
 
 
 def run(action: str, argument: str) -> None:

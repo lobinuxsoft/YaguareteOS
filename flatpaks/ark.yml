@@ -1,10 +1,10 @@
 version: 1
 
 flatpak:
-  id: org.anatase.ArchiveManager
+  id: org.yaguarete.ArchiveManager
   command: ark
   rename: Archive Manager (Ark)
-  rename-author: "%s (packaged by Anatase)"
+  rename-author: "%s (packaged by YaguareteOS)"
   rename-desktop-file: org.kde.ark.desktop
   rename-appdata-file: org.kde.ark.appdata.xml
   rename-icon: ark
@@ -28,8 +28,8 @@ build-deps:
   - ccache
 
 files:
-  - app/share/kio/servicemenus/org.anatase.ArchiveManager.compress.desktop::kde/files/org.anatase.ArchiveManager.compress.desktop
-  - app/share/kio/servicemenus/org.anatase.ArchiveManager.extract.desktop::kde/files/org.anatase.ArchiveManager.extract.desktop
+  - app/share/kio/servicemenus/org.yaguarete.ArchiveManager.compress.desktop::kde/files/org.yaguarete.ArchiveManager.compress.desktop
+  - app/share/kio/servicemenus/org.yaguarete.ArchiveManager.extract.desktop::kde/files/org.yaguarete.ArchiveManager.extract.desktop
 
 specs:
   - spec: kde/ark/ark.spec

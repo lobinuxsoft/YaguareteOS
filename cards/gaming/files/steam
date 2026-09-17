@@ -1,4 +1,4 @@
 #!/usr/bin/bash
 
 # Provide the conventional host command expected by launchers such as Faugus.
-exec /usr/bin/flatpak run org.anatase.Steam "$@"
+exec /usr/bin/flatpak run org.yaguarete.Steam "$@"

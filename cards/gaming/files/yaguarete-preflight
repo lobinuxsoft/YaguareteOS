@@ -7,7 +7,7 @@ import re
 import subprocess
 import sys
 
-APP_ID = "org.anatase.Steam"
+APP_ID = "org.yaguarete.Steam"
 
 
 def steam_installed(run=subprocess.run):

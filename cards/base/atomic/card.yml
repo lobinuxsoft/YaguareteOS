@@ -82,6 +82,7 @@ specs:
 files:
   - keys/yaguarete-mok-ca.crt
   - keys/yaguarete-cosign.pub
+  - keys/yaguarete-gpg.pub.asc
   - keys/anatase-gpg.pub.asc
   - keys/anatase-cosign-root.pem
   - containers/anatase-registries.yaml
@@ -92,6 +93,7 @@ files:
   - flatpak/anatase-flatpak-remote
   - flatpak/anatase-flatpaks.service
   - flatpak/anatase.flatpakrepo
+  - flatpak/yaguarete.flatpakrepo
   - flatpak/flathub.filter
   - flatpak/flathub.flatpakrepo
   - dracut_cleanup_shadow.sh
@@ -161,6 +163,24 @@ postprocess: |
         /usr/share/flatpak/remotes.d/flathub.flatpakrepo
     install -Dm0644 /files/flatpak/anatase.flatpakrepo \
         /usr/share/flatpak/remotes.d/anatase.flatpakrepo
+
+    # Our own classic (non-OCI) Flatpak repo, hosted as a plain ostree+summary
+    # static tree on GitHub Pages (lobinuxsoft/YaguareteOS-flatpaks). Unlike
+    # the anatase.flatpakrepo above, GPGKey= works fine embedded directly here
+    # -- the parser bug mentioned above is specific to oci+ remotes, not
+    # classic ones (this is the exact same mechanism flathub.flatpakrepo uses
+    # for its own embedded key).
+    install -Dm0644 /files/flatpak/yaguarete.flatpakrepo \
+        /usr/share/flatpak/remotes.d/yaguarete.flatpakrepo
+    install -Dm0644 /files/keys/yaguarete-gpg.pub.asc \
+        /usr/share/yaguarete/keys/yaguarete-gpg.pub.asc
+    gpg_key_yaguarete="$(awk '
+        /^-----BEGIN PGP PUBLIC KEY BLOCK-----$/ { body = 1; next }
+        /^-----END PGP PUBLIC KEY BLOCK-----$/ { body = 0; next }
+        body && $0 !~ /:/ && $0 !~ /^=/ && length($0) { printf "%s", $0 }
+    ' /files/keys/yaguarete-gpg.pub.asc)"
+    sed -i "s|@gpg@|${gpg_key_yaguarete}|g" \
+        /usr/share/flatpak/remotes.d/yaguarete.flatpakrepo
 
     #
     # Registries

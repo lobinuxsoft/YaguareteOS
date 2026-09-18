@@ -56,10 +56,22 @@ for name in "${flatpak_names[@]}"; do
     card="flatpaks/${name}"
     echo "=== Building ${card} ==="
     venv/bin/ludos build --force --flatpak "${card}" YaguareteOS.yml
-    image="localhost/flatpaks:${name}"
-    mnt=$(buildah unshare podman image mount "${image}")
-    flatpak build-export --no-update-summary "${repo_dir}" "${mnt}" stable
-    buildah unshare podman image unmount "${image}"
+    # Mount, export, and unmount must happen inside the SAME `buildah unshare`
+    # invocation: the rootless overlay mount from `podman image mount` only
+    # resolves within that unshared user/mount namespace. Splitting it across
+    # separate `buildah unshare` calls (mount in one, export in another)
+    # leaves `flatpak build-export` looking at what it sees as an empty
+    # directory -- it fails with "Build directory ... not initialized" even
+    # though files/ and metadata are really there, confirmed against
+    # flatpak's own source (flatpak-builtins-build-export.c just checks
+    # g_file_query_exists on files/ and metadata under the given path).
+    image="localhost/flatpaks:${name}" repo_dir="${repo_dir}" \
+        buildah unshare bash -c '
+            set -euo pipefail
+            mnt=$(podman image mount "${image}")
+            flatpak build-export --no-update-summary "${repo_dir}" "${mnt}" stable
+            podman image unmount "${image}"
+        '
 done
 
 echo "=== Signing and updating the repo summary ==="

@@ -15,25 +15,25 @@ from pathlib import Path
 
 APPLICATIONS_PATH = Path(
     os.environ.get(
-        "ANATASE_STEAM_APPLICATIONS",
-        Path(__file__).with_name("anatase-steam-applications.py"),
+        "YAGUARETE_STEAM_APPLICATIONS",
+        Path(__file__).with_name("yaguarete-steam-applications.py"),
     )
 )
 HRUN_PATH = Path(
     os.environ.get(
-        "ANATASE_STEAM_HRUN",
+        "YAGUARETE_STEAM_HRUN",
         Path(__file__).with_name("hrun"),
     )
 )
 REAPER_PATH = Path(
     os.environ.get(
-        "ANATASE_STEAM_REAPER",
-        Path(__file__).with_name("anatase-steam-reaper.c"),
+        "YAGUARETE_STEAM_REAPER",
+        Path(__file__).with_name("yaguarete-steam-reaper.c"),
     )
 )
 
 loader = importlib.machinery.SourceFileLoader(
-    "anatase_steam_applications", str(APPLICATIONS_PATH)
+    "yaguarete_steam_applications", str(APPLICATIONS_PATH)
 )
 spec = importlib.util.spec_from_loader(loader.name, loader)
 applications = importlib.util.module_from_spec(spec)
@@ -59,7 +59,7 @@ class ApplicationCatalogTests(unittest.TestCase):
     def test_reconcile_filters_rewrites_and_copies_icons(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             base = Path(temporary)
-            root = base / "runtime/anatase-steam"
+            root = base / "runtime/yaguarete-steam"
             user_apps = base / "user/applications"
             user_icons = base / "user/icons"
             system_apps = base / "system/applications"
@@ -185,7 +185,7 @@ class ApplicationCatalogTests(unittest.TestCase):
                 root,
                 sources,
                 reaper,
-                {"org.anatase.Steam.desktop", "steam.desktop"},
+                {"org.yaguarete.Steam.desktop", "steam.desktop"},
             )
 
             example = parse_desktop(root / "applications/example.desktop")
@@ -250,7 +250,7 @@ class ApplicationCatalogTests(unittest.TestCase):
             for desktop_id in (*excluded, "missing-exec.desktop"):
                 masked = parse_desktop(root / "applications" / desktop_id)
                 self.assertEqual(masked["Desktop Entry"]["Hidden"], "true")
-            for desktop_id in ("org.anatase.Steam.desktop", "steam.desktop"):
+            for desktop_id in ("org.yaguarete.Steam.desktop", "steam.desktop"):
                 masked = parse_desktop(root / "applications" / desktop_id)
                 self.assertEqual(masked["Desktop Entry"]["Hidden"], "true")
 
@@ -354,7 +354,7 @@ class HostLaunchTests(unittest.TestCase):
             self.assertEqual(
                 output[-9:],
                 [
-                    f"<{base}/run/anatase-steam/bin/reaper>",
+                    f"<{base}/run/yaguarete-steam/bin/reaper>",
                     "<SteamLaunch>",
                     "<AppId=1234>",
                     "<-->",

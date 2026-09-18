@@ -9,8 +9,8 @@ from pathlib import Path
 
 WRAPPER_PATH = Path(
     os.environ.get(
-        "ANATASE_FOSSILIZE_REPLAY_WRAPPER",
-        Path(__file__).with_name("anatase-fossilize-replay-wrapper"),
+        "YAGUARETE_FOSSILIZE_REPLAY_WRAPPER",
+        Path(__file__).with_name("yaguarete-fossilize-replay-wrapper"),
     )
 )
 
@@ -38,10 +38,10 @@ class FossilizeReplayWrapperTests(unittest.TestCase):
                 }
             )
             if timeout is not None:
-                environment["ANATASE_FOSSILIZE_REPLAY_TIMEOUT_SECONDS"] = timeout
+                environment["YAGUARETE_FOSSILIZE_REPLAY_TIMEOUT_SECONDS"] = timeout
             else:
                 environment.pop(
-                    "ANATASE_FOSSILIZE_REPLAY_TIMEOUT_SECONDS", None
+                    "YAGUARETE_FOSSILIZE_REPLAY_TIMEOUT_SECONDS", None
                 )
 
             return subprocess.run(

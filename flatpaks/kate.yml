@@ -1,10 +1,10 @@
 version: 1
 
 flatpak:
-  id: org.anatase.TextEditor
+  id: org.yaguarete.TextEditor
   command: kate
   rename: Text Editor (Kate)
-  rename-author: "%s (packaged by Anatase)"
+  rename-author: "%s (packaged by YaguareteOS)"
   rename-desktop-file: org.kde.kate.desktop
   rename-appdata-file: org.kde.kate.appdata.xml
   rename-icon: kate

@@ -2,17 +2,17 @@
 
 original_app="${FOSSILIZE_REPLAY_WRAPPER_ORIGINAL_APP:-}"
 if [[ -z $original_app || ! -x $original_app ]]; then
-    printf 'anatase-fossilize-replay-wrapper: original replay executable is unavailable\n' >&2
+    printf 'yaguarete-fossilize-replay-wrapper: original replay executable is unavailable\n' >&2
     exit 127
 fi
 
 # Steam currently gives workers ten seconds without a completed pipeline before
 # Fossilize kills and restarts them. Complex pipelines can legitimately take
 # longer, making the replay repeatedly discard useful compiler work.
-timeout_seconds="${ANATASE_FOSSILIZE_REPLAY_TIMEOUT_SECONDS:-60}"
+timeout_seconds="${YAGUARETE_FOSSILIZE_REPLAY_TIMEOUT_SECONDS:-60}"
 case "$timeout_seconds" in
     ''|*[!0-9]*)
-        printf 'anatase-fossilize-replay-wrapper: invalid timeout %q; using 60 seconds\n' \
+        printf 'yaguarete-fossilize-replay-wrapper: invalid timeout %q; using 60 seconds\n' \
             "$timeout_seconds" >&2
         timeout_seconds=60
         ;;

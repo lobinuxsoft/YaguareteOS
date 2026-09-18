@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Service
+Actions=addToSteam;
+X-KDE-ExcludeAppIds=org.yaguarete.Steam;org.yaguarete.Steam.Silent;
+
+[Desktop Action addToSteam]
+Name=Add to Steam
+Icon=org.yaguarete.Steam
+Exec=yaguarete-add-to-steam %u

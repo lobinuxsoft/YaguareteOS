@@ -1,10 +1,10 @@
 version: 1
 
 flatpak:
-  id: org.anatase.ImageViewer
+  id: org.yaguarete.ImageViewer
   command: gwenview
   rename: Image Viewer (Gwenview)
-  rename-author: "%s (packaged by Anatase)"
+  rename-author: "%s (packaged by YaguareteOS)"
   rename-desktop-file: org.kde.gwenview.desktop
   rename-appdata-file: org.kde.gwenview.appdata.xml
   rename-icon: gwenview

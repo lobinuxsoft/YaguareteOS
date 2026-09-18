@@ -53,7 +53,7 @@ case "$target" in
 esac
 
 if [[ -n ${SteamAppId:-} ]]; then
-    runtime_root="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/anatase-steam"
+    runtime_root="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/yaguarete-steam"
     exec "${spawn[@]}" \
         "$runtime_root/bin/reaper" \
         SteamLaunch "AppId=$SteamAppId" -- "${command[@]}"

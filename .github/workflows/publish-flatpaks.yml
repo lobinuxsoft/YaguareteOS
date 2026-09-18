@@ -1,0 +1,55 @@
+name: Publish YaguareteOS Flatpaks
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-flatpaks
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Build and publish the 7 YaguareteOS-owned flatpaks
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install ludos
+        run: ./ludos/prepare.sh images
+
+      - name: Free disk space
+        run: |
+          sudo swapoff -a || true
+          sudo rm -f /swapfile || true
+          shopt -s nullglob
+          printf '%s\0' /opt/PyPy /opt/az /opt/node/ /opt/pipx /opt/go /opt/Ruby \
+              /usr/lib/llvm-* /usr/local/julia* /usr/local/lib/android /usr/share/dotnet \
+              /usr/share/swift /usr/local/.ghcup /usr/lib/firefox /opt/google/chrome \
+              /opt/microsoft/msedge \
+              | sudo xargs -0 -n1 -P4 rm -rf
+          df -h
+
+      # A dedicated deploy key scoped to just lobinuxsoft/YaguareteOS-flatpaks
+      # (write access), not the broad personal PAT -- see the key's title in
+      # that repo's deploy key list if it ever needs rotating.
+      - name: Set up deploy key for YaguareteOS-flatpaks
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.FLATPAKS_DEPLOY_KEY }}" > ~/.ssh/flatpaks_deploy_key
+          chmod 600 ~/.ssh/flatpaks_deploy_key
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          echo "GIT_SSH_COMMAND=ssh -i ~/.ssh/flatpaks_deploy_key -o IdentitiesOnly=yes" >> "$GITHUB_ENV"
+
+      - name: Build, sign, and publish
+        env:
+          FLATPAK_GPG_PRIVATE_KEY: ${{ secrets.FLATPAK_GPG_PRIVATE_KEY }}
+          FLATPAK_GPG_PASSWORD: ${{ secrets.FLATPAK_GPG_PASSWORD }}
+          FLATPAKS_REPO_SSH_URL: git@github.com:lobinuxsoft/YaguareteOS-flatpaks.git
+        run: ./scripts/publish_flatpaks.sh

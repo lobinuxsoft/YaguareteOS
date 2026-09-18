@@ -1,7 +1,14 @@
-# Keep Anatase-owned Flatpaks and runtimes resolved from the Anatase remote.
+# Keep the org.anatase.Platform runtime (still real Anatase infra, see
+# card.yml) resolved only from the Anatase remote, never from Flathub.
 deny org.anatase.*
 deny app/org.anatase.*
 deny runtime/org.anatase.*
 
-# Steam is provided by the Anatase remote as org.anatase.Steam.
+# Keep our own rebranded apps resolved only from our own remote, never from
+# Flathub, in case anyone ever publishes a look-alike org.yaguarete.* there.
+deny org.yaguarete.*
+deny app/org.yaguarete.*
+deny runtime/org.yaguarete.*
+
+# Steam is provided by our own remote as org.yaguarete.Steam.
 deny com.valvesoftware.Steam

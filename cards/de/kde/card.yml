@@ -238,20 +238,18 @@ postprocess: |
     RequiredNotificationInterval=604800
     EOF
 
-    # TODO(rebase-fase-B): estos IDs son Flatpaks REALES hosteados por Anatase
-    # (org.anatase.*). Los dejamos así a propósito -- son apps que existen y
-    # funcionan hoy. Renombrarlos sin hostear nuestros propios Flatpaks bajo
-    # org.yaguarete.* rompe Discover (apuntaría a IDs que no existen).
+    # Estos IDs ahora hostean nuestro propio build, publicado en
+    # lobinuxsoft/YaguareteOS-flatpaks (ver cards/base/atomic/flatpak/).
     install -dm0755 /usr/share/discover
     cat > /usr/share/discover/yaguarete-featured.json <<'EOF'
     [
-        "appstream://org.anatase.Steam",
-        "appstream://org.anatase.ArchiveManager",
-        "appstream://org.anatase.DiskUsageAnalyzer",
-        "appstream://org.anatase.ImageViewer",
-        "appstream://org.anatase.TextEditor",
-        "appstream://org.anatase.Calculator",
-        "appstream://org.anatase.DocumentViewer"
+        "appstream://org.yaguarete.Steam",
+        "appstream://org.yaguarete.ArchiveManager",
+        "appstream://org.yaguarete.DiskUsageAnalyzer",
+        "appstream://org.yaguarete.ImageViewer",
+        "appstream://org.yaguarete.TextEditor",
+        "appstream://org.yaguarete.Calculator",
+        "appstream://org.yaguarete.DocumentViewer"
     ]
     EOF
     cat > /usr/share/discover/featuredurlrc <<'EOF'

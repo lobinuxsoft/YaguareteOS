@@ -90,15 +90,15 @@ installer:
   ostree: True
 
   flatpaks:
-    - repo: anatase
+    - repo: yaguarete
       nodeps: True
       preinstall:
-        - org.anatase.ArchiveManager
-        - org.anatase.DiskUsageAnalyzer
-        - org.anatase.ImageViewer
-        - org.anatase.TextEditor
-        - org.anatase.Calculator
-        - org.anatase.DocumentViewer
+        - org.yaguarete.ArchiveManager
+        - org.yaguarete.DiskUsageAnalyzer
+        - org.yaguarete.ImageViewer
+        - org.yaguarete.TextEditor
+        - org.yaguarete.Calculator
+        - org.yaguarete.DocumentViewer
       installer:
 
   files:

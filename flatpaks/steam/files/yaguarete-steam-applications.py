@@ -250,8 +250,8 @@ def reconcile(
 def configured_sources() -> tuple[Source, ...]:
     sandbox_data_home = Path(
         os.environ.get(
-            "ANATASE_STEAM_SANDBOX_DATA_HOME",
-            str(Path.home() / ".var/app/org.anatase.Steam/data"),
+            "YAGUARETE_STEAM_SANDBOX_DATA_HOME",
+            str(Path.home() / ".var/app/org.yaguarete.Steam/data"),
         )
     )
     user_flatpak = sandbox_data_home / "flatpak"
@@ -278,11 +278,11 @@ def configured_sources() -> tuple[Source, ...]:
 
 def main() -> None:
     runtime = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}"))
-    flatpak_id = os.environ.get("FLATPAK_ID", "org.anatase.Steam")
+    flatpak_id = os.environ.get("FLATPAK_ID", "org.yaguarete.Steam")
     reconcile(
-        runtime / "anatase-steam",
+        runtime / "yaguarete-steam",
         configured_sources(),
-        Path("/app/libexec/anatase-steam-reaper"),
+        Path("/app/libexec/yaguarete-steam-reaper"),
         {"steam.desktop", f"{flatpak_id}.desktop"},
     )
 

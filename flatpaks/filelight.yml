@@ -1,10 +1,10 @@
 version: 1
 
 flatpak:
-  id: org.anatase.DiskUsageAnalyzer
+  id: org.yaguarete.DiskUsageAnalyzer
   command: filelight
   rename: Disk Usage Analyzer (Filelight)
-  rename-author: "%s (packaged by Anatase)"
+  rename-author: "%s (packaged by YaguareteOS)"
   rename-desktop-file: org.kde.filelight.desktop
   rename-appdata-file: org.kde.filelight.appdata.xml
   rename-icon: filelight

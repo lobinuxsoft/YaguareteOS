@@ -398,7 +398,7 @@ yaguarete_p10k_git_formatter() {
 functions -M yaguarete_p10k_git_formatter 2>/dev/null
 
 yaguarete_should_configure_prompt() {
-  case "${ANATASE_ZSH_THEME:-auto}" in
+  case "${YAGUARETE_ZSH_THEME:-auto}" in
     off)
       return 1
       ;;
@@ -414,7 +414,7 @@ yaguarete_should_configure_prompt() {
 }
 
 if yaguarete_should_configure_prompt; then
-  yaguarete_zsh_theme=${ANATASE_ZSH_THEME:-auto}
+  yaguarete_zsh_theme=${YAGUARETE_ZSH_THEME:-auto}
   if [[ "$yaguarete_zsh_theme" = auto && -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}" ]]; then
     yaguarete_zsh_theme=simple
   fi
@@ -730,7 +730,7 @@ case $- in
 esac
 
 if [ -t 1 ] &&
-    [ -z "${ANATASE_DISABLE_MOTD:-}" ] &&
+    [ -z "${YAGUARETE_DISABLE_MOTD:-}" ] &&
     [ -z "${STY:-}" ] &&
     command -v fastfetch >/dev/null 2>&1; then
     echo

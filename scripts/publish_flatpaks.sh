@@ -52,6 +52,27 @@ if [ -z "${gpg_fingerprint}" ]; then
     exit 1
 fi
 
+# `flatpak build-update-repo --gpg-sign` shells out to gpg without requesting
+# loopback pinentry itself, so on a headless CI runner (no real tty) it fails
+# with "Pinentry: Inappropriate ioctl for device" instead of prompting.
+# Preset the passphrase directly into gpg-agent for every keygrip on this key
+# (primary + all subkeys, since we don't know upfront which one signing will
+# actually use) so no pinentry interaction happens at all.
+cat > "${gnupg_home}/gpg-agent.conf" <<'EOF'
+allow-loopback-pinentry
+allow-preset-passphrase
+EOF
+gpgconf --kill gpg-agent
+preset_bin=$(find /usr/lib* /usr/libexec* -name gpg-preset-passphrase 2>/dev/null | head -1)
+if [ -z "${preset_bin}" ]; then
+    echo "could not find gpg-preset-passphrase on this runner" >&2
+    exit 1
+fi
+gpg --with-keygrip --list-secret-keys --with-colons | awk -F: '/^grp/{print $10}' | \
+    while read -r keygrip; do
+        "${preset_bin}" --preset "${keygrip}" <<< "${FLATPAK_GPG_PASSWORD}"
+    done
+
 for name in "${flatpak_names[@]}"; do
     card="flatpaks/${name}"
     echo "=== Building ${card} ==="

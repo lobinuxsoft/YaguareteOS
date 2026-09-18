@@ -12,6 +12,7 @@ on:
       - 'LICENSE'
       - 'COPYRIGHT'
       - '.gitignore'
+      - 'scripts/**'
 
 permissions:
   contents: read

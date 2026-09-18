@@ -68,7 +68,7 @@ default-cache-ttl 86400
 max-cache-ttl 86400
 EOF
 gpgconf --kill gpg-agent
-preset_bin=$(find /usr/lib* /usr/libexec* -name gpg-preset-passphrase 2>/dev/null | head -1)
+preset_bin=$(find /usr/lib* /usr/libexec* -name gpg-preset-passphrase -print -quit 2>/dev/null || true)
 if [ -z "${preset_bin}" ]; then
     echo "could not find gpg-preset-passphrase on this runner" >&2
     exit 1
@@ -105,12 +105,51 @@ for name in "${flatpak_names[@]}"; do
         '
 done
 
+# `flatpak build-export` above does not sign the app commits, and
+# `build-update-repo --gpg-sign` below signs only the summary. Clients with
+# GPG verification on (the yaguarete.flatpakrepo default) check each commit's
+# own signature too, and refuse to install with "GPG verification enabled,
+# but no signatures found" -- found on real hardware, not in CI. Refs are
+# read from the filesystem because `ostree refs` chokes on the empty
+# refs/remotes directory that git doesn't preserve in the gh-pages clone.
+echo "=== Signing app commits ==="
+preset_passphrase
+while IFS=/ read -r app_id arch branch; do
+    flatpak build-sign \
+        --gpg-sign="${gpg_fingerprint}" \
+        --gpg-homedir="${gnupg_home}" \
+        --arch="${arch}" \
+        "${repo_dir}" "${app_id}" "${branch}" \
+        || { echo "failed to sign ${app_id}/${arch}/${branch}" >&2; exit 1; }
+done < <(find "${repo_dir}/refs/heads/app" -type f -printf '%P\n')
+
 echo "=== Signing and updating the repo summary ==="
 preset_passphrase
 flatpak build-update-repo \
     --gpg-sign="${gpg_fingerprint}" \
     --gpg-homedir="${gnupg_home}" \
     "${repo_dir}"
+
+# Same check a client does: a GPG-verified pull of every app ref against our
+# vendored public key, so an unsigned or wrongly-signed publish fails here
+# instead of on someone's machine.
+echo "=== Verifying like a client (GPG-verified pull of every app ref) ==="
+verify_dir=$(mktemp -d)
+ostree init --repo="${verify_dir}" --mode=archive
+ostree --repo="${verify_dir}" remote add \
+    --gpg-import=cards/base/atomic/keys/yaguarete-gpg.pub.asc verify "file://${repo_dir}"
+verify_failed=0
+while read -r ref; do
+    if ! ostree --repo="${verify_dir}" pull verify "${ref}"; then
+        echo "GPG-verified pull failed for ${ref}" >&2
+        verify_failed=1
+    fi
+done < <(find "${repo_dir}/refs/heads/app" -type f -printf 'app/%P\n')
+rm -rf "${verify_dir}"
+if [ "${verify_failed}" -ne 0 ]; then
+    echo "refusing to publish: at least one app ref is not client-verifiable" >&2
+    exit 1
+fi
 
 if [ "${1:-}" = "--no-push" ]; then
     echo "Built and signed at ${repo_dir}, not pushing (--no-push)."

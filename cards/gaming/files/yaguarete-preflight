@@ -702,7 +702,7 @@ class Preflight(Gtk.Application):
                     "--system",
                     "--assumeyes",
                     "--noninteractive",
-                    "anatase",
+                    "yaguarete",
                     APP_ID,
                 ],
                 flags,

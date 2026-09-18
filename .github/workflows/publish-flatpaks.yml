@@ -24,6 +24,14 @@ jobs:
       - name: Install ludos
         run: ./ludos/prepare.sh images
 
+      # The runner image doesn't ship the flatpak CLI -- `ludos build --flatpak`
+      # itself doesn't need it (that's all podman/buildah), but this workflow's
+      # own build-export/build-update-repo steps do.
+      - name: Install flatpak CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak
+
       - name: Free disk space
         run: |
           sudo swapoff -a || true

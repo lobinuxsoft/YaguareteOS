@@ -55,12 +55,17 @@ fi
 # `flatpak build-update-repo --gpg-sign` shells out to gpg without requesting
 # loopback pinentry itself, so on a headless CI runner (no real tty) it fails
 # with "Pinentry: Inappropriate ioctl for device" instead of prompting.
-# Preset the passphrase directly into gpg-agent for every keygrip on this key
-# (primary + all subkeys, since we don't know upfront which one signing will
-# actually use) so no pinentry interaction happens at all.
+# Work around it by presetting the passphrase directly into gpg-agent so no
+# pinentry interaction happens at all -- but the preset is a *cache entry*
+# with a TTL (default 10 min), and this script spends hours building flatpaks
+# before it signs anything. Presetting up front (as an earlier version did)
+# meant the entry had long expired by signing time; so the preset itself is
+# deferred to preset_passphrase, called right before signing.
 cat > "${gnupg_home}/gpg-agent.conf" <<'EOF'
 allow-loopback-pinentry
 allow-preset-passphrase
+default-cache-ttl 86400
+max-cache-ttl 86400
 EOF
 gpgconf --kill gpg-agent
 preset_bin=$(find /usr/lib* /usr/libexec* -name gpg-preset-passphrase 2>/dev/null | head -1)
@@ -68,10 +73,15 @@ if [ -z "${preset_bin}" ]; then
     echo "could not find gpg-preset-passphrase on this runner" >&2
     exit 1
 fi
-gpg --with-keygrip --list-secret-keys --with-colons | awk -F: '/^grp/{print $10}' | \
-    while read -r keygrip; do
-        "${preset_bin}" --preset "${keygrip}" <<< "${FLATPAK_GPG_PASSWORD}"
-    done
+
+# Presets every keygrip on the key (primary + all subkeys, since we don't
+# know upfront which one signing will actually use).
+preset_passphrase() {
+    gpg --with-keygrip --list-secret-keys --with-colons | awk -F: '/^grp/{print $10}' | \
+        while read -r keygrip; do
+            "${preset_bin}" --preset "${keygrip}" <<< "${FLATPAK_GPG_PASSWORD}"
+        done
+}
 
 for name in "${flatpak_names[@]}"; do
     card="flatpaks/${name}"
@@ -96,6 +106,7 @@ for name in "${flatpak_names[@]}"; do
 done
 
 echo "=== Signing and updating the repo summary ==="
+preset_passphrase
 flatpak build-update-repo \
     --gpg-sign="${gpg_fingerprint}" \
     --gpg-homedir="${gnupg_home}" \

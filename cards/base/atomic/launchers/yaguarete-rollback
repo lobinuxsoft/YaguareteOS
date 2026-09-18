@@ -1,0 +1,45 @@
+#!/bin/bash
+
+if (( $# != 0 )); then
+    echo "Usage: ${0##*/}" >&2
+    exit 2
+fi
+
+title="YaguareteOS Rollback"
+
+info=$(pkexec /usr/libexec/yaguarete-rollback-helper info)
+status=$?
+case $status in
+    0) ;;
+    3)
+        kdialog --title "$title" --sorry "There is no previous system version to roll back to."
+        exit 0
+        ;;
+    4)
+        kdialog --title "$title" --sorry "An update is already staged. Reboot to apply it first, then roll back if needed."
+        exit 0
+        ;;
+    126|127)
+        exit 0
+        ;;
+    *)
+        kdialog --title "$title" --error "Could not read the system state (exit code $status)."
+        exit 1
+        ;;
+esac
+
+IFS=$'\t' read -r booted target <<< "$info"
+
+if ! kdialog --title "$title" --warningcontinuecancel \
+    "Roll back from $booted to $target?\n\nThe change takes effect after a reboot."; then
+    exit 0
+fi
+
+if ! pkexec /usr/libexec/yaguarete-rollback-helper apply; then
+    kdialog --title "$title" --error "The rollback failed."
+    exit 1
+fi
+
+if kdialog --title "$title" --yesno "Rollback prepared.\n\nReboot now to boot $target?"; then
+    exec qdbus-qt6 org.kde.Shutdown /Shutdown org.kde.Shutdown.logoutAndReboot
+fi

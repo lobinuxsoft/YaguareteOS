@@ -99,12 +99,35 @@ files:
   - dracut_cleanup_shadow.sh
   - systemd-remount-fs.conf
   - udev/70-anatase-sysfs.rules
+  - launchers/yaguarete-update
+  - launchers/yaguarete-update-helper
+  - launchers/yaguarete-rollback
+  - launchers/yaguarete-rollback-helper
+  - launchers/org.yaguarete.update.policy
+  - launchers/org.yaguarete.rollback.policy
+  - launchers/yaguarete-update.desktop
+  - launchers/yaguarete-rollback.desktop
 
 postprocess: |
     set -eux
 
     install -Dm0644 /files/udev/70-anatase-sysfs.rules \
         /usr/lib/udev/rules.d/70-anatase-sysfs.rules
+
+    # Update and rollback launchers: menu entries plus a Desktop copy for new
+    # users (executable, so Plasma treats it as a trusted launcher).
+    for action in update rollback; do
+        install -Dm0755 "/files/launchers/yaguarete-${action}" \
+            "/usr/bin/yaguarete-${action}"
+        install -Dm0755 "/files/launchers/yaguarete-${action}-helper" \
+            "/usr/libexec/yaguarete-${action}-helper"
+        install -Dm0644 "/files/launchers/org.yaguarete.${action}.policy" \
+            "/usr/share/polkit-1/actions/org.yaguarete.${action}.policy"
+        install -Dm0644 "/files/launchers/yaguarete-${action}.desktop" \
+            "/usr/share/applications/yaguarete-${action}.desktop"
+        install -Dm0755 "/files/launchers/yaguarete-${action}.desktop" \
+            "/etc/skel/Desktop/yaguarete-${action}.desktop"
+    done
 
     install -dm0755 /usr/lib/ostree
     cat > /usr/lib/ostree/prepare-root.conf <<'EOF'

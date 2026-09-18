@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -euo pipefail
+
+if (( $# != 1 )) || [[ $1 != info && $1 != apply ]]; then
+    echo "Usage: ${0##*/} info|apply" >&2
+    exit 2
+fi
+
+if (( EUID != 0 )); then
+    echo "This helper must run as root" >&2
+    exit 1
+fi
+
+state=$(bootc status --json)
+
+# 3: no previous deployment. 4: an update is staged and would be reordered.
+if [[ $(jq -r '.status.rollback != null' <<< "$state") != true ]]; then
+    echo "No previous deployment to roll back to" >&2
+    exit 3
+fi
+if [[ $(jq -r '.status.staged != null' <<< "$state") == true ]]; then
+    echo "A staged update is pending" >&2
+    exit 4
+fi
+
+if [[ $1 == info ]]; then
+    jq -r '[.status.booted, .status.rollback][]
+           | ((.image // {}) | (.version // .timestamp // "unknown"))' <<< "$state" | paste -sd '\t'
+    exit 0
+fi
+
+exec bootc rollback

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Roll Back System
+Comment=Boot the previous YaguareteOS version on the next restart
+Exec=/usr/bin/yaguarete-rollback
+Icon=edit-undo
+Terminal=false
+Categories=System;
+Keywords=rollback;revert;downgrade;bootc;system;
+OnlyShowIn=KDE;
+StartupNotify=false

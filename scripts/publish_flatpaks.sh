@@ -123,9 +123,15 @@ while IFS=/ read -r app_id arch branch; do
         || { echo "failed to sign ${app_id}/${arch}/${branch}" >&2; exit 1; }
 done < <(find "${repo_dir}/refs/heads/app" -type f -printf '%P\n')
 
+# Static deltas matter here: a classic ostree repo is fetched one HTTP request
+# per object, and installing a single KDE app from scratch cost ~6500 requests
+# (measured with the real flatpak client). Installing the six ISO apps in one
+# go from the same runner got HTTP 429 from GitHub Pages and failed the ISO
+# build. With deltas the same install is ~30 requests. Costs ~46 MB of repo.
 echo "=== Signing and updating the repo summary ==="
 preset_passphrase
 flatpak build-update-repo \
+    --generate-static-deltas \
     --gpg-sign="${gpg_fingerprint}" \
     --gpg-homedir="${gnupg_home}" \
     "${repo_dir}"

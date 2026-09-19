@@ -69,6 +69,19 @@ fi
 boot_movie=/app/share/yaguarete/steam/movies/yaguarete-boot.webm
 suspend_movie=/app/share/yaguarete/steam/movies/yaguarete-suspend.webm
 movies_dir="${XDG_DATA_HOME:-$HOME/.local/share}/Steam/config/uioverrides/movies"
+
+# The picker in Steam shows the .jpg next to each .webm, so both are managed.
+sync_override() {
+    local source_file=$1 destination=$2
+    if $animation_changer; then
+        if cmp -s "$source_file" "$destination"; then
+            rm -f "$destination"
+        fi
+    elif ! cmp -s "$source_file" "$destination"; then
+        cp "$source_file" "$destination"
+    fi
+}
+
 if mkdir -p "$movies_dir"; then
     startup_movies=(
         bigpicture_startup.webm
@@ -77,14 +90,8 @@ if mkdir -p "$movies_dir"; then
         steam_os_startup.webm
     )
     for movie in "${startup_movies[@]}"; do
-        destination="$movies_dir/$movie"
-        if $animation_changer; then
-            if cmp -s "$boot_movie" "$destination"; then
-                rm -f "$destination"
-            fi
-        elif ! cmp -s "$boot_movie" "$destination"; then
-            cp "$boot_movie" "$destination"
-        fi
+        sync_override "$boot_movie" "$movies_dir/$movie"
+        sync_override "${boot_movie%.webm}.jpg" "$movies_dir/${movie%.webm}.jpg"
     done
 
     suspend_movies=(
@@ -96,14 +103,8 @@ if mkdir -p "$movies_dir"; then
         steam_os_suspend.webm
     )
     for movie in "${suspend_movies[@]}"; do
-        destination="$movies_dir/$movie"
-        if $animation_changer; then
-            if cmp -s "$suspend_movie" "$destination"; then
-                rm -f "$destination"
-            fi
-        elif ! cmp -s "$suspend_movie" "$destination"; then
-            cp "$suspend_movie" "$destination"
-        fi
+        sync_override "$suspend_movie" "$movies_dir/$movie"
+        sync_override "${suspend_movie%.webm}.jpg" "$movies_dir/${movie%.webm}.jpg"
     done
 fi
 

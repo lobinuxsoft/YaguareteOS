@@ -108,7 +108,7 @@ install-tatu:
             icon_src=$(find squashfs-root \( -name "${icon_name}.svg" -o -name "${icon_name}.png" \) -print -quit 2>/dev/null)
         fi
         mkdir -p "$YG_DESKTOP_DIR" "$YG_ICON_DIR"
-        sed "s|^Name=.*|Name=Tatu|; s|^Exec=.*|Exec=$TATU_BIN %f|; s|^Icon=.*|Icon=tatu|; s|^Comment=.*|Comment=Steam backlog tracker (Tatu)|" \
+        sed "s|^Name=.*|Name=Tatu|; s|^Exec=.*|Exec=$TATU_BIN --run %f|; s|^Icon=.*|Icon=tatu|; s|^Comment=.*|Comment=Steam backlog tracker (Tatu)|" \
             "$desktop_src" > "$YG_DESKTOP_DIR/Tatu.desktop"
         if [[ -n "$icon_src" ]]; then
             cp "$icon_src" "$YG_ICON_DIR/tatu.${icon_src##*.}"

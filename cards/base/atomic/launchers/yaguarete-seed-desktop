@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Runs once per account; deleting the marker seeds the icons again.
+marker="${XDG_STATE_HOME:-$HOME/.local/state}/yaguarete/desktop-launchers"
+[[ -e $marker ]] && exit 0
+
+# xdg-user-dirs-update reassigns a missing Desktop to $HOME, so only run it
+# on a first login, when no config exists yet.
+[[ -f ${XDG_CONFIG_HOME:-$HOME/.config}/user-dirs.dirs ]] || xdg-user-dirs-update
+
+desktop=$(xdg-user-dir DESKTOP)
+[[ -d $desktop && $desktop != "$HOME" ]] || exit 0
+
+for launcher in gamemode yaguarete-update yaguarete-rollback; do
+    source_file="${YAGUARETE_APPLICATIONS_DIR:-/usr/share/applications}/${launcher}.desktop"
+    [[ -f $source_file && ! -e $desktop/${launcher}.desktop ]] || continue
+    install -m 0755 "$source_file" "$desktop/${launcher}.desktop"
+done
+
+mkdir -p "${marker%/*}"
+: > "$marker"

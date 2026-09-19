@@ -1,0 +1,10 @@
+[Unit]
+Description=Place the YaguareteOS launchers on the Desktop
+After=graphical-session-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/yaguarete-seed-desktop
+
+[Install]
+WantedBy=plasma-workspace.target

@@ -107,6 +107,8 @@ files:
   - launchers/org.yaguarete.rollback.policy
   - launchers/yaguarete-update.desktop
   - launchers/yaguarete-rollback.desktop
+  - launchers/yaguarete-seed-desktop
+  - launchers/yaguarete-seed-desktop.service
 
 postprocess: |
     set -eux
@@ -114,8 +116,7 @@ postprocess: |
     install -Dm0644 /files/udev/70-anatase-sysfs.rules \
         /usr/lib/udev/rules.d/70-anatase-sysfs.rules
 
-    # Update and rollback launchers: menu entries plus a Desktop copy for new
-    # users (executable, so Plasma treats it as a trusted launcher).
+    # Update and rollback launchers (menu entries).
     for action in update rollback; do
         install -Dm0755 "/files/launchers/yaguarete-${action}" \
             "/usr/bin/yaguarete-${action}"
@@ -125,9 +126,17 @@ postprocess: |
             "/usr/share/polkit-1/actions/org.yaguarete.${action}.policy"
         install -Dm0644 "/files/launchers/yaguarete-${action}.desktop" \
             "/usr/share/applications/yaguarete-${action}.desktop"
-        install -Dm0755 "/files/launchers/yaguarete-${action}.desktop" \
-            "/etc/skel/Desktop/yaguarete-${action}.desktop"
     done
+
+    # Desktop icons are seeded per account at login: the folder is localized
+    # (Escritorio) and /etc/skel only reaches accounts created afterwards.
+    install -Dm0755 /files/launchers/yaguarete-seed-desktop \
+        /usr/libexec/yaguarete-seed-desktop
+    install -Dm0644 /files/launchers/yaguarete-seed-desktop.service \
+        /usr/lib/systemd/user/yaguarete-seed-desktop.service
+    install -dm0755 /usr/lib/systemd/user/plasma-workspace.target.wants
+    ln -snf ../yaguarete-seed-desktop.service \
+        /usr/lib/systemd/user/plasma-workspace.target.wants/yaguarete-seed-desktop.service
 
     install -dm0755 /usr/lib/ostree
     cat > /usr/lib/ostree/prepare-root.conf <<'EOF'

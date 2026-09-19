@@ -55,9 +55,7 @@ sed -i \
     /usr/share/plasma/layout-templates/org.kde.plasma.desktop.defaultPanel/contents/layout.js
 
 # The live session must not offer the installed system's launchers
-rm -f /etc/skel/Desktop/gamemode.desktop \
-    /etc/skel/Desktop/yaguarete-update.desktop \
-    /etc/skel/Desktop/yaguarete-rollback.desktop
+ln -snf /dev/null /etc/systemd/user/yaguarete-seed-desktop.service
 
 # Add Installer user and skeleton
 install -Dm0644 /files/installer/anatase.ks \

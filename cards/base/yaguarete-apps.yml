@@ -145,7 +145,10 @@ postprocess: |
       appimage=$(grep -o '/etc/skel/Applications/[^ "]*' "$desktop" | head -1) || true
       [ -n "$appimage" ] || continue
       rel="${appimage#/etc/skel/Applications/}"
-      sed -i "s|^Exec=.*|Exec=sh -c 'exec \"\$HOME/Applications/${rel}\" \"\$@\"' sh %f|" "$desktop"
+      # Keep the recipe's flags (Tatu needs --run or its AppRun offers to move
+      # the AppImage out of ~/Applications and adds a second, icon-less entry).
+      flags=$(sed -n 's|^Exec=[^ ]* *||p' "$desktop" | sed 's| *%[fFuU]$||')
+      sed -i "s|^Exec=.*|Exec=sh -c 'exec \"\$HOME/Applications/${rel}\" ${flags} \"\$@\"' sh %f|" "$desktop"
   done
 
   # Same class of bug, different shape: Claude Code's own installer

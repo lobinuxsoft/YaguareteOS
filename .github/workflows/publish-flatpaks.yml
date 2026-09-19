@@ -24,13 +24,15 @@ jobs:
       - name: Install ludos
         run: ./ludos/prepare.sh images
 
-      # The runner image doesn't ship the flatpak CLI -- `ludos build --flatpak`
-      # itself doesn't need it (that's all podman/buildah), but this workflow's
-      # own build-export/build-update-repo steps do.
-      - name: Install flatpak CLI
+      # The runner image doesn't ship the flatpak or ostree CLIs --
+      # `ludos build --flatpak` itself doesn't need them (that's all
+      # podman/buildah), but this workflow's own build-export/build-update-repo
+      # steps and the final GPG-verified pull do. The flatpak package does
+      # not pull in the `ostree` binary.
+      - name: Install flatpak and ostree CLIs
         run: |
           sudo apt-get update
-          sudo apt-get install -y flatpak
+          sudo apt-get install -y flatpak ostree
 
       - name: Free disk space
         run: |

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Update System
+Comment=Download and stage the latest YaguareteOS image
+Exec=/usr/bin/yaguarete-update
+Icon=system-software-update
+Terminal=true
+Categories=System;
+Keywords=update;upgrade;bootc;system;
+OnlyShowIn=KDE;
+StartupNotify=false

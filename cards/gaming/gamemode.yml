@@ -206,6 +206,8 @@ postprocess: |
       /usr/share/polkit-1/actions/org.yaguarete.return-to-gamemode.policy
   install -Dm0644 /files/files/return-to-gamemode.desktop \
       /usr/share/applications/gamemode.desktop
+  install -Dm0755 /files/files/return-to-gamemode.desktop \
+      /etc/skel/Desktop/gamemode.desktop
 
   # Sanity check preflight
   python3 - <<'PY'

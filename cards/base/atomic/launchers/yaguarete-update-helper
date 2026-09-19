@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -euo pipefail
+
+if (( $# != 0 )); then
+    echo "Usage: ${0##*/}" >&2
+    exit 2
+fi
+
+if (( EUID != 0 )); then
+    echo "This helper must run as root" >&2
+    exit 1
+fi
+
+bootc upgrade
+
+# 0: a deployment is staged for the next boot. 10: nothing new to apply.
+if [[ $(bootc status --json | jq -r '.status.staged != null') == true ]]; then
+    exit 0
+fi
+exit 10

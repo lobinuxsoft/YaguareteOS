@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if (( $# != 0 )); then
+    echo "Usage: ${0##*/}" >&2
+    exit 2
+fi
+
+title="YaguareteOS System Update"
+
+echo "Checking for a new YaguareteOS image..."
+pkexec /usr/libexec/yaguarete-update-helper
+status=$?
+
+case $status in
+    0)
+        if kdialog --title "$title" --yesno "The update is downloaded and ready.\n\nReboot now to apply it?"; then
+            exec qdbus-qt6 org.kde.Shutdown /Shutdown org.kde.Shutdown.logoutAndReboot
+        fi
+        ;;
+    10)
+        kdialog --title "$title" --msgbox "YaguareteOS is already up to date."
+        ;;
+    126|127)
+        # Authentication dismissed or refused: nothing to report.
+        ;;
+    *)
+        kdialog --title "$title" --error "The update failed (exit code $status).\n\nThe terminal output has the details."
+        read -rp "Press Enter to close..."
+        exit 1
+        ;;
+esac

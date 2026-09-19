@@ -320,12 +320,12 @@ postprocess: |
 
     systemctl preset fedora-kinoite-plasmalogin-workaround.service || true
 
-    # Just the app store, browser, and discover
+    # Browser, files, Discover, plus the Gamemode and system-update launchers
     kicker_extra_favorites=/usr/share/kde-settings/kde-profile/default/xdg/kicker-extra-favoritesrc
     install -dm0755 "$(dirname "${kicker_extra_favorites}")"
     cat > "${kicker_extra_favorites}" <<'EOF'
     [General]
-    Prepend=preferred://browser;org.kde.dolphin.desktop;org.kde.discover.desktop
+    Prepend=preferred://browser;org.kde.dolphin.desktop;org.kde.discover.desktop;gamemode.desktop;yaguarete-update.desktop
     IgnoreDefaults=true
     EOF
 

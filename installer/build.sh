@@ -54,6 +54,11 @@ sed -i \
     's#panel.addWidget("org.kde.plasma.icontasks")#var iconTasks = panel.addWidget("org.kde.plasma.icontasks")\niconTasks.currentConfigGroup = ["General"]\niconTasks.writeConfig("launchers", "preferred://filemanager,preferred://browser")#' \
     /usr/share/plasma/layout-templates/org.kde.plasma.desktop.defaultPanel/contents/layout.js
 
+# The live session must not offer the installed system's launchers
+rm -f /etc/skel/Desktop/gamemode.desktop \
+    /etc/skel/Desktop/yaguarete-update.desktop \
+    /etc/skel/Desktop/yaguarete-rollback.desktop
+
 # Add Installer user and skeleton
 install -Dm0644 /files/installer/anatase.ks \
     /usr/share/yaguarete-installer/anatase.ks

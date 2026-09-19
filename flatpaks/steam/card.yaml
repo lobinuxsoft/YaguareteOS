@@ -101,6 +101,8 @@ files:
   - files/steamos-session-select
   - files/yaguarete-boot.webm
   - files/yaguarete-suspend.webm
+  - files/yaguarete-boot.jpg
+  - files/yaguarete-suspend.jpg
   - files/registry.vdf
   - files/org.yaguarete.Steam.Silent.desktop
   - files/org.yaguarete.Steam.kickeractions.desktop
@@ -157,6 +159,10 @@ postprocess: |-
       app/share/yaguarete/steam/movies/yaguarete-boot.webm
   install -Dm0644 files/yaguarete-suspend.webm \
       app/share/yaguarete/steam/movies/yaguarete-suspend.webm
+  install -Dm0644 files/yaguarete-boot.jpg \
+      app/share/yaguarete/steam/movies/yaguarete-boot.jpg
+  install -Dm0644 files/yaguarete-suspend.jpg \
+      app/share/yaguarete/steam/movies/yaguarete-suspend.jpg
   install -Dm0644 files/registry.vdf \
       app/share/yaguarete/steam/registry.vdf
   install -Dm0644 files/org.yaguarete.Steam.Silent.desktop \

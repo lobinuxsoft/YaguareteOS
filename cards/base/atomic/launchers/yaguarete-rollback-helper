@@ -25,8 +25,11 @@ if [[ $(jq -r '.status.staged != null' <<< "$state") == true ]]; then
 fi
 
 if [[ $1 == info ]]; then
+    # Version alone can repeat across builds of the same day, so add the digest.
     jq -r '[.status.booted, .status.rollback][]
-           | ((.image // {}) | (.version // .timestamp // "unknown"))' <<< "$state" | paste -sd '\t'
+           | (.image // {})
+           | (.version // .timestamp // "unknown") + (if .imageDigest then " (\(.imageDigest[7:19]))" else "" end)' \
+        <<< "$state" | paste -sd '\t'
     exit 0
 fi
 

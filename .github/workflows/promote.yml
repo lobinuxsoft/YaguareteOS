@@ -1,172 +1,131 @@
-name: Promote Rolling to Stable
+name: Promote Test to Stable
+
+# Promotes the image currently on :test (built and signed by build.yml) to the
+# :stable channel that installed systems follow, then tags a GitHub Release.
+# Registry-side copy: layers are already in the repository, so it takes minutes.
+#
+# Version suffixes: two builds on the same day share the image version label.
+# If :stable-<version> already points at a different digest, the next free
+# suffix is used (<version>-2, <version>-3, ...). Re-running over an unchanged
+# :test is idempotent.
 
 on:
-  workflow_dispatch:
-    inputs:
-      images:
-        description: Images
-        required: true
-        type: boolean
-        default: true
-      flatpaks:
-        description: Flatpaks
-        required: true
-        type: boolean
-        default: true
+  workflow_dispatch: {}
 
 permissions:
   contents: write
-  id-token: write
+  packages: write
 
 concurrency:
   group: promote
+  cancel-in-progress: false
 
 jobs:
   promote:
-    name: Promote
+    name: Promote :test to :stable
     runs-on: ubuntu-26.04
-    environment: "prod"
     env:
-      LUDOS_S3_API: ${{ secrets.LUDOS_S3_API }}
-      LUDOS_S3_KEY: ${{ secrets.LUDOS_S3_KEY }}
-      LUDOS_S3_SECRET: ${{ secrets.LUDOS_S3_SECRET }}
-      LUDOS_GPG_CERT: ${{ secrets.LUDOS_GPG_CERT }}
-      LUDOS_GPG_KEY: ${{ secrets.LUDOS_GPG_KEY }}
-
+      GH_TOKEN: ${{ github.token }}
+      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 100
-          token: ${{ secrets.ANATASE_READ }}
-          persist-credentials: false
-          submodules: recursive
 
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-          create_credentials_file: true
-          token_format: access_token
-
-      - name: Set up Google Cloud SDK
-        if: ${{ inputs.flatpaks }}
-        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
-
-      - name: Install ludos
-        run: ./ludos/prepare.sh flatpaks
-
-      - name: Generate Stable changelog
-        if: ${{ inputs.images }}
-        id: image
+      - name: Log in to GHCR
         run: |
-          skopeo --override-arch amd64 inspect --no-tags \
-            docker://i.anatase.org/anatase:stable \
-            > previous-stable.json
-          skopeo --override-arch amd64 inspect --no-tags \
-            docker://i.anatase.org/anatase:rolling \
-            > current-rolling.json
+          echo "${{ secrets.GITHUB_TOKEN }}" | skopeo login ghcr.io \
+            --username "${{ github.actor }}" --password-stdin
 
-          version=$(jq -r \
-            '.Labels["org.opencontainers.image.version"] // empty' \
-            current-rolling.json)
-          revision=$(jq -r \
-            '.Labels["org.opencontainers.image.revision"] // empty' \
-            current-rolling.json)
-          if [[ -z "$version" || -z "$revision" ]]; then
-            echo "Rolling image has no version or revision label" >&2
+      - name: Promote, sign and release
+        run: |
+          set -euo pipefail
+
+          repo="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/yaguareteos"
+
+          digest=$(skopeo inspect --no-tags --format '{{.Digest}}' "docker://${repo}:test")
+          labels=$(skopeo inspect --no-tags --format '{{json .Labels}}' "docker://${repo}@${digest}")
+          version=$(jq -r '.["org.opencontainers.image.version"] // empty' <<< "$labels")
+          revision=$(jq -r '.["org.opencontainers.image.revision"] // empty' <<< "$labels")
+          if [[ -z $version || -z $revision ]]; then
+            echo "::error::${repo}:test has no version or revision label"
             exit 1
           fi
 
-          venv/bin/python .github/changelog.py \
-            previous-stable.json current-rolling.json \
-            --channel stable > changelog.md
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+          tag_version=$version
+          suffix=1
+          while true; do
+            existing=$(skopeo inspect --no-tags --format '{{.Digest}}' \
+              "docker://${repo}:stable-${tag_version}" 2>/dev/null || true)
+            if [[ -z $existing || $existing == "$digest" ]]; then
+              break
+            fi
+            suffix=$((suffix + 1))
+            tag_version="${version}-${suffix}"
+          done
+          echo "Promoting ${digest} as stable-${tag_version} (image version ${version}, commit ${revision})"
 
-      - name: Promote
-        env:
-          PROMOTE_IMAGES: ${{ inputs.images }}
-          PROMOTE_FLATPAKS: ${{ inputs.flatpaks }}
-        run: |
-          if [[ "$PROMOTE_IMAGES" != "true" && "$PROMOTE_FLATPAKS" != "true" ]]; then
-            echo "Select at least one of Images or Flatpaks" >&2
-            exit 1
+          cosign_key=$(mktemp)
+          cosign_pass=$(mktemp)
+          registries_d=$(mktemp -d)
+          policy=$(mktemp)
+          trap 'rm -rf "${cosign_key}" "${cosign_pass}" "${registries_d}" "${policy}"' EXIT
+          printf '%s' "${COSIGN_PRIVATE_KEY}" > "${cosign_key}"
+          printf '%s' "${COSIGN_PASSWORD}" > "${cosign_pass}"
+          cat > "${registries_d}/ghcr.yaml" <<'EOF'
+          docker:
+            ghcr.io:
+              use-sigstore-attachments: true
+          EOF
+
+          # Refuse to promote anything :test does not carry a valid signature for.
+          jq -n --arg repo "$repo" --arg key "$PWD/cards/base/atomic/keys/yaguarete-cosign.pub" '{
+            default: [{type: "reject"}],
+            transports: {docker: {($repo): [{
+              type: "sigstoreSigned",
+              keyPath: $key,
+              signedIdentity: {type: "matchRepository"}
+            }]}}
+          }' > "${policy}"
+
+          for target in stable "stable-${tag_version}"; do
+            skopeo copy --all --preserve-digests \
+              --registries.d "${registries_d}" \
+              --policy "${policy}" \
+              --sign-by-sigstore-private-key "${cosign_key}" \
+              --sign-passphrase-file "${cosign_pass}" \
+              "docker://${repo}@${digest}" "docker://${repo}:${target}"
+            promoted=$(skopeo inspect --no-tags --format '{{.Digest}}' "docker://${repo}:${target}")
+            if [[ $promoted != "$digest" ]]; then
+              echo "::error::${repo}:${target} is ${promoted}, expected ${digest}"
+              exit 1
+            fi
+          done
+
+          release_tag="stable-${tag_version}"
+          notes=$(mktemp)
+          {
+            printf '## Image\n\n'
+            printf -- '- Follow: `bootc switch %s:stable`\n' "$repo"
+            printf -- '- Pinned: `%s:%s`\n' "$repo" "$release_tag"
+            printf -- '- Digest: `%s`\n' "$digest"
+            printf -- '- Signature: cosign, key `cards/base/atomic/keys/yaguarete-cosign.pub`\n\n'
+          } > "$notes"
+
+          if gh release view "$release_tag" >/dev/null 2>&1; then
+            gh release edit "$release_tag" --notes-file "$notes"
+          else
+            gh release create "$release_tag" \
+              --target "$revision" \
+              --title "YaguareteOS Stable ${tag_version}" \
+              --notes-file "$notes" \
+              --generate-notes \
+              --latest
           fi
 
-          args=(
-            anatase.yml
-            --prefix rolling-
-            --from rolling
-            --to stable
-          )
-          if [[ "$PROMOTE_IMAGES" == "true" ]]; then
-            args+=(--images)
-          fi
-          if [[ "$PROMOTE_FLATPAKS" == "true" ]]; then
-            args+=(
-              --flatpaks
-              --refresh
-              --arch x86_64
-              )
-              # --arch aarch64 # lets skip you for now, until builds start
-          fi
-          venv/bin/ludos ci promote "${args[@]}"
-
-      - name: Archive Stable image manifest
-        if: ${{ inputs.images }}
-        env:
-          VERSION: ${{ steps.image.outputs.version }}
-        run: |
-          skopeo --override-arch amd64 inspect --no-tags \
-            docker://i.anatase.org/anatase:stable \
-            > final-manifest.json
-          venv/bin/ludos registry file upload \
-            final-manifest.json \
-            "releases/anatase/stable/$VERSION.json" \
-            "$VERSION.json" \
-            --sign
-
-      - name: Create GitHub release
-        if: ${{ inputs.images }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REVISION: ${{ steps.image.outputs.revision }}
-          VERSION: ${{ steps.image.outputs.version }}
-        run: |
-          update_url="https://updates.anatase.org/$VERSION"
-          update_html=$(curl \
-            --fail-with-body \
-            --silent \
-            --show-error \
-            --location \
-            --retry 3 \
-            --retry-connrefused \
-            --retry-delay 2 \
-            --retry-max-time 30 \
-            --max-time 30 \
-            "$update_url")
-          summary=$(python3 .github/update-summary.py <<< "$update_html")
-          update_title=$(jq -er '.title | select(length > 0)' <<< "$summary")
-          update_preamble=$(jq -er '.description | select(length > 0)' <<< "$summary")
-
-          printf '%s\n\nFull Changelog: %s\n\n## Changelog\n\n' \
-            "$update_preamble" "$update_url" > release-notes.md
-          cat changelog.md >> release-notes.md
-
-          gh release create "stable-$VERSION" \
-            --target "$REVISION" \
-            --title "$update_title" \
-            --notes-file release-notes.md
-
-      - name: Announce release on Discord
-        if: ${{ inputs.images }}
-        env:
-          DISCORD_ROLE_ID: ${{ secrets.DISCORD_ROLE_STABLE }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          VERSION: ${{ steps.image.outputs.version }}
-        run: >-
-          .github/discord-notify.sh stable "$VERSION"
-          "https://updates.anatase.org/$VERSION"
+          {
+            echo "### Promoted ${release_tag}"
+            echo
+            echo "- \`${repo}:stable\` and \`${repo}:${release_tag}\` -> \`${digest}\`"
+            echo "- Release: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${release_tag}"
+          } >> "$GITHUB_STEP_SUMMARY"

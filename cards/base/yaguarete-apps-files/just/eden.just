@@ -137,13 +137,13 @@ install-eden:
             icon_src=$(find squashfs-root \( -name "${icon_name}.svg" -o -name "${icon_name}.png" \) -print -quit 2>/dev/null)
         fi
 
-        mkdir -p "$YG_DESKTOP_DIR" "$YG_ICON_DIR"
+        mkdir -p "$YG_DESKTOP_DIR"
         # Rewrite Exec= to point at our AppImage; rename Icon= to a stable
         # `eden` slug so we install one canonical icon file.
         sed "s|^Exec=.*|Exec=$EDEN_BIN %f|; s|^Icon=.*|Icon=eden|" \
             "$desktop_src" > "$YG_DESKTOP_DIR/Eden.desktop"
         if [[ -n "$icon_src" ]]; then
-            cp "$icon_src" "$YG_ICON_DIR/eden.${icon_src##*.}"
+            yg_install_icon "$icon_src" eden
         else
             yg_warn "No icon matching Icon=$icon_name in the AppImage — Eden will show a generic launcher icon."
         fi
@@ -236,7 +236,7 @@ remove-eden:
 
     rm -f "$YG_APPS_DIR/Eden.AppImage"
     rm -f "$YG_DESKTOP_DIR/Eden.desktop"
-    rm -f "$YG_ICON_DIR/eden.svg"
+    yg_remove_icon eden
     yg_refresh_desktop_db
 
     srm_cfg="$YG_CONFIG_DIR/steam-rom-manager/userData/userConfigurations.json"

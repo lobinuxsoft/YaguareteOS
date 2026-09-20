@@ -18,7 +18,7 @@ export YG_BIN_DIR="${XDG_BIN_HOME:-$HOME/.local/bin}"
 export YG_DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
 export YG_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
 export YG_DESKTOP_DIR="$YG_DATA_DIR/applications"
-export YG_ICON_DIR="$YG_DATA_DIR/icons/hicolor/scalable/apps"
+export YG_ICON_ROOT="$YG_DATA_DIR/icons/hicolor"
 # /opt is a symlink to /var/opt on bootc — writable + persistent.
 export YG_OPT_DIR="${YAGUARETE_OPT_DIR:-/opt}"
 
@@ -177,13 +177,40 @@ yg_download() {
     curl -fL --retry 3 --retry-delay 2 --progress-bar "$url" -o "$dest"
 }
 
+# Installs a launcher icon where KDE resolves it. KDE only reads SVGs from
+# scalable/; a PNG has to sit in the sized directory that matches its width
+# (snapped down to a size the hicolor theme defines).
+yg_install_icon() {
+    local source_file="$1" name="$2" width
+    case "$source_file" in
+        *.svg)
+            install -Dm0644 "$source_file" "$YG_ICON_ROOT/scalable/apps/$name.svg"
+            ;;
+        *.png)
+            width=$(python3 -c 'import struct, sys
+w = struct.unpack(">I", open(sys.argv[1], "rb").read(24)[16:20])[0]
+print(max((s for s in (16, 22, 24, 32, 36, 48, 64, 72, 96, 128, 192, 256, 512) if s <= w), default=16))' "$source_file")
+            install -Dm0644 "$source_file" "$YG_ICON_ROOT/${width}x${width}/apps/$name.png"
+            ;;
+        *)
+            yg_warn "Unsupported icon format for $name: $source_file"
+            ;;
+    esac
+}
+
+# Removes every variant of an icon, including the scalable/*.png location
+# that earlier versions of the recipes used.
+yg_remove_icon() {
+    rm -f "$YG_ICON_ROOT"/*/apps/"$1".{svg,png}
+}
+
 # Refresh the desktop entry / icon caches after dropping files into
 # ~/.local/share/applications + ~/.local/share/icons.
 yg_refresh_desktop_db() {
     command -v update-desktop-database >/dev/null 2>&1 && \
         update-desktop-database "$YG_DESKTOP_DIR" 2>/dev/null || true
     command -v gtk-update-icon-cache >/dev/null 2>&1 && \
-        gtk-update-icon-cache -f "$YG_DATA_DIR/icons/hicolor" 2>/dev/null || true
+        gtk-update-icon-cache -f "$YG_ICON_ROOT" 2>/dev/null || true
 }
 
 # ---------------------------------------------------------------------
@@ -215,11 +242,12 @@ Use from a ujust recipe:
     source /usr/libexec/yaguarete/emu-helpers.sh
 
 Exports: YG_APPS_DIR YG_BIN_DIR YG_DATA_DIR YG_CONFIG_DIR
-         YG_DESKTOP_DIR YG_ICON_DIR YG_OPT_DIR
+         YG_DESKTOP_DIR YG_ICON_ROOT YG_OPT_DIR
 Provides: yg_info yg_ok yg_warn yg_err
           yg_arch yg_supports_v3 yg_is_handheld
           yg_check_internet yg_check_disk
           yg_confirm yg_pause yg_sudo yg_has_font
+          yg_install_icon yg_remove_icon
           yg_download yg_refresh_desktop_db
           yg_has_emudeck yg_emudeck_setting
 USAGE

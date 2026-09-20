@@ -42,6 +42,9 @@ echo "Cloning existing repo tree from ${FLATPAKS_REPO_SSH_URL} (gh-pages)..."
 git clone --depth 1 --branch gh-pages "${FLATPAKS_REPO_SSH_URL}" "$clone_dir"
 if [ -d "$clone_dir/objects" ]; then
     cp -a "$clone_dir/." "$repo_dir/"
+    # git drops empty directories and ostree refuses to list refs without them
+    # ("opendir(refs/remotes)" while generating static deltas).
+    mkdir -p "$repo_dir"/refs/{heads,remotes,mirrors} "$repo_dir"/{tmp,state}
 fi
 
 printf '%s' "${FLATPAK_GPG_PRIVATE_KEY}" | \

@@ -1,0 +1,11 @@
+[Unit]
+Description=Ensure the GRUB stub exists in the YaguareteOS EFI directory
+After=bootloader-update.service
+ConditionPathIsMountPoint=/boot/efi
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/yaguarete-efi-stub
+
+[Install]
+WantedBy=multi-user.target

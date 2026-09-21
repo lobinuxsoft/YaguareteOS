@@ -75,9 +75,17 @@ curl -sI -r 0-1023 "https://archive.org/download/<identifier>/<iso>" | head -1
 # expect: HTTP/1.1 206 Partial Content
 ```
 
-## Known gap
+## Update verification
 
-The kickstart tracks `ostree-unverified-registry:...:stable`, so installed
-systems do not verify the cosign signature on update. Moving to
-`ostree-image-signed` touches `installer/`, needs a new image build and a new
-ISO, and is deliberately left until this cycle has been validated end to end.
+The kickstart tracks `ostree-image-signed:docker://ghcr.io/lobinuxsoft/yaguareteos:stable`,
+so installed systems verify the cosign signature against the policy in
+`/etc/containers/policy.json` on every update. `promote.yml` signs `:stable`
+and `:stable-<version>`; an unsigned or wrongly signed image is refused.
+
+Systems installed before this (or switched with `bootc switch` without
+`--enforce-container-sigpolicy`) keep following the unverified ref. To move one
+over without a reinstall:
+
+```bash
+sudo bootc switch --enforce-container-sigpolicy ghcr.io/lobinuxsoft/yaguareteos:stable
+```

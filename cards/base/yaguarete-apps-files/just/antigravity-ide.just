@@ -152,8 +152,7 @@ install-antigravity-ide:
     [[ -z "$icon_src" ]] && icon_src=$(sudo find "$stage" -path '*/icons/hicolor/*/apps/antigravity.*' -print -quit 2>/dev/null)
     [[ -z "$icon_src" ]] && icon_src=$(sudo find "$stage" \( -name 'antigravity.png' -o -name 'antigravity.svg' \) -not -path '*/resources/*' -print -quit 2>/dev/null)
     if [[ -n "$icon_src" ]]; then
-        mkdir -p "$YG_ICON_DIR"
-        cp "$icon_src" "$YG_ICON_DIR/antigravity.${icon_src##*.}"
+        yg_install_icon "$icon_src" antigravity
     fi
     yg_refresh_desktop_db
 
@@ -179,6 +178,6 @@ remove-antigravity-ide:
     sudo rm -rf "$YG_OPT_DIR/antigravity"
     sudo rm -f "${YAGUARETE_BIN_DIR:-/usr/local/bin}/antigravity"
     rm -f "$YG_DESKTOP_DIR/antigravity.desktop"
-    rm -f "$YG_ICON_DIR"/antigravity.{png,svg}
+    yg_remove_icon antigravity
     yg_refresh_desktop_db
     yg_ok "Antigravity IDE removed. Config preserved at $YG_CONFIG_DIR/antigravity."

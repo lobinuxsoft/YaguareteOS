@@ -84,11 +84,11 @@ install-yryvu:
         if [[ -n "$icon_name" ]]; then
             icon_src=$(find squashfs-root \( -name "${icon_name}.svg" -o -name "${icon_name}.png" \) -print -quit 2>/dev/null)
         fi
-        mkdir -p "$YG_DESKTOP_DIR" "$YG_ICON_DIR"
+        mkdir -p "$YG_DESKTOP_DIR"
         sed "s|^Exec=.*|Exec=$YRYVU_BIN %f|; s|^Icon=.*|Icon=yryvu|" \
             "$desktop_src" > "$YG_DESKTOP_DIR/Yryvu.desktop"
         if [[ -n "$icon_src" ]]; then
-            cp "$icon_src" "$YG_ICON_DIR/yryvu.${icon_src##*.}"
+            yg_install_icon "$icon_src" yryvu
         else
             yg_warn "No icon matching Icon=$icon_name in the AppImage — Yryvu will show a generic launcher icon."
         fi
@@ -140,6 +140,6 @@ remove-yryvu:
 
     rm -f "$YG_APPS_DIR/Yryvu.AppImage"
     rm -f "$YG_DESKTOP_DIR/Yryvu.desktop"
-    rm -f "$YG_ICON_DIR/yryvu.svg" "$YG_ICON_DIR/yryvu.png"
+    yg_remove_icon yryvu
     yg_refresh_desktop_db
     yg_ok "Yryvu uninstalled. User data preserved at $YG_CONFIG_DIR/yryvu/."

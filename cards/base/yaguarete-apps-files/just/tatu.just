@@ -107,11 +107,11 @@ install-tatu:
         if [[ -n "$icon_name" ]]; then
             icon_src=$(find squashfs-root \( -name "${icon_name}.svg" -o -name "${icon_name}.png" \) -print -quit 2>/dev/null)
         fi
-        mkdir -p "$YG_DESKTOP_DIR" "$YG_ICON_DIR"
+        mkdir -p "$YG_DESKTOP_DIR"
         sed "s|^Name=.*|Name=Tatu|; s|^Exec=.*|Exec=$TATU_BIN --run %f|; s|^Icon=.*|Icon=tatu|; s|^Comment=.*|Comment=Steam backlog tracker (Tatu)|" \
             "$desktop_src" > "$YG_DESKTOP_DIR/Tatu.desktop"
         if [[ -n "$icon_src" ]]; then
-            cp "$icon_src" "$YG_ICON_DIR/tatu.${icon_src##*.}"
+            yg_install_icon "$icon_src" tatu
         else
             yg_warn "No icon matching Icon=$icon_name in the AppImage — Tatu will show a generic launcher icon."
         fi
@@ -163,6 +163,6 @@ remove-tatu:
 
     rm -f "$YG_APPS_DIR/Tatu.AppImage"
     rm -f "$YG_DESKTOP_DIR/Tatu.desktop"
-    rm -f "$YG_ICON_DIR/tatu.svg" "$YG_ICON_DIR/tatu.png"
+    yg_remove_icon tatu
     yg_refresh_desktop_db
     yg_ok "Tatu uninstalled. User data preserved."

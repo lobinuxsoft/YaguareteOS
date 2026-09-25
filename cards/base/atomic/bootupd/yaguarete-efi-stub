@@ -1,0 +1,62 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# bootupd writes the static GRUB stub (grub.cfg and bootuuid.cfg) only when it
+# installs a system. When an update introduces a new EFI vendor directory, the
+# firmware boots its GRUB with no configuration and stops at the grub> prompt.
+# Make sure the stub is there after every boot, before the next one needs it.
+
+esp=${YAGUARETE_ESP:-/boot/efi/EFI}
+vendor="$esp/yaguarete"
+
+[[ -f $vendor/shimx64.efi ]] || exit 0
+
+boot_uuid=${YAGUARETE_BOOT_UUID:-$(findmnt -no UUID /boot 2>/dev/null || true)}
+
+for name in grub.cfg bootuuid.cfg; do
+    [[ -f $vendor/$name ]] && continue
+
+    for other in "$esp"/*/; do
+        [[ ${other%/} == "$vendor" ]] && continue
+        if [[ -f $other$name ]]; then
+            cp "$other$name" "$vendor/$name"
+            echo "yaguarete-efi-stub: copied $name from ${other%/}"
+            continue 2
+        fi
+    done
+
+    case $name in
+        bootuuid.cfg)
+            [[ -n $boot_uuid ]] || continue
+            printf 'set BOOT_UUID="%s"\n' "$boot_uuid" > "$vendor/$name"
+            ;;
+        grub.cfg)
+            cat > "$vendor/$name" <<'STUB'
+if [ -e (md/md-boot) ]; then
+  set prefix=md/md-boot
+else
+  if [ -f ${config_directory}/bootuuid.cfg ]; then
+    source ${config_directory}/bootuuid.cfg
+  fi
+  if [ -n "${BOOT_UUID}" ]; then
+    search --fs-uuid "${BOOT_UUID}" --set prefix --no-floppy
+  else
+    search --label boot --set prefix --no-floppy
+  fi
+fi
+if [ -d ($prefix)/grub2 ]; then
+  set prefix=($prefix)/grub2
+  configfile $prefix/grub.cfg
+else
+  set prefix=($prefix)/boot/grub2
+  configfile $prefix/grub.cfg
+fi
+boot
+STUB
+            ;;
+    esac
+    echo "yaguarete-efi-stub: generated $name"
+done
+
+sync

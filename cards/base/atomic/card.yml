@@ -109,6 +109,8 @@ files:
   - launchers/yaguarete-rollback.desktop
   - launchers/yaguarete-seed-desktop
   - launchers/yaguarete-seed-desktop.service
+  - bootupd/yaguarete-efi-stub
+  - bootupd/yaguarete-efi-stub.service
 
 postprocess: |
     set -eux
@@ -463,6 +465,17 @@ postprocess: |
     cat > /usr/lib/systemd/system-preset/80-yaguarete-bootupd.preset <<'EOF'
     enable bootloader-update.service
     EOF
+
+    # bootupd writes the static GRUB stub only at install time, so an update
+    # that adds an EFI vendor directory leaves it without grub.cfg and the
+    # firmware stops at the grub> prompt. Restore the stub after every boot.
+    install -Dm0755 /files/bootupd/yaguarete-efi-stub \
+        /usr/libexec/yaguarete-efi-stub
+    install -Dm0644 /files/bootupd/yaguarete-efi-stub.service \
+        /usr/lib/systemd/system/yaguarete-efi-stub.service
+    install -dm0755 /usr/lib/systemd/system/multi-user.target.wants
+    ln -snf ../yaguarete-efi-stub.service \
+        /usr/lib/systemd/system/multi-user.target.wants/yaguarete-efi-stub.service
     systemctl preset bootloader-update.service || true
 
     # Composefs rejects remounting the live overlay root with the options from

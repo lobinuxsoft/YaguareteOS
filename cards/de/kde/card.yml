@@ -83,7 +83,6 @@ packages:
     - plasma-nm
     - plasma-nm-openconnect
     - plasma-nm-openvpn
-    - plasma-nm-vpnc
     - samba-usershares
 
     # Graphics and media

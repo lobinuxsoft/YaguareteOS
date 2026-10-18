@@ -88,6 +88,8 @@ flatpak:
 
 files:
   - files/yaguarete-steam
+  - files/yaguarete-pressure-vessel-unruntime
+  - files/test-yaguarete-pressure-vessel-unruntime.py
   - files/yaguarete-fossilize-replay-wrapper
   - files/yaguarete-steam-applications.py
   - files/yaguarete-add-to-steam
@@ -172,6 +174,8 @@ postprocess: |-
       cp -f /usr/bin/cmp app/bin/cmp
   fi
   install -Dm0755 files/yaguarete-steam app/bin/yaguarete-steam
+  install -Dm0755 files/yaguarete-pressure-vessel-unruntime \
+      app/libexec/yaguarete-pressure-vessel/bin/pressure-vessel-unruntime
   install -Dm0755 files/yaguarete-fossilize-replay-wrapper \
       app/libexec/yaguarete-fossilize-replay-wrapper
   install -Dm0755 files/yaguarete-steam-applications.py \
@@ -196,6 +200,9 @@ postprocess: |-
   ln -s /usr/bin/steamos-polkit-helpers/steamos-select-branch app/bin/steamos-select-branch
 
   bash -n app/bin/yaguarete-steam
+  bash -n app/libexec/yaguarete-pressure-vessel/bin/pressure-vessel-unruntime
+  YAGUARETE_PRESSURE_VESSEL_UNRUNTIME=files/yaguarete-pressure-vessel-unruntime \
+      python3 files/test-yaguarete-pressure-vessel-unruntime.py
   bash -n app/bin/yaguarete-add-to-steam
   bash -n app/libexec/yaguarete-fossilize-replay-wrapper
   bash -n app/bin/hrun

@@ -1,5 +1,5 @@
 Name:           nvidia-settings
-Version:        615.71.09
+Version:        615.78.08
 Release:        1%{?dist}
 Summary:        Configure the NVIDIA graphics driver
 Epoch:          3
@@ -9,7 +9,7 @@ ExclusiveArch:  x86_64 aarch64
 
 Source0:        https://download.nvidia.com/XFree86/%{name}/%{name}-%{version}.tar.bz2
 Source1:        %{name}-load.desktop
-Source2:        %{name}.appdata.xml
+Source2:        %{name}.metainfo.xml
 Patch0:         %{name}-desktop.patch
 Patch1:         %{name}-lib-permissions.patch
 Patch2:         %{name}-link-order.patch
@@ -105,18 +105,18 @@ cp doc/%{name}.png %{buildroot}%{_datadir}/pixmaps/
 # Install autostart file to load settings at login
 install -p -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/xdg/autostart/%{name}-load.desktop
 
-# install AppData and add modalias provides
+# Install AppStream metadata
 mkdir -p %{buildroot}%{_metainfodir}/
 install -p -m 0644 %{SOURCE2} %{buildroot}%{_metainfodir}/
 
 %check
 desktop-file-validate %{buildroot}/%{_datadir}/applications/%{name}.desktop
 desktop-file-validate %{buildroot}%{_sysconfdir}/xdg/autostart/%{name}-load.desktop
-appstream-util validate-relax --nonet %{buildroot}/%{_metainfodir}/%{name}.appdata.xml
+appstream-util validate-relax --nonet %{buildroot}/%{_metainfodir}/%{name}.metainfo.xml
 
 %files
 %{_bindir}/%{name}
-%{_metainfodir}/%{name}.appdata.xml
+%{_metainfodir}/%{name}.metainfo.xml
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/pixmaps/%{name}.png
 %{_libdir}/libnvidia-gtk3.so.%{version}
@@ -134,8 +134,13 @@ appstream-util validate-relax --nonet %{buildroot}/%{_metainfodir}/%{name}.appda
 %{_libdir}/libXNVCtrl.so
 
 %changelog
+* Wed Oct 07 2026 Simone Caronni <negativo17@gmail.com> - 3:615.78.08-1
+- Update to 615.78.08.
+
 * Thu Sep 10 2026 Simone Caronni <negativo17@gmail.com> - 3:615.71.09-1
 - Update to 615.71.09.
+- Update AppStream metadata.
+- Fix Brazilian Portuguese comment in the desktop file.
 
 * Fri Aug 07 2026 Simone Caronni <negativo17@gmail.com> - 3:610.57.04-1
 - Update to 610.57.04.

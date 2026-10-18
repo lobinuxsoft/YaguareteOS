@@ -112,9 +112,12 @@ install -m0644 /usr/lib/ludos/efi/YAGUARETE-KEY-ENROLLME.der "$target_efi/"
 read -r efi_parent efi_part < <(lsblk --nodeps -nro PKNAME,PARTN "$efi_device")
 [ -n "$efi_parent" ] && [ -n "$efi_part" ]
 [ -f "$target_efi/EFI/yaguarete/shimx64.efi" ]
-command -v efibootmgr >/dev/null
-efibootmgr --create --disk "/dev/$efi_parent" --part "$efi_part" \
-    --loader '\EFI\yaguarete\shimx64.efi' --label YaguareteOS
+if ! command -v efibootmgr >/dev/null; then
+    echo "efibootmgr is unavailable; skipping EFI boot entry creation" >&2
+elif ! efibootmgr --create --disk "/dev/$efi_parent" --part "$efi_part" \
+    --loader '\EFI\yaguarete\shimx64.efi' --label YaguareteOS; then
+    echo "failed to create EFI boot entry; continuing installation" >&2
+fi
 %end
 
 #

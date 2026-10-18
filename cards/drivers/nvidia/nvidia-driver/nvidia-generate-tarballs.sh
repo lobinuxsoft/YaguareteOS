@@ -2,7 +2,7 @@
 set -e
 
 set_vars() {
-   export VERSION=${VERSION:-615.71.09}
+   export VERSION=${VERSION:-615.78.08}
    export TEMP_UNPACK=${ARCH}
    export PLATFORM=Linux-${ARCH}
    export RUN_FILE=NVIDIA-${PLATFORM}-${VERSION}.run
@@ -40,6 +40,8 @@ cleanup_folder() {
     #   - GLVND test scripts
     #   - Closed source modules
     #   - Open source modules with precompiled c++ code
+    #   - All systemd sleep units (not needed with open modules + kernel suspend notifiers)
+    #   - Powerd systemd unit is shipped as an override
     rm -r \
         nvidia-xconfig* \
         nvidia-persistenced* \
@@ -52,8 +54,7 @@ cleanup_folder() {
         libEGL.so.${VERSION} \
         nvidia-installer* .manifest make* mk* libglvnd_install_checker \
         *_nvidia_gbm.json *_nvidia_wayland.json *_nvidia_xcb.json *_nvidia_xlib.json *_nvidia_wayland2.json \
-        kernel kernel-open \
-        systemd/system-sleep systemd/system/*.service systemd/nvidia-sleep.sh
+        kernel kernel-open systemd
 
     if [ "${ARCH}" == x86_64 ]; then
         rm -r \

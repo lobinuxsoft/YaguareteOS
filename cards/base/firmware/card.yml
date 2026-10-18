@@ -22,7 +22,9 @@ specs:
       - cirrus-audio-firmware
       - intel-audio-firmware
       - intel-gpu-firmware
+      - intel-npu-firmware
       - intel-vsc-firmware
+      - iwlbluetooth-firmware
       - iwlegacy-firmware
       - iwlwifi-dvm-firmware
       - iwlwifi-mld-firmware

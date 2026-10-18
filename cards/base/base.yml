@@ -211,3 +211,9 @@ postprocess: |
   disable sshd.service
   disable sshd.socket
   EOF
+
+  # Use agetty until kmscon's atomic modesetting works properly
+  cat > /usr/lib/systemd/system-preset/80-yaguarete-console.preset <<'EOF'
+  disable kmsconvt@.service
+  enable getty@.service
+  EOF

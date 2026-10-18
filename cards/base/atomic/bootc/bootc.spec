@@ -23,7 +23,7 @@
 
 Name:           bootc
 # Ensure this local build overrides anything else.
-Version:        1.16.10
+Version:        1.16.13
 Release:        %{autorelease}
 Summary:        Bootable container system
 
@@ -47,6 +47,9 @@ ExcludeArch:    %{ix86}
 BuildRequires: libzstd-devel
 BuildRequires: make
 BuildRequires: ostree-devel
+# selinux-sys generates libselinux bindings with bindgen at build time.
+# bindgen requires libclang.
+BuildRequires: clang-devel
 BuildRequires: openssl-devel
 BuildRequires: go-md2man
 %if 0%{?rhel}

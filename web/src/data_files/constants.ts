@@ -4,9 +4,9 @@ export const SITE = {
   title: 'YaguareteOS',
   tagline: 'Sovereign bootc-based KDE for gaming and dev',
   description:
-    'YaguareteOS is a bootable, image-based Linux distribution, a fork of Anatase (Fedora Atomic / bootc). Gaming-ready, atomic, signed in our own CI, with Argentine cultural identity.',
+    'YaguareteOS is a bootable, image-based Linux distribution (Fedora Atomic / bootc). Gaming-ready, atomic, signed in our own CI, with Argentine cultural identity.',
   description_short:
-    'Bootc-based KDE distribution, a fork of Anatase — gaming-ready, atomic, signed in our own CI.',
+    'Bootc-based KDE distribution — gaming-ready, atomic, signed in our own CI.',
   url: 'https://lobinuxsoft.github.io/YaguareteOS/',
   author: 'Lobinux',
 };
@@ -37,6 +37,6 @@ export const OG = {
   url: SITE.url,
   title: `${SITE.title} — ${SITE.tagline}`,
   description:
-    'A bootable, image-based KDE distribution, a fork of Anatase (Fedora Atomic / bootc). One image for desktop, laptop, handheld, HTPC and NVIDIA hardware. Signed in our own CI, distributed from our own registry, atomic rollback included.',
+    'A bootable, image-based KDE distribution (Fedora Atomic / bootc). One image for desktop, laptop, handheld, HTPC and NVIDIA hardware. Signed in our own CI, distributed from our own registry, atomic rollback included.',
   image: ogImageSrc,
 };

@@ -3,16 +3,16 @@ import type { Translations } from './types';
 const es: Translations = {
   meta: {
     pageTitle:
-      'YaguareteOS — Distro KDE basada en Anatase, orientada al desarrollo y el gaming',
-    ogTitle: 'YaguareteOS — KDE para dev y gaming sobre Anatase',
+      'YaguareteOS — Distro KDE para desarrollo y gaming',
+    ogTitle: 'YaguareteOS — KDE para dev y gaming',
     description:
-      'YaguareteOS es una distribución Linux booteable, fork de Anatase (Fedora Atomic / bootc), orientada al desarrollo y el gaming en handhelds. Daemon de mando/TDP/RGB nativo, slider de VRAM validado por firmware, actualizaciones atómicas y firmada en nuestra propia CI.',
+      'YaguareteOS es una distribución Linux booteable (Fedora Atomic / bootc) orientada al desarrollo y el gaming en handhelds. Daemon de mando/TDP/RGB nativo, slider de VRAM validado por firmware, actualizaciones atómicas y firmada en nuestra propia CI.',
   },
   hero: {
     titlePrefix: 'Yaguarete',
     titleSuffix: 'OS',
     subTitle:
-      'Distro KDE handheld-first, fork de Anatase. HHD (Handheld Daemon) nativo para mando/TDP/RGB, slider de VRAM validado por el firmware desde el propio panel de HHD, apps propias (Yryvu, Tatu) y sesión Gamemode gamescope+Steam. Image-based con bootc, actualizaciones atómicas, firmada en nuestra propia CI.',
+      'Distro KDE handheld-first. HHD (Handheld Daemon) nativo para mando/TDP/RGB, slider de VRAM validado por el firmware desde el propio panel de HHD, apps propias (Yryvu, Tatu) y sesión Gamemode gamescope+Steam. Image-based con bootc, actualizaciones atómicas, firmada en nuestra propia CI.',
     primaryBtn: 'Leer el README',
     primaryBtnUrl: 'https://github.com/lobinuxsoft/YaguareteOS#readme',
   },
@@ -38,9 +38,9 @@ const es: Translations = {
     ],
   },
   stack: {
-    title: 'Anatase por debajo, dev y gaming arriba',
+    title: 'Stack de gaming de fábrica, dev arriba',
     subTitle:
-      'Heredamos el stack de gaming de Anatase — Steam (Flatpak), gamescope, GameMode, MangoHud, Mesa al día, HHD nativo — y le agregamos lo que necesitamos para el dev cotidiano y para exprimir un handheld. Image-based con bootc: cada update es atómico, rollback en un comando.',
+      'Steam (Flatpak), gamescope, GameMode, MangoHud, Mesa al día y HHD nativo — y le agregamos lo que necesitamos para el dev cotidiano y para exprimir un handheld. Image-based con bootc: cada update es atómico, rollback en un comando.',
     features: [
       {
         heading: 'Gaming-ready',

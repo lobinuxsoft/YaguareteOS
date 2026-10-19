@@ -3,82 +3,53 @@ import type { Translations } from './types';
 const es: Translations = {
   meta: {
     pageTitle:
-      'YaguareteOS — Distro KDE basada en Bazzite, orientada al desarrollo y el gaming',
-    ogTitle: 'YaguareteOS — KDE para dev y gaming sobre Bazzite',
+      'YaguareteOS — Distro KDE basada en Anatase, orientada al desarrollo y el gaming',
+    ogTitle: 'YaguareteOS — KDE para dev y gaming sobre Anatase',
     description:
-      'YaguareteOS es una distribución Linux booteable basada en Bazzite (Universal Blue / Fedora Atomic), orientada al desarrollo y el gaming en handhelds, con slider de memoria gráfica para APUs AMD, actualizaciones atómicas y firmada en nuestra propia CI.',
+      'YaguareteOS es una distribución Linux booteable, fork de Anatase (Fedora Atomic / bootc), orientada al desarrollo y el gaming en handhelds. Daemon de mando/TDP/RGB nativo, slider de VRAM validado por firmware, actualizaciones atómicas y firmada en nuestra propia CI.',
   },
   hero: {
     titlePrefix: 'Yaguarete',
     titleSuffix: 'OS',
     subTitle:
-      'Distro KDE handheld-first sobre Bazzite. Slider de memoria gráfica para APUs AMD sin pasar por el BIOS, Portal con 182 acciones de instalación, apps propias (Yryvu, Tatu) y autoconfiguración de FSR4. Image-based con bootc, actualizaciones atómicas, firmada en nuestra propia CI.',
+      'Distro KDE handheld-first, fork de Anatase. HHD (Handheld Daemon) nativo para mando/TDP/RGB, slider de VRAM validado por el firmware desde el propio panel de HHD, apps propias (Yryvu, Tatu) y sesión Gamemode gamescope+Steam. Image-based con bootc, actualizaciones atómicas, firmada en nuestra propia CI.',
     primaryBtn: 'Leer el README',
-    primaryBtnUrl: 'https://github.com/lobinuxsoft/yaguarete_os#readme',
+    primaryBtnUrl: 'https://github.com/lobinuxsoft/YaguareteOS#readme',
   },
   variants: {
-    title: 'Cuatro variantes KDE, un solo pipeline',
+    title: 'Una sola imagen, todo el hardware',
     subTitle:
-      'Elegí la variante que matchea con tu hardware. Las cuatro se construyen del mismo árbol y se firman con la misma clave cosign.',
+      'Sin variantes que elegir: una imagen cubre handhelds, desktops, laptops, HTPCs y hardware NVIDIA. Se construye y firma siempre del mismo árbol.',
     upstreamLabel: 'Base upstream',
     downloadLabel: 'Descargar ISO',
-    pendingNote: 'ISO en preparación para esta variante',
+    pendingNote: 'ISO en preparación — el pipeline de releases todavía no publicó la primera',
     cosignNote:
       'Las releases stable se publican firmadas con cosign. Verificá la firma contra cosign.pub antes de instalar — instrucciones en el README.',
     cards: [
       {
-        name: 'yaguarete_os',
-        tag: 'Desktop AMD / Intel',
+        name: 'yaguareteos',
+        tag: 'Desktop, laptop, handheld y HTPC — AMD, Intel y NVIDIA',
         description:
-          'Variante por defecto. Stack de gráficos open-source, funciona en la mayoría del hardware no-NVIDIA.',
-        upstream: 'bazzite:stable',
-        downloadUrl:
-          'https://archive.org/download/yaguarete_os-stable-44.20260730/yaguarete_os-stable-44.20260730-live-amd64.iso',
-      },
-      {
-        name: 'yaguarete_os-nvidia',
-        tag: 'NVIDIA propietario',
-        description:
-          'GPU NVIDIA con el driver propietario. Recomendado para gaming en hardware NVIDIA hoy.',
-        upstream: 'bazzite-nvidia:stable',
-        downloadUrl:
-          'https://archive.org/download/yaguarete_os-nvidia-stable-44.20260730/yaguarete_os-nvidia-stable-44.20260730-live-amd64.iso',
-      },
-      {
-        name: 'yaguarete_os-nvidia-open',
-        tag: 'Módulo kernel NVIDIA abierto',
-        description:
-          'GPU NVIDIA con el módulo kernel abierto (Turing+). Orientado a workstations de desarrollo.',
-        upstream: 'bazzite-nvidia-open:stable',
-        downloadUrl:
-          'https://archive.org/download/yaguarete_os-nvidia-open-stable-44.20260730/yaguarete_os-nvidia-open-stable-44.20260730-live-amd64.iso',
-      },
-      {
-        name: 'yaguarete_os-deck',
-        tag: 'Handheld (Steam Deck, OneXFly, ROG Ally)',
-        description:
-          'Bootea directo en game mode. Heredado de Bazzite-deck, todavía en Fedora 43.',
-        upstream: 'bazzite-deck:stable',
-        downloadUrl:
-          'https://archive.org/download/yaguarete_os-deck-stable-43.20260730/yaguarete_os-deck-stable-43.20260730-live-amd64.iso',
+          'Imagen única. Stack de gráficos AMD/Intel de fábrica, drivers NVIDIA propietarios incluidos cuando el hardware los necesita. Sesiones Plasma Desktop, Plasma Mobile y Gamemode (gamescope + Steam) en el mismo boot.',
+        upstream: 'anatase:stable',
       },
     ],
   },
   stack: {
-    title: 'Bazzite por debajo, dev y gaming arriba',
+    title: 'Anatase por debajo, dev y gaming arriba',
     subTitle:
-      'Heredamos el stack de gaming de Bazzite — Steam, Proton-GE, GameMode, gamescope, MangoHud, Mesa al día — y le agregamos lo que necesitamos para el dev cotidiano y para exprimir un handheld. Image-based con bootc: cada update es atómico, rollback en un comando.',
+      'Heredamos el stack de gaming de Anatase — Steam (Flatpak), gamescope, GameMode, MangoHud, Mesa al día, HHD nativo — y le agregamos lo que necesitamos para el dev cotidiano y para exprimir un handheld. Image-based con bootc: cada update es atómico, rollback en un comando.',
     features: [
       {
         heading: 'Gaming-ready',
         content:
-          'Steam, Proton-GE, GameMode, gamescope y MangoHud preconfigurados. Mesa/AMD recientes. Perfiles para handhelds (Steam Deck, OneXFly, ROG Ally).',
+          'Steam (Flatpak), GameMode, gamescope y MangoHud preconfigurados en la sesión Gamemode. Mesa/AMD recientes. HHD (Handheld Daemon) nativo: mando, TDP y RGB out of the box en handhelds como la OneXFly.',
         svg: 'rocket',
       },
       {
         heading: 'Herramientas propias para handheld',
         content:
-          'ujust yaguarete-vram asigna RAM del sistema como memoria gráfica en APUs AMD sin pasar por el firmware. Más ujust yaguarete-setup-decky, que instala Decky Loader verificando antes de borrar nada, y yaguarete-fsr4, que detecta la GPU y aplica el upgrade correcto.',
+          'Plugin de HHD para mover el carveout de VRAM del firmware (validado por el kernel, no un workaround de GTT) directo desde el panel de ajustes del handheld, sin terminal. Recetas ujust curadas para Decky Loader, Eden, Antigravity, Claude Code y nuestras propias apps.',
         svg: 'puzzle',
       },
       {
@@ -90,7 +61,7 @@ const es: Translations = {
       {
         heading: 'Dev-friendly',
         content:
-          'Terminal lista de fábrica: kitty con zsh, prompt Powerlevel10k y FiraCode Nerd Font con ligatures, en un comando. Claude Code y Antigravity a un clic desde el Portal. Toolbox, distrobox y devcontainer first-class. KDE Plasma como escritorio. Defaults en español, locale es-AR.',
+          'Terminal lista de fábrica: kitty con zsh, prompt Powerlevel10k y FiraCode Nerd Font con ligatures, en un comando. Claude Code y Antigravity a un `ujust`. Toolbox, distrobox y devcontainer first-class. KDE Plasma como escritorio. Defaults en español, locale es-AR.',
         svg: 'tools',
       },
     ],
@@ -98,37 +69,37 @@ const es: Translations = {
   faq: {
     title: 'Preguntas frecuentes',
     subTitle:
-      'Qué es YaguareteOS, cómo se instala, y cómo se relaciona con Bazzite y el ecosistema Universal Blue.',
+      'Qué es YaguareteOS, cómo se instala, y cómo se relaciona con Anatase y el ecosistema Fedora Atomic.',
     items: [
       {
-        question: '¿YaguareteOS es Bazzite con otro logo?',
+        question: '¿YaguareteOS es Anatase con otro logo?',
         answer:
-          'No. Sumamos sobre Bazzite: el comando ujust yaguarete-vram para repartir RAM como memoria gráfica en APUs AMD, un Portal yafti con 79 apps y ajustes en 8 secciones (188 acciones install/update/uninstall, con la salida de cada una registrada en disco), instaladores propios para nuestras apps —Yryvu y Tatu— y recetas curadas para software de terceros como Eden, Antigravity, Claude Code o Decky Loader, el wrapper ujust yaguarete-fsr4 que autodetecta la GPU, comandos de rescate y de instalación por categoría (yaguarete-rescue, yaguarete-install-gaming, yaguarete-install-dev), versionado Aurora-style en rpm-ostree status y pipeline propio firmado con cosign.',
+          'No. Sumamos sobre Anatase: un plugin de HHD propio para mover el carveout de VRAM desde el panel del handheld (validado por el firmware/kernel), instaladores propios para nuestras apps —Yryvu y Tatu— y recetas ujust curadas para software de terceros como Eden, Antigravity, Claude Code o Decky Loader, identidad y arte propios (logos, wallpapers, Plymouth, tema KDE) y pipeline propio firmado con cosign sobre nuestro propio registro de contenedores.',
       },
       {
-        question: '¿Qué es el slider de memoria gráfica para handhelds?',
+        question: '¿Qué es el slider de VRAM para handhelds?',
         answer:
-          'En una APU AMD la "VRAM dedicada" la reserva el firmware y cambiarla exige reiniciar. El pool que se mueve desde el sistema es el GTT: RAM que la GPU mapea como memoria gráfica a través del argumento de kernel ttm.pages_limit. ujust yaguarete-vram lo expone como un porcentaje (10-90%, con un piso de 6 GiB siempre reservado para el sistema): elegís el valor, reiniciás y queda persistido. Sirve para juegos con texturas pesadas y para correr modelos de lenguaje locales. Ninguna otra distro handheld —Bazzite, SteamOS, ChimeraOS— lo expone de esta forma.',
+          'En una APU AMD el firmware expone un conjunto fijo de tamaños de carveout de VRAM (por ejemplo 512 MB a 32 GB en la OneXFly). Nuestro plugin de HHD lo muestra como un selector directo en el panel del handheld: elegís el nivel, confirmás y el sistema reinicia para aplicarlo — sin terminal, sin tocar el BIOS a mano. El valor siempre lo valida el propio firmware.',
       },
       {
-        question: '¿Qué variante instalo?',
+        question: '¿Necesito elegir una variante para NVIDIA?',
         answer:
-          'GPU AMD o Intel en desktop o laptop → yaguarete_os. NVIDIA con driver propietario → yaguarete_os-nvidia. NVIDIA con módulo kernel abierto (Turing+) → yaguarete_os-nvidia-open. Steam Deck, OneXFly o ROG Ally → yaguarete_os-deck (todavía en Fedora 43, lockstep con Bazzite-deck).',
+          'No. Es una sola imagen: los drivers NVIDIA propietarios ya están incluidos, se activan cuando el kernel detecta el módulo NVIDIA cargado.',
       },
       {
         question: '¿Cómo hago rebase desde otro sistema bootc?',
         answer:
-          'Verificá la firma con cosign contra nuestra clave pública, después corré sudo bootc switch ghcr.io/lobinuxsoft/<variante>:stable y reiniciá. El deployment previo queda en disco como target de rollback. Instrucciones paso a paso completas viven en el README.',
+          'Verificá la firma con cosign contra nuestra clave pública, después corré sudo bootc switch ghcr.io/lobinuxsoft/yaguareteos:stable y reiniciá. El deployment previo queda en disco como target de rollback. Instrucciones paso a paso completas viven en el README.',
       },
       {
         question: '¿Cuándo va a haber ISOs descargables?',
         answer:
-          'Ya están disponibles. Cada promoción de :testing a :stable genera un GitHub Release más un item permanente en archive.org. Los botones de descarga en la sección de variantes apuntan a la última ISO publicada por variant. Para usuarios bootc, el rebase es directo: sudo bootc switch ghcr.io/lobinuxsoft/<variante>:stable.',
+          'Todavía no. El pipeline que publica cada promoción a :stable como GitHub Release + item en archive.org está en construcción. Hasta entonces, la vía de instalación es bootc switch sobre un sistema Fedora Atomic ya instalado.',
       },
       {
         question: '¿Dónde van a vivir las releases stable?',
         answer:
-          'Cada promoción a :stable produce un GitHub Release más un item con fecha en archive.org bajo identificador <imagen>-stable-<fedora>.<YYYYMMDD>. El registro de containers sirve los canales :stable, :testing y :unstable para usuarios bootc; los tags con fecha pinean una build específica.',
+          'Cada promoción a :stable va a producir un GitHub Release más un item con fecha en archive.org. El registro de contenedores ya sirve los canales :stable, :testing y :unstable para usuarios bootc; los tags con fecha pinean una build específica.',
       },
     ],
   },

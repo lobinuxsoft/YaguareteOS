@@ -2,7 +2,7 @@
 //
 // Los links internos son anchors bare (`#id`) para que el navegador conserve
 // el path actual — con el slash inicial saltaríamos a la raíz del sitio y
-// perderíamos el prefijo /yaguarete_os.
+// perderíamos el prefijo /YaguareteOS.
 
 const navBarLinks = [
   { name: 'Variantes', url: '#variants' },
@@ -16,27 +16,23 @@ const footerLinks = [
     links: [
       {
         name: 'GitHub',
-        url: 'https://github.com/lobinuxsoft/yaguarete_os',
+        url: 'https://github.com/lobinuxsoft/YaguareteOS',
       },
       {
         name: 'Releases',
-        url: 'https://github.com/lobinuxsoft/yaguarete_os/releases',
+        url: 'https://github.com/lobinuxsoft/YaguareteOS/releases',
       },
       {
         name: 'README',
-        url: 'https://github.com/lobinuxsoft/yaguarete_os#readme',
-      },
-      {
-        name: 'ADRs',
-        url: 'https://github.com/lobinuxsoft/yaguarete_os/tree/main/docs/adr',
+        url: 'https://github.com/lobinuxsoft/YaguareteOS#readme',
       },
     ],
   },
   {
     section: 'Upstream',
     links: [
-      { name: 'Bazzite', url: 'https://bazzite.gg/' },
-      { name: 'Universal Blue', url: 'https://universal-blue.org/' },
+      { name: 'Anatase', url: 'https://github.com/anatase-org/anatase' },
+      { name: 'ludos', url: 'https://github.com/anatase-org/ludos' },
       {
         name: 'Fedora Atomic',
         url: 'https://fedoraproject.org/atomic-desktops/',
@@ -50,7 +46,7 @@ const footerLinks = [
 // placeholder que apuntaban al repo del proyecto eran engañosas y se
 // eliminaron. Mantenemos la shape pero los canales no usados son null para
 // que el footer los pueda saltar en vez de renderizar links muertos.
-const projectUrl = 'https://github.com/lobinuxsoft/yaguarete_os';
+const projectUrl = 'https://github.com/lobinuxsoft/YaguareteOS';
 const socialLinks = {
   github: projectUrl,
   facebook: null,

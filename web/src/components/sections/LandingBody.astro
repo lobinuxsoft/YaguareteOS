@@ -38,7 +38,7 @@ const heroTitle = `<span class="text-orange-500 dark:text-orange-400">${t.hero.t
     <p class="mt-2 text-neutral-300">{t.variants.subTitle}</p>
   </div>
 
-  <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+  <ul class="mx-auto grid max-w-md gap-6">
     {
       t.variants.cards.map(variant => (
         <li class="flex flex-col rounded-2xl border border-neutral-700/60 bg-neutral-950/60 p-6 shadow-2xl shadow-black/30 backdrop-blur-md">
@@ -88,7 +88,7 @@ const heroTitle = `<span class="text-orange-500 dark:text-orange-400">${t.hero.t
 </section>
 
 {/* Stack — replaces the previous Soberanía / Herencia blocks with a single
-    short section: Bazzite underneath, dev + gaming on top. */}
+    short section: Anatase underneath, dev + gaming on top. */}
 <div id="stack">
   <FeaturesGeneral
     title={t.stack.title}

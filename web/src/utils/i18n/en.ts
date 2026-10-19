@@ -22,7 +22,7 @@ const en: Translations = {
       'No variant to pick: one image covers handhelds, desktops, laptops, HTPCs and NVIDIA hardware. Always built and signed from the same source tree.',
     upstreamLabel: 'Upstream',
     downloadLabel: 'Download ISO',
-    pendingNote: 'ISO in preparation — the release pipeline hasn\'t published the first one yet',
+    pendingNote: 'ISO in preparation for this release',
     cosignNote:
       'Stable releases are signed with cosign. Verify the signature against cosign.pub before installing — instructions in the README.',
     cards: [
@@ -32,6 +32,8 @@ const en: Translations = {
         description:
           'A single image. AMD/Intel graphics stack out of the box, proprietary NVIDIA drivers included for hardware that needs them. Plasma Desktop, Plasma Mobile and Gamemode (gamescope + Steam) sessions on the same boot.',
         upstream: 'anatase:stable',
+        downloadUrl:
+          'https://archive.org/download/yaguareteos-stable-20261019/yaguareteos-20261019-x86_64.iso',
       },
     ],
   },
@@ -94,12 +96,12 @@ const en: Translations = {
       {
         question: 'When will downloadable ISOs be available?',
         answer:
-          'Not yet. The pipeline that publishes each :stable promotion as a GitHub Release plus an archive.org item is under construction. Until then, the install path is bootc switch over an existing Fedora Atomic system.',
+          'The first one already is. Each :stable promotion produces a GitHub Release plus an archive.org item with the x86_64 ISO. The download button above links straight to the latest one published. For bootc users, rebase stays direct: sudo bootc switch ghcr.io/lobinuxsoft/yaguareteos:stable.',
       },
       {
-        question: 'Where will stable releases live?',
+        question: 'Where do stable releases live?',
         answer:
-          'Each :stable promotion will produce a GitHub Release plus a dated archive.org item. The container registry already serves :stable, :testing and :unstable channels for bootc users; the dated tags pin a specific build.',
+          'Each :stable promotion produces a GitHub Release plus a dated archive.org item (identifier yaguareteos-stable-<YYYYMMDD>). The container registry serves :stable, :testing and :unstable channels for bootc users; the dated tags pin a specific build.',
       },
     ],
   },

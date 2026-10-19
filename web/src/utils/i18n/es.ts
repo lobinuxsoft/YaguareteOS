@@ -22,7 +22,7 @@ const es: Translations = {
       'Sin variantes que elegir: una imagen cubre handhelds, desktops, laptops, HTPCs y hardware NVIDIA. Se construye y firma siempre del mismo árbol.',
     upstreamLabel: 'Base upstream',
     downloadLabel: 'Descargar ISO',
-    pendingNote: 'ISO en preparación — el pipeline de releases todavía no publicó la primera',
+    pendingNote: 'ISO en preparación para esta release',
     cosignNote:
       'Las releases stable se publican firmadas con cosign. Verificá la firma contra cosign.pub antes de instalar — instrucciones en el README.',
     cards: [
@@ -32,6 +32,8 @@ const es: Translations = {
         description:
           'Imagen única. Stack de gráficos AMD/Intel de fábrica, drivers NVIDIA propietarios incluidos cuando el hardware los necesita. Sesiones Plasma Desktop, Plasma Mobile y Gamemode (gamescope + Steam) en el mismo boot.',
         upstream: 'anatase:stable',
+        downloadUrl:
+          'https://archive.org/download/yaguareteos-stable-20261019/yaguareteos-20261019-x86_64.iso',
       },
     ],
   },
@@ -94,12 +96,12 @@ const es: Translations = {
       {
         question: '¿Cuándo va a haber ISOs descargables?',
         answer:
-          'Todavía no. El pipeline que publica cada promoción a :stable como GitHub Release + item en archive.org está en construcción. Hasta entonces, la vía de instalación es bootc switch sobre un sistema Fedora Atomic ya instalado.',
+          'Ya está disponible la primera. Cada promoción a :stable produce un GitHub Release más un item en archive.org con la ISO x86_64. El botón de descarga de la sección de arriba apunta directo a la última publicada. Para usuarios bootc, el rebase sigue siendo directo: sudo bootc switch ghcr.io/lobinuxsoft/yaguareteos:stable.',
       },
       {
-        question: '¿Dónde van a vivir las releases stable?',
+        question: '¿Dónde viven las releases stable?',
         answer:
-          'Cada promoción a :stable va a producir un GitHub Release más un item con fecha en archive.org. El registro de contenedores ya sirve los canales :stable, :testing y :unstable para usuarios bootc; los tags con fecha pinean una build específica.',
+          'Cada promoción a :stable produce un GitHub Release más un item con fecha en archive.org (identificador yaguareteos-stable-<YYYYMMDD>). El registro de contenedores sirve los canales :stable, :testing y :unstable para usuarios bootc; los tags con fecha pinean una build específica.',
       },
     ],
   },

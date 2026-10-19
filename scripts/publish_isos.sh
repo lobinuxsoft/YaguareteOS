@@ -102,7 +102,7 @@ ia upload "$identifier" \
     --retries 5 \
     --metadata="title:YaguareteOS ${version}" \
     --metadata="creator:lobinuxsoft" \
-    --metadata="description:YaguareteOS ${version}, stable release. Bootable, offline-installable x86_64 ISO of an atomic (bootc) Fedora 44 KDE Plasma gaming distribution built on the Anatase build system. Source: https://github.com/lobinuxsoft/YaguareteOS" \
+    --metadata="description:YaguareteOS ${version}, stable release. Bootable, offline-installable x86_64 ISO of an atomic (bootc) Fedora 45 KDE Plasma gaming distribution built on the Anatase build system. Source: https://github.com/lobinuxsoft/YaguareteOS" \
     --metadata="subject:linux;distro;fedora;bootc;yaguarete;gaming;kde" \
     --metadata="licenseurl:https://www.gnu.org/licenses/agpl-3.0.html" \
     --metadata="mediatype:software" \

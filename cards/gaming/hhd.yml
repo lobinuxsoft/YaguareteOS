@@ -32,6 +32,7 @@ files:
   - files/power-profiles-daemon.dbus.xml.in
   - gamecontrollerdb.txt::https://raw.githubusercontent.com/mdqinc/SDL_GameControllerDB/refs/heads/master/gamecontrollerdb.txt
   - hhd-vram.tar.gz
+  - hhd-ssh-toggle.tar.gz
 
 specs:
   # - spec: git+https://github.com/hhd-dev/hhd:hhd.spec
@@ -84,6 +85,15 @@ postprocess: |
   pip install --prefix=/usr --no-build-isolation --no-deps "$tmpdir/hhd-vram"
   rm -rf "$tmpdir"
   python3 -c "import hhd_vram"
+
+  # hhd-ssh-toggle: turns sshd on/off from HHD's own UI, since sshd ships
+  # disabled by default (80-yaguarete-ssh.preset) and there is otherwise no
+  # way back in without a keyboard. See issue #42.
+  tmpdir="$(mktemp -d)"
+  tar xzf /files/hhd-ssh-toggle.tar.gz -C "$tmpdir"
+  pip install --prefix=/usr --no-build-isolation --no-deps "$tmpdir/hhd-ssh-toggle"
+  rm -rf "$tmpdir"
+  python3 -c "import hhd_ssh_toggle"
 
   # These paths conflict when the user installs ppd/tuned, so hhd cannot
   # provide them or it will cause issues. But we will not install ppd/tuned

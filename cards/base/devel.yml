@@ -1,0 +1,14 @@
+version: 1
+packages:
+  # C/C++ toolchain: the linker for Rust, and every crate built through `cc`
+  - gcc
+  - gcc-c++
+  - pkgconf-pkg-config
+
+  # Headers the Kóoch engine's `-sys` crates probe (kooch/docs/REQUIREMENTS.md)
+  - alsa-lib-devel
+  - systemd-devel
+  - vulkan-headers
+
+  # The link is where a Rust build spends its time
+  - mold

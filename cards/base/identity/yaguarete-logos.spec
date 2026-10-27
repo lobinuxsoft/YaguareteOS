@@ -10,6 +10,7 @@ Source2:	borderless-onwhite.svg
 Source3:	letterhead-onblack.svg
 Source4:	letterhead-onwhite.svg
 Source5:	COPYING
+Source6:	start-here-icon.svg
 Provides:	redhat-logos = %{version}-%{release}
 Provides:	gnome-logos = %{version}-%{release}
 Provides:	system-logos = %{version}-%{release}
@@ -36,7 +37,7 @@ mkdir -p "$builddir"/plymouth/themes/spinner
 
 cp -p %{SOURCE0} "$builddir"/icons/hicolor/scalable/apps/yaguarete-logo-icon.svg
 cp -p %{SOURCE1} "$builddir"/icons/hicolor/scalable/apps/yaguarete-splash.svg
-cp -p %{SOURCE1} "$builddir"/icons/hicolor/scalable/apps/start-here.svg
+cp -p %{SOURCE6} "$builddir"/icons/hicolor/scalable/apps/start-here.svg
 
 rsvg-convert -a -w 252 -h 252 -o "$builddir"/pixmaps/yaguarete-logo-sprite.png %{SOURCE0}
 rsvg-convert -a -w 252 -h 252 -o "$builddir"/pixmaps/system-logo-white.png %{SOURCE0}
@@ -46,7 +47,7 @@ for size in 16 22 24 32 36 48 96 256 ; do
   mkdir -p "$builddir"/icons/hicolor/${size}x${size}/apps
   mkdir -p "$builddir"/icons/hicolor/${size}x${size}/places
   rsvg-convert -a -w "$size" -h "$size" -o "$builddir"/icons/hicolor/${size}x${size}/apps/yaguarete-logo-icon.png %{SOURCE0}
-  rsvg-convert -a -w "$size" -h "$size" -o "$builddir"/icons/hicolor/${size}x${size}/places/start-here.png %{SOURCE1}
+  rsvg-convert -a -w "$size" -h "$size" -o "$builddir"/icons/hicolor/${size}x${size}/places/start-here.png %{SOURCE6}
 done
 
 %install
@@ -83,7 +84,7 @@ for i in 16 22 24 32 48 64 96 ; do
   mkdir -p \
     $RPM_BUILD_ROOT%{_datadir}/icons/breeze/places/${i} \
     $RPM_BUILD_ROOT%{_datadir}/icons/breeze-dark/places/${i}
-  install -p -m 644 %{SOURCE2} $RPM_BUILD_ROOT%{_datadir}/icons/breeze/places/${i}/start-here.svg
+  install -p -m 644 %{SOURCE6} $RPM_BUILD_ROOT%{_datadir}/icons/breeze/places/${i}/start-here.svg
   pushd $RPM_BUILD_ROOT%{_datadir}/icons/breeze-dark/places/${i}
     ln -s ../../../hicolor/scalable/apps/start-here.svg start-here.svg
   popd

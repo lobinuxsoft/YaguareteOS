@@ -28,6 +28,7 @@ hash: >
     ./borderless-onwhite.svg,
     letterhead-onblack.svg,
     letterhead-onwhite.svg,
+    start-here-icon.svg,
     desktop-backgrounds/yaguarete-wallpapers.tar.gz,
     plymouth/watermark.png
   )

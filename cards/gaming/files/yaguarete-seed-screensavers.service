@@ -1,0 +1,9 @@
+[Unit]
+Description=Seed the YaguareteOS Steam screensavers
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/yaguarete-seed-screensavers
+
+[Install]
+WantedBy=default.target

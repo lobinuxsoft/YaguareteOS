@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Runs once per account; deleting the marker re-seeds the screensavers (e.g.
+# after we ship a new one). Steam reads config/uioverrides/screensavers/ from
+# the real Steam data dir, not from the Flatpak's own read-only payload, so
+# this has to land in the user's home rather than in the card's postprocess.
+marker="${XDG_STATE_HOME:-$HOME/.local/state}/yaguarete/steam-screensavers"
+[[ -e $marker ]] && exit 0
+
+src="${YAGUARETE_SCREENSAVERS_DIR:-/usr/share/yaguarete/steam-screensavers}"
+dest="$HOME/.local/share/Steam/config/uioverrides/screensavers"
+
+[[ -d $src ]] || exit 0
+
+mkdir -p "$dest"
+for saver in "$src"/*/; do
+    name=$(basename "$saver")
+    [[ -e $dest/$name ]] && continue
+    cp -r "$saver" "$dest/$name"
+done
+
+mkdir -p "${marker%/*}"
+: > "$marker"

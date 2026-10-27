@@ -1,0 +1,5 @@
+version: 1
+packages:
+  # Godot's Mono/C# edition needs hostfxr at runtime; without it, creating or
+  # editing a C# project crashes ("Failed to load .NET runtime").
+  - dotnet-sdk-10.0

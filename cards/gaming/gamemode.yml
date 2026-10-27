@@ -170,6 +170,13 @@ files:
   - files/org.yaguarete.return-to-gamemode.policy
   - files/return-to-gamemode.desktop
 
+  - files/yaguarete-seed-screensavers
+  - files/yaguarete-seed-screensavers.service
+  - files/screensavers/yaguarete-amanecer/index.html
+  - files/screensavers/yaguarete-amanecer/video.webm
+  - files/screensavers/yaguarete-cyberpunk/index.html
+  - files/screensavers/yaguarete-cyberpunk/video.webm
+
 postprocess: |
   set -eux
 
@@ -206,6 +213,23 @@ postprocess: |
       /usr/share/polkit-1/actions/org.yaguarete.return-to-gamemode.policy
   install -Dm0644 /files/files/return-to-gamemode.desktop \
       /usr/share/applications/gamemode.desktop
+
+  # Steam only discovers custom screensavers in the user's own Steam data
+  # dir (config/uioverrides/screensavers/), so this just stages the source
+  # payload read-only; yaguarete-seed-screensavers copies it into place.
+  for saver in yaguarete-amanecer yaguarete-cyberpunk; do
+      install -Dm0644 "/files/files/screensavers/${saver}/index.html" \
+          "/usr/share/yaguarete/steam-screensavers/${saver}/index.html"
+      install -Dm0644 "/files/files/screensavers/${saver}/video.webm" \
+          "/usr/share/yaguarete/steam-screensavers/${saver}/video.webm"
+  done
+  install -Dm0755 /files/files/yaguarete-seed-screensavers \
+      /usr/libexec/yaguarete-seed-screensavers
+  install -Dm0644 /files/files/yaguarete-seed-screensavers.service \
+      /usr/lib/systemd/user/yaguarete-seed-screensavers.service
+  install -dm0755 /usr/lib/systemd/user/default.target.wants
+  ln -snf ../yaguarete-seed-screensavers.service \
+      /usr/lib/systemd/user/default.target.wants/yaguarete-seed-screensavers.service
 
   # Sanity check preflight
   python3 - <<'PY'
@@ -267,6 +291,14 @@ postprocess: |
       /usr/lib/systemd/user/xdg-desktop-portal.service
   ! grep -Eq '^(After|PartOf)=graphical-session.target$' \
       /usr/lib/systemd/user/xdg-desktop-portal-holo.service
+  bash -n /usr/libexec/yaguarete-seed-screensavers
+  for saver in yaguarete-amanecer yaguarete-cyberpunk; do
+      test -s "/usr/share/yaguarete/steam-screensavers/${saver}/index.html"
+      test -s "/usr/share/yaguarete/steam-screensavers/${saver}/video.webm"
+  done
+  grep -Fq '<video autoplay loop muted playsinline src="video.webm">' \
+      /usr/share/yaguarete/steam-screensavers/yaguarete-amanecer/index.html
+  test -L /usr/lib/systemd/user/default.target.wants/yaguarete-seed-screensavers.service
 
   # 
   # Dummy polkit helpers for steam. It expects them in hardcoded paths,

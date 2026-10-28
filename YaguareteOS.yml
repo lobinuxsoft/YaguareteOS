@@ -50,6 +50,7 @@ cards:
   - cards/base/grub
   - cards/base/utils
   - cards/base/devel
+  - cards/base/dotnet
   - cards/base/atomic
   - cards/base/scx
   - cards/drivers/nvidia/nvidia

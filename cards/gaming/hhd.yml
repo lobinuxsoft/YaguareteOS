@@ -33,6 +33,7 @@ files:
   - gamecontrollerdb.txt::https://raw.githubusercontent.com/mdqinc/SDL_GameControllerDB/refs/heads/master/gamecontrollerdb.txt
   - hhd-vram.tar.gz
   - hhd-ssh-toggle.tar.gz
+  - hhd-output-select.tar.gz
 
 specs:
   # - spec: git+https://github.com/hhd-dev/hhd:hhd.spec
@@ -94,6 +95,14 @@ postprocess: |
   pip install --prefix=/usr --no-build-isolation --no-deps "$tmpdir/hhd-ssh-toggle"
   rm -rf "$tmpdir"
   python3 -c "import hhd_ssh_toggle"
+
+  # hhd-output-select: picks the monitor Gamemode's Gamescope session uses,
+  # since neither Gamescope nor Steam's Big Picture expose that choice.
+  tmpdir="$(mktemp -d)"
+  tar xzf /files/hhd-output-select.tar.gz -C "$tmpdir"
+  pip install --prefix=/usr --no-build-isolation --no-deps "$tmpdir/hhd-output-select"
+  rm -rf "$tmpdir"
+  python3 -c "import hhd_output_select"
 
   # These paths conflict when the user installs ppd/tuned, so hhd cannot
   # provide them or it will cause issues. But we will not install ppd/tuned

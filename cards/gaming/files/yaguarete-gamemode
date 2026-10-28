@@ -97,6 +97,11 @@ else
     echo >&2 "Another Gamescope statistics session is already active"
 fi
 
+# hhd-output-select (HHD plugin) writes the user's chosen monitor here;
+# falls back to the handheld default (any output, eDP-1 panel) when unset.
+preferred_output="$(cat /etc/yaguarete/gamescope-preferred-output 2>/dev/null)"
+preferred_output="${preferred_output:-*,eDP-1}"
+
 gamescope_args=(
     --backend drm
     --generate-drm-mode fixed
@@ -111,7 +116,7 @@ gamescope_args=(
     -e
     -R "$socket"
     -T "$stats"
-    -O '*',eDP-1
+    -O "$preferred_output"
 )
 
 # Steam activates SteamOS Manager while its web UI is starting, then waits for

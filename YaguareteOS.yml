@@ -81,6 +81,7 @@ runtime:
 
 flatpaks:
   - flatpaks/ark
+  - flatpaks/claude-desktop
   - flatpaks/filelight
   - flatpaks/gwenview
   - flatpaks/kate

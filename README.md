@@ -56,10 +56,14 @@ Typing `arch`, `fedora`, `ubuntu`, or `kali` in a terminal switches to that dist
 ## Roadmap
 
 Inherited from Anatase's own mechanism, evaluated selectively for YaguareteOS's own needs (see project notes, not tracked here yet):
- * Rebrand cards (identity, KDE theme, wallpapers, Plymouth) — **fase 3, en curso**
- * Revive `hhd-vram` (GTT control) as a native HHD plugin — YaguareteOS already had this working before Bazzite dropped HHD
+ * Rebrand cards (identity, KDE theme, wallpapers, Plymouth) — **done**
+ * Revive `hhd-vram` (GTT control) as a native HHD plugin — **done**, YaguareteOS already had this working before Bazzite dropped HHD
+ * Ship a full C toolchain and the .NET SDK, for building games and GDExtensions on the system itself — **done** (`cards/base/devel`, `cards/base/dotnet`)
+ * Pick which connected monitor Gamemode uses, from HHD's own UI — **done** (`hhd-output-select`), since neither Gamescope nor Steam's Big Picture expose that choice natively
+ * Package official Claude Desktop as a flatpak (`org.yaguarete.ClaudeDesktop`) — **done**
  * Evaluate TDP write correctness on Strix Point APUs vs. our own validated clamping logic
- * Everything else Anatase tracks upstream (SLSA3, ARM image, TPM attestation) — adopt as it lands, no divergence unless needed
+ * ARM/aarch64 image — Anatase already has the base pieces (cross-compile, boot chain, Steam ARM bootstrap); adoption gated on having ARM hardware to validate boot
+ * Everything else Anatase tracks upstream (SLSA3, TPM attestation) — adopt as it lands, no divergence unless needed
 
 ## Contributing
 

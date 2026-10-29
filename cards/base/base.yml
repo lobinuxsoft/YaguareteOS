@@ -57,6 +57,7 @@ packages:
   - NetworkManager-config-connectivity-fedora
   - NetworkManager-wifi
   - NetworkManager-wwan
+  - NetworkManager-libreswan
   - bind-utils
   - dnsmasq
   - ethtool

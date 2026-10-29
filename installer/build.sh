@@ -5,6 +5,12 @@ set -eux
 command -v liveinst >/dev/null
 command -v slitherer-anaconda >/dev/null
 
+# Mark the installer as final, overriding liveinst's Fedora RPM prerelease check.
+cat > /.buildstamp <<'EOF'
+[Main]
+IsFinal=True
+EOF
+
 # Disable hhd features that are unavailable in the live installer session. The
 # installed system keeps the normal service environment from the OSTree payload.
 hhd_override=/usr/lib/systemd/system/hhd.service.d/override.conf
@@ -132,6 +138,8 @@ rm -rf /usr/lib*/python*/site-packages/pyanaconda/modules/storage/partitioning/a
 # On UEFI, mount Anaconda's selected ESP in the payload service's namespace and
 # let bootupd use it instead of rediscovering the first ESP on the boot disk.
 # BIOS still needs the whole-disk target.
+# Resolve the tmpfiles root through the live system's /mnt -> /var/mnt symlink
+# so its SELinux label checks use the same root path as the directory entries.
 python3 <<'PY'
 from glob import glob
 
@@ -139,6 +147,9 @@ path, = glob("/usr/lib*/python*/site-packages/pyanaconda/modules/payloads/payloa
 with open(path) as f:
     text = f.read()
 replacements = {
+'''                "--root=" + self._sysroot,
+''': '''                "--root=" + os.path.realpath(self._sysroot),
+''',
 '''        # do not insert UEFI entry if leavebootorder was requested
         if not bootloader.KeepBootOrder:
             log.debug("Adding --update-firmware to bootupdctl call")
@@ -170,10 +181,10 @@ replacements = {
 for old, new in replacements.items():
     if old in text:
         if text.count(old) != 1:
-            raise SystemExit(f"found multiple Anaconda bootupd matches in {path}")
+            raise SystemExit(f"found multiple Anaconda payload installation matches in {path}")
         text = text.replace(old, new)
     elif new not in text:
-        raise SystemExit(f"failed to find Anaconda bootupd invocation in {path}")
+        raise SystemExit(f"failed to find Anaconda payload installation patch target in {path}")
 
 with open(path, "w") as f:
     f.write(text)

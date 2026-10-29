@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Electron's own setuid sandbox binary needs a suid bit flatpak's sandbox
+# never grants it; --no-sandbox drops Electron's inner sandbox and relies
+# on flatpak's outer one instead (same tradeoff Flathub Electron apps take).
+set -eu
+exec /app/lib/claude-desktop/claude-desktop --no-sandbox "$@"

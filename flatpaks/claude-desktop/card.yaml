@@ -1,0 +1,66 @@
+version: 1
+
+# Packages Anthropic's own official .deb (proprietary, Anthropic PBC) as a
+# flatpak under our branding -- same posture as flatpaks/steam for Valve's
+# client. We relocate the payload unmodified; nothing here claims to
+# relicense it. See files/yaguarete-claude-desktop for the one behavior
+# change (Electron sandbox under flatpak's own sandbox).
+
+flatpak:
+  id: org.yaguarete.ClaudeDesktop
+  command: yaguarete-claude-desktop
+  rename-author: "%s (packaged by YaguareteOS)"
+  rename-desktop-file: com.anthropic.Claude.desktop
+  rename-icon: claude-desktop
+  finish-args: |-
+    --share=ipc
+    --share=network
+    --socket=x11
+    --socket=wayland
+    --socket=pulseaudio
+    --device=dri
+    --filesystem=home
+    --filesystem=xdg-run/pipewire-0:ro
+    --talk-name=org.freedesktop.Notifications
+    --talk-name=org.freedesktop.secrets
+    --talk-name=org.gnome.keyring.SystemPrompter
+    --system-talk-name=org.freedesktop.UPower
+
+files:
+  # Official .deb from Anthropic's own apt repo -- plain HTTPS, no bot
+  # challenge. Pin (version + sha256) is bumped by hand; check
+  # https://downloads.claude.ai/claude-desktop/apt/stable/dists/stable/main/binary-amd64/Packages
+  - claude-desktop.deb::https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop/claude-desktop_4.29.0_amd64.deb
+  - files/yaguarete-claude-desktop
+
+build-deps:
+  - binutils
+  - tar
+  - xz
+
+postprocess: |-
+  set -eux
+
+  sha256sum /files/claude-desktop.deb | grep -q \
+    '^4aa0f763d6c05ac79502392dd50f5d7f5c455b2f0a405d5bdf1554acd8342a89 '
+
+  extract_dir="$(mktemp -d)"
+  ar p /files/claude-desktop.deb data.tar.xz | tar -xJ -C "$extract_dir"
+
+  # Proprietary payload (Anthropic PBC): app.asar, Electron binary,
+  # locales. Relocated under app/, contents untouched.
+  mkdir -p app/lib
+  cp -a "$extract_dir/usr/lib/claude-desktop" app/lib/claude-desktop
+
+  mkdir -p app/share/icons
+  cp -a "$extract_dir/usr/share/icons/hicolor" app/share/icons/hicolor
+
+  mkdir -p app/share/applications
+  sed 's|Exec=claude-desktop|Exec=yaguarete-claude-desktop|g' \
+    "$extract_dir/usr/share/applications/com.anthropic.Claude.desktop" \
+    > app/share/applications/com.anthropic.Claude.desktop
+
+  rm -rf "$extract_dir"
+
+  install -Dm0755 files/yaguarete-claude-desktop app/bin/yaguarete-claude-desktop
+  bash -n app/bin/yaguarete-claude-desktop

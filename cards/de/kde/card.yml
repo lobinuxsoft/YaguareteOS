@@ -82,6 +82,7 @@ packages:
     - mobile-broadband-provider-info
     - plasma-nm
     - plasma-nm-openconnect
+    - plasma-nm-openswan
     - plasma-nm-openvpn
     - samba-usershares
 

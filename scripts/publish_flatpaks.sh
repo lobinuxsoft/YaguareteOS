@@ -25,7 +25,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-flatpak_names=(ark filelight gwenview kate kcalc okular steam)
+flatpak_names=(ark claude-desktop filelight gwenview kate kcalc okular steam)
 
 repo_dir=$(mktemp -d)
 clone_dir=$(mktemp -d)

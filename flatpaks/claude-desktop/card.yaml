@@ -38,6 +38,13 @@ build-deps:
   - tar
   - xz
 
+# This card repacks Anthropic's own .deb (see files/postprocess below) and
+# has nothing to build from an RPM spec. ludos's FlatpakCard still requires
+# a non-empty `specs:`, so this builds an intentionally empty package that
+# `packages:` never references -- see placeholder.spec for why.
+specs:
+  - spec: placeholder.spec
+
 postprocess: |-
   set -eux
 

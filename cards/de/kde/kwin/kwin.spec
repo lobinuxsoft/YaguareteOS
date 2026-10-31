@@ -211,6 +211,16 @@ BuildArch:      noarch
 # No spaceship operator support on 32-bit arches
 %define _pkg_extra_cxxflags -DVULKAN_HPP_NO_SPACESHIP_OPERATOR
 %endif
+# YAGUARETEOS: unlike the generic %%cmake macro, %%cmake_kf6 (kf6-rpm-macros)
+# never passes -G, so cmake falls back to its own default: Unix Makefiles.
+# That generator's weaker dependency tracking for qt6_add_dbus_interface's
+# generated headers lets kwin's own build race under parallel make -- hit
+# reproducibly (2/2) as "globalshortcuts.cpp: kglobalaccel_interface.h: No
+# such file or directory". Ninja tracks it correctly; force it here since
+# ninja-build is already a build-dep of this orchestrator.
+# NOTE: this line lives in a dist-git-synced file -- re-add it after the
+# next `upstream: dist-git` sync of this spec overwrites it.
+export CMAKE_GENERATOR=Ninja
 %cmake_kf6
 
 %build

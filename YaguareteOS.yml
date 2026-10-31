@@ -51,6 +51,7 @@ cards:
   - cards/base/utils
   - cards/base/devel
   - cards/base/dotnet
+  - cards/base/qwen-code
   - cards/base/atomic
   - cards/base/scx
   - cards/drivers/nvidia/nvidia
@@ -87,6 +88,7 @@ flatpaks:
   - flatpaks/kate
   - flatpaks/kcalc
   - flatpaks/okular
+  - flatpaks/qwen-code-desktop
   - flatpaks/steam
 
 installer:

@@ -1,0 +1,39 @@
+version: 1
+
+# CLI coding agent (QwenLM/qwen-code, Apache-2.0) for local-LLM workflows.
+# Ships the npm-published build directly: its own package.json declares
+# `dependencies: {}` -- chunks/vendor are already bundled -- so there is
+# nothing to compile, just extract and run with system node.
+#
+# Point it at a local OpenAI-compatible server (e.g. llama.cpp's
+# llama-server) via OPENAI_BASE_URL/OPENAI_API_KEY/OPENAI_MODEL, or a
+# ~/.qwen/settings.json modelProviders.openai[] block -- no cloud account
+# required. We ship no default config; that choice is the user's.
+
+packages:
+  - nodejs
+
+build-deps:
+  - tar
+
+files:
+  # Pin (version + sha256) bumped by hand; check
+  # https://registry.npmjs.org/@qwen-code/qwen-code for newer releases.
+  - qwen-code.tgz::https://registry.npmjs.org/@qwen-code/qwen-code/-/qwen-code-0.26.4.tgz
+
+postprocess: |-
+  set -eux
+
+  sha256sum /files/qwen-code.tgz | grep -q \
+    '^a7640f1c0656b7e54ea5995335ed6cc18ee219b8b4200fe8a6141cff148aaa89 '
+
+  install -dm0755 /usr/lib/yaguarete-qwen-code
+  tar -xzf /files/qwen-code.tgz -C /usr/lib/yaguarete-qwen-code \
+      --strip-components=1
+
+  chmod 0755 /usr/lib/yaguarete-qwen-code/cli-entry.js
+  ln -snf /usr/lib/yaguarete-qwen-code/cli-entry.js /usr/bin/qwen
+
+  node --check /usr/lib/yaguarete-qwen-code/cli-entry.js
+  node --check /usr/lib/yaguarete-qwen-code/cli.js
+  test -L /usr/bin/qwen

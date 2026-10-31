@@ -1,0 +1,70 @@
+version: 1
+
+# QwenLM/qwen-code's own Tauri GUI shell (Apache-2.0), same posture as
+# flatpaks/claude-desktop: relocate the official build under our branding.
+# Unlike Claude Desktop, this .deb bundles its own node + the qwen CLI as a
+# self-contained sidecar (usr/lib/Qwen Code Desktop/runtime/qwen-code/) --
+# it does not depend on cards/base/qwen-code.yml's system `qwen`. Supports
+# both Qwen's cloud account and a local OpenAI-compatible endpoint
+# (OPENAI_BASE_URL/settings.json), same as the CLI.
+
+flatpak:
+  id: org.yaguarete.QwenCodeDesktop
+  command: yaguarete-qwen-code-desktop
+  rename-author: "%s (packaged by YaguareteOS)"
+  rename-desktop-file: "Qwen Code Desktop.desktop"
+  rename-icon: qwen-code-desktop
+  finish-args: |-
+    --share=ipc
+    --share=network
+    --socket=x11
+    --socket=wayland
+    --device=dri
+    --filesystem=home
+    --talk-name=org.freedesktop.Notifications
+    --talk-name=org.freedesktop.secrets
+    --talk-name=org.gnome.keyring.SystemPrompter
+
+files:
+  # Official build from QwenLM's own GitHub release -- plain HTTPS.
+  # Pin (version + sha256) bumped by hand; check
+  # https://github.com/QwenLM/qwen-code/releases for newer desktop-vX tags.
+  - qwen-code-desktop.deb::https://github.com/QwenLM/qwen-code/releases/download/desktop-v0.26.4/Qwen-Code-Desktop_0.26.4_amd64.deb
+  - files/yaguarete-qwen-code-desktop
+
+build-deps:
+  - binutils
+  - tar
+  - xz
+
+# This card repacks QwenLM's own .deb (see postprocess below) and has
+# nothing to build from an RPM spec. ludos's FlatpakCard still requires a
+# non-empty `specs:`, so this builds an intentionally empty package that
+# nothing lists under `packages:` and nothing in `files:` ever references.
+specs:
+  - spec: placeholder.spec
+
+postprocess: |-
+  set -eux
+
+  sha256sum /files/qwen-code-desktop.deb | grep -q \
+    '^95525e1dbcf9a0e8007ac0613a1bc71e9fcad0ec0d86084fa0e42c17c3eac20c '
+
+  extract_dir="$(mktemp -d)"
+  ar p /files/qwen-code-desktop.deb data.tar.gz | tar -xz -C "$extract_dir"
+
+  mkdir -p app/lib/qwen-code-desktop
+  cp -a "$extract_dir/usr/lib/Qwen Code Desktop/." app/lib/qwen-code-desktop/
+
+  mkdir -p app/share/icons
+  cp -a "$extract_dir/usr/share/icons/hicolor" app/share/icons/hicolor
+
+  mkdir -p app/share/applications
+  sed 's|Exec=qwen-code-desktop|Exec=yaguarete-qwen-code-desktop|g' \
+    "$extract_dir/usr/share/applications/Qwen Code Desktop.desktop" \
+    > "app/share/applications/Qwen Code Desktop.desktop"
+
+  rm -rf "$extract_dir"
+
+  install -Dm0755 files/yaguarete-qwen-code-desktop app/bin/yaguarete-qwen-code-desktop
+  bash -n app/bin/yaguarete-qwen-code-desktop

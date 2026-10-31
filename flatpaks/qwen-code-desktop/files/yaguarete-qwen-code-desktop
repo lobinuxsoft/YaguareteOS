@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+set -eu
+exec /app/lib/qwen-code-desktop/qwen-code-desktop "$@"

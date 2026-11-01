@@ -115,6 +115,7 @@ packages:
     - kf6-threadweaver # Okular
 
     # Plasma mobile deps
+    - feedbackd
     - gmobile
     - gsound
     - libfeedbackd

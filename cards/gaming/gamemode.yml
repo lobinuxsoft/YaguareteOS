@@ -36,6 +36,10 @@ packages:
   - upower
   # Automount
   - udiskie
+  # RecompLauncher's Tauri runtime
+  - webkit2gtk4.1
+  - libsoup3
+  - libappindicator-gtk3
   # Steam setup screen
   # These are free and that;s why the script uses cairo :(
   # hhd, ibus, and anaconda pull them
@@ -128,6 +132,12 @@ specs:
       url: https://github.com/evlav/steamos-manager
       ref: v${spec:Version}
       file: overrides.patch
+
+  - spec: recomplauncher/recomplauncher.spec
+    files:
+      - recomplauncher.spec
+    packages:
+      - recomplauncher
 
   - spec: xdg/xdg-desktop-portal-holo.spec
     files:

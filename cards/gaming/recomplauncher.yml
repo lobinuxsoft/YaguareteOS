@@ -1,0 +1,49 @@
+version: 1
+
+# RecompLauncher (elripalda/RecompLauncher, GPL-3.0-or-later): one home for
+# PC game recompilations, launched via Proton/GE-Proton/umu-launcher/Wine.
+#
+# Shipped as native RPM content, not a Flatpak: it shells out directly to
+# Proton/Wine as host subprocesses and restarts Steam itself
+# (steam -shutdown / xdg-open steam://exit), none of which upstream wires
+# through a Flatpak sandbox escape the way flatpaks/steam's own hrun does.
+#
+# It's also not built from source: Fedora doesn't package the Tauri/wry/
+# webkit2gtk-rs crate stack this app needs, and cargo2rpm's dynamic
+# BuildRequires computation can't be reconciled with manually patched-in
+# crates at this scale (tried, failed a real build). Upstream already
+# publishes a ready-to-run Linux build on every release, so this repackages
+# that .deb directly instead -- same approach as cards/base/qwen-code.yml.
+
+packages:
+  # Hard runtime deps, read off `readelf -d usr/bin/recomplauncher | grep
+  # NEEDED` in the upstream .deb -- glib2/gtk3/dbus/systemd's libudev are
+  # already baseline on this image.
+  - webkit2gtk4.1
+  - libsoup3
+  # Tray icon support: dlopen'd, not a hard NEEDED entry -- degrades
+  # gracefully without it.
+  - libayatana-appindicator-gtk3
+
+build-deps:
+  - binutils
+  - tar
+
+files:
+  # Pin (version + sha256) bumped by hand; check
+  # https://github.com/elripalda/RecompLauncher/releases for newer releases.
+  - recomplauncher.deb::https://github.com/elripalda/RecompLauncher/releases/download/v0.90.0-beta.6/RecompLauncher_0.90.0-beta.6_amd64.deb
+
+postprocess: |-
+  set -eux
+
+  sha256sum /files/recomplauncher.deb | grep -q \
+    '^0c58cc371fc1920c6199aa3de43d1175bde6f6c2414628b6b3e6cb9aabfac967 '
+
+  workdir="$(mktemp -d)"
+  ar x /files/recomplauncher.deb --output="$workdir"
+  tar -xzf "$workdir/data.tar.gz" -C /
+
+  desktop-file-validate /usr/share/applications/RecompLauncher.desktop
+  test -x /usr/bin/recomplauncher
+  test -s /usr/share/icons/hicolor/128x128/apps/recomplauncher.png

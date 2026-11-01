@@ -2,7 +2,7 @@
 %bcond x11 %[%{undefined rhel}]
 
 Name:           plasma-login-manager
-Version:        6.7.5
+Version:        6.8.2
 Release:        1%{?dist}
 License:        BSD-3-Clause and CC0-1.0 and (GPL-2.0-only or GPL-3.0-only) and GPL-2.0-or-later and LGPL-2.0-or-later and LGPL-2.1-or-later
 Summary:        QML based login manager from KDE
@@ -11,6 +11,8 @@ URL:            https://invent.kde.org/plasma/plasma-login-manager
 Source0: http://download.kde.org/%{stable_kf6}/plasma/%{maj_ver_kf6}.%{min_ver_kf6}.%{bug_ver_kf6}/%{name}-%{version}.tar.xz
 Source1: http://download.kde.org/%{stable_kf6}/plasma/%{maj_ver_kf6}.%{min_ver_kf6}.%{bug_ver_kf6}/%{name}-%{version}.tar.xz.sig
 
+# README.scripts
+Source10:       README.scripts
 # sysconfig snippet
 Source11:       plasmalogin.sysconfig
 # sysusers config file. note these are shipped in the upstream tarball
@@ -24,18 +26,8 @@ Source13:       plasmalogin.conf
 
 # upstream patches
 
-# VirtualTerminal: replace unconditional VT takeover with a bounded wait
-# Vendored instead of fetched live: this points at an open KDE merge
-# request, whose diff is mutable upstream and drifted out of sync with
-# this source tarball after Fedora's own build (confirmed reproducible
-# with a fresh download of both).
-Patch0:         170.patch
-
-# Add support for unlocking oo7 wallets on login
-# Vendored instead of fetched live, same reason as Patch0 above.
-Patch1:         200.patch
-
 # proposed patches
+
 # Add this here so we do not diff on updates
 Patch0900:     overrides.patch
 
@@ -145,6 +137,7 @@ Requires: qt6-filesystem
 mkdir -p %{buildroot}%{_sysconfdir}/plasmalogin.conf.d
 mkdir -p %{buildroot}%{_prefix}/lib/plasmalogin/plasmalogin.conf.d
 
+install -Dpm 644 %{SOURCE10} %{buildroot}%{_datadir}/plasmalogin/scripts/README.scripts
 install -Dpm 644 %{SOURCE11} %{buildroot}%{_sysconfdir}/sysconfig/plasmalogin
 install -Dpm 644 %{SOURCE13} %{buildroot}%{_sysconfdir}/plasmalogin.conf
 
@@ -225,6 +218,24 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/kcm_plasmalogin.desk
 
 
 %changelog
+* Tue Oct 27 2026 Steve Cossette <steve@ninjasinpajamas.com> - 6.8.2-1
+- 6.8.2
+
+* Fri Oct 23 2026 Jan Grulich <jgrulich@redhat.com> - 6.8.1-2
+- Rebuild (qt6)
+
+* Tue Oct 20 2026 Steve Cossette <steve@ninjasinpajamas.com> - 6.8.1-1
+- 6.8.1
+
+* Fri Oct 09 2026 Steve Cossette <farchord@gmail.com> - 6.8.0-1
+- 6.8.0
+
+* Thu Sep 24 2026 Steve Cossette <farchord@gmail.com> - 6.7.91-1
+- 6.7.91
+
+* Thu Sep 10 2026 Steve Cossette <farchord@gmail.com> - 6.7.90-1
+- 6.7.90
+
 * Tue Sep 08 2026 Steve Cossette <farchord@gmail.com> - 6.7.5-1
 - 6.7.5
 

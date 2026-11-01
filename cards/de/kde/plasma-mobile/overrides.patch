@@ -63,27 +63,27 @@ diff --git a/containments/taskpanel/qml/NavigationPanelComponent.qml b/containme
 index 763460455..9c1285483 100644
 --- a/containments/taskpanel/qml/NavigationPanelComponent.qml
 +++ b/containments/taskpanel/qml/NavigationPanelComponent.qml
-@@ -86,7 +86,7 @@ MobileShell.NavigationPanel {
+@@ -87,7 +87,7 @@ MobileShell.NavigationPanel {
          id: homeAction
- 
+
          enabled: true
 -        iconSource: "start-here-kde"
 +        iconSource: "start-here"
- 
+         accessibleText: i18nc("@action:button", "Home")
+
          onTriggered: {
-             MobileShellState.ShellDBusClient.openHomeScreen();
 diff --git a/kcms/navigation/ui/TutorialPhone.qml b/kcms/navigation/ui/TutorialPhone.qml
 index 52014b70a..7f05c29be 100644
 --- a/kcms/navigation/ui/TutorialPhone.qml
 +++ b/kcms/navigation/ui/TutorialPhone.qml
-@@ -44,7 +44,7 @@ Item {
-         Kirigami.Icon {
-             visible: root.showBackground
- 
+@@ -131,7 +131,7 @@ Item {
+             id: homeScreenBackground
+             opacity: 0
+
 -            source: "start-here-kde"
 +            source: "start-here"
              smooth: true
- 
+
              anchors.verticalCenter: phone.verticalCenter
 diff --git a/kwin/mobiletaskswitcher/package/contents/ui/TaskSwitcher.qml b/kwin/mobiletaskswitcher/package/contents/ui/TaskSwitcher.qml
 index e6146392f..d9882af6a 100644

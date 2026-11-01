@@ -190,6 +190,7 @@ specs:
       - plasmalogin.conf
       - plasmalogin.sysconfig
       - plasmalogin.sysusers
+      - README.scripts
       - "*.patch"
     packages:
       - plasma-login-manager

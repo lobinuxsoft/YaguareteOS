@@ -1,0 +1,28 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+list=/usr/share/yaguarete/flatpaks.list
+remote=yaguarete
+
+[ -f "$list" ] || exit 0
+
+installed=$(/usr/bin/flatpak list --system --app --columns=application)
+
+status=0
+while IFS= read -r app_id; do
+    case "$app_id" in
+        ''|\#*) continue ;;
+    esac
+
+    if grep -qxF "$app_id" <<< "$installed"; then
+        continue
+    fi
+
+    echo "Installing ${app_id} from ${remote}"
+    if ! /usr/bin/flatpak install --system -y --noninteractive "$remote" "$app_id"; then
+        echo "ERROR: failed to install ${app_id} from ${remote}" >&2
+        status=1
+    fi
+done < "$list"
+
+exit "$status"

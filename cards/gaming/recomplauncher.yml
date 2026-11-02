@@ -14,6 +14,17 @@ version: 1
 # crates at this scale (tried, failed a real build). Upstream already
 # publishes a ready-to-run Linux build on every release, so this repackages
 # that .deb directly instead -- same approach as cards/base/qwen-code.yml.
+#
+# Upstream ships every release as `prerelease: true` (betas, several a day)
+# -- there is no stable channel to track, and GitHub's own "latest" endpoint
+# excludes prereleases entirely. So this resolves the newest release by date
+# at build time instead of a hand-pinned version.
+#
+# Tradeoff: no sha256 pin is possible when the version isn't fixed, so build
+# integrity here rests entirely on GitHub's TLS + account security, same
+# trust level as the curl-based installers in yaguarete-apps-files/just/*.
+# Acceptable short-term: this card is slated for removal once Tatu ships its
+# own recomp catalog (see feedback_tatu_prepares_launcher_consumes).
 
 packages:
   # Hard runtime deps, read off `readelf -d usr/bin/recomplauncher | grep
@@ -29,19 +40,30 @@ build-deps:
   - binutils
   - tar
 
-files:
-  # Pin (version + sha256) bumped by hand; check
-  # https://github.com/elripalda/RecompLauncher/releases for newer releases.
-  - recomplauncher.deb::https://github.com/elripalda/RecompLauncher/releases/download/v0.90.0-beta.6/RecompLauncher_0.90.0-beta.6_amd64.deb
-
 postprocess: |-
   set -eux
 
-  sha256sum /files/recomplauncher.deb | grep -q \
-    '^0c58cc371fc1920c6199aa3de43d1175bde6f6c2414628b6b3e6cb9aabfac967 '
+  python3 - <<'PY'
+import json
+import urllib.request
+
+req = urllib.request.Request(
+    "https://api.github.com/repos/elripalda/RecompLauncher/releases",
+    headers={"Accept": "application/vnd.github+json"},
+)
+with urllib.request.urlopen(req, timeout=30) as resp:
+    releases = json.load(resp)
+
+release = next(r for r in releases if not r["draft"])
+asset = next(a for a in release["assets"] if a["name"].endswith("_amd64.deb"))
+
+with urllib.request.urlopen(asset["browser_download_url"], timeout=120) as resp, \
+        open("/tmp/recomplauncher.deb", "wb") as f:
+    f.write(resp.read())
+PY
 
   workdir="$(mktemp -d)"
-  ar x /files/recomplauncher.deb --output="$workdir"
+  ar x /tmp/recomplauncher.deb --output="$workdir"
   tar -xzf "$workdir/data.tar.gz" -C /
 
   desktop-file-validate /usr/share/applications/RecompLauncher.desktop

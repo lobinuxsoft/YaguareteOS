@@ -12,3 +12,12 @@ packages:
 
   # The link is where a Rust build spends its time
   - mold
+
+  # Native-Linux recomp installers (e.g. valentderah/totk-pc-recomp's "dev
+  # mode") shutil.which() these on $PATH to compile their own host probe
+  # before anything else runs -- without them the installer fails with a
+  # FileNotFoundError on a `clang-missing` placeholder path instead of a
+  # clear "clang not found".
+  - clang
+  - lld
+  - ninja-build

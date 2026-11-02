@@ -40,27 +40,16 @@ build-deps:
   - binutils
   - tar
 
+files:
+  # Kept as its own file instead of a postprocess heredoc: an unindented
+  # heredoc body inside a YAML block scalar reads as new top-level YAML
+  # keys and breaks manifest parsing (caught by CI on this card already).
+  - recomplauncher-files/fetch-latest.py
+
 postprocess: |-
   set -eux
 
-  python3 - <<'PY'
-import json
-import urllib.request
-
-req = urllib.request.Request(
-    "https://api.github.com/repos/elripalda/RecompLauncher/releases",
-    headers={"Accept": "application/vnd.github+json"},
-)
-with urllib.request.urlopen(req, timeout=30) as resp:
-    releases = json.load(resp)
-
-release = next(r for r in releases if not r["draft"])
-asset = next(a for a in release["assets"] if a["name"].endswith("_amd64.deb"))
-
-with urllib.request.urlopen(asset["browser_download_url"], timeout=120) as resp, \
-        open("/tmp/recomplauncher.deb", "wb") as f:
-    f.write(resp.read())
-PY
+  python3 /files/recomplauncher-files/fetch-latest.py
 
   workdir="$(mktemp -d)"
   ar x /tmp/recomplauncher.deb --output="$workdir"

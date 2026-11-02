@@ -1,0 +1,13 @@
+[Unit]
+Description=Install YaguareteOS-owned Flatpak apps missing from this system
+After=flatpak-system-helper.service network-online.target
+Wants=network-online.target
+RequiresMountsFor=/var/lib/flatpak
+ConditionPathExists=/run/ostree-booted
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/yaguarete-flatpak-sync
+
+[Install]
+WantedBy=multi-user.target

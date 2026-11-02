@@ -1,0 +1,15 @@
+# App IDs synced onto every YaguareteOS system by yaguarete-flatpak-sync,
+# one per line. Keep this in sync with flatpaks/*/card.y*ml's flatpak.id
+# whenever a card is added to YaguareteOS.yml's flatpaks: list.
+#
+# org.yaguarete.Steam is intentionally NOT here: it goes through its own
+# first-boot setup screen (anaconda-webui), which owns when it gets
+# installed instead of a silent background sync.
+org.yaguarete.ArchiveManager
+org.yaguarete.ClaudeDesktop
+org.yaguarete.DiskUsageAnalyzer
+org.yaguarete.ImageViewer
+org.yaguarete.TextEditor
+org.yaguarete.Calculator
+org.yaguarete.DocumentViewer
+org.yaguarete.QwenCodeDesktop

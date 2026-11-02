@@ -100,6 +100,9 @@ files:
   - flatpak/anatase-flatpaks.service
   - flatpak/anatase.flatpakrepo
   - flatpak/yaguarete.flatpakrepo
+  - flatpak/yaguarete-flatpaks.list
+  - flatpak/yaguarete-flatpak-sync
+  - flatpak/yaguarete-flatpak-sync.service
   - flatpak/flathub.filter
   - flatpak/flathub.flatpakrepo
   - dracut_cleanup_shadow.sh
@@ -221,6 +224,24 @@ postprocess: |
     ' /files/keys/yaguarete-gpg.pub.asc)"
     sed -i "s|@gpg@|${gpg_key_yaguarete}|g" \
         /usr/share/flatpak/remotes.d/yaguarete.flatpakrepo
+
+    # Flatpak cards built and published to the yaguarete remote otherwise
+    # never reach a real system: the Anaconda-time preinstall list is a
+    # hand-curated subset, and nothing else ever runs `flatpak install` for
+    # them. This syncs the full list on every boot, idempotently.
+    install -Dm0644 /files/flatpak/yaguarete-flatpaks.list \
+        /usr/share/yaguarete/flatpaks.list
+    install -Dm0755 /files/flatpak/yaguarete-flatpak-sync \
+        /usr/libexec/yaguarete-flatpak-sync
+    install -Dm0644 /files/flatpak/yaguarete-flatpak-sync.service \
+        /usr/lib/systemd/system/yaguarete-flatpak-sync.service
+    cat > /usr/lib/systemd/system-preset/80-yaguarete-flatpak-sync.preset <<'EOF'
+    enable yaguarete-flatpak-sync.service
+    EOF
+    systemctl preset yaguarete-flatpak-sync.service || true
+    bash -n /usr/libexec/yaguarete-flatpak-sync
+    systemd-analyze verify --recursive-errors=yes \
+        /usr/lib/systemd/system/yaguarete-flatpak-sync.service
 
     #
     # Registries

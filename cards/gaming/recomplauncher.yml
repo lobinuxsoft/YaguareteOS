@@ -35,6 +35,13 @@ packages:
   # Tray icon support: dlopen'd, not a hard NEEDED entry -- degrades
   # gracefully without it.
   - libayatana-appindicator-gtk3
+  # Not a dep of recomplauncher itself -- SDL3's screensaver-inhibit code
+  # path is a hard NEEDED entry in native Linux recomp builds this app
+  # launches (confirmed on totk-pc-recomp's AppImage release). Missing on
+  # the base image, so a recomp-launched game fails at exec with "error
+  # while loading shared libraries: libXss.so.1" however it's started --
+  # same failure through recomplauncher, Steam, or a bare shell.
+  - libXScrnSaver
 
 build-deps:
   - binutils

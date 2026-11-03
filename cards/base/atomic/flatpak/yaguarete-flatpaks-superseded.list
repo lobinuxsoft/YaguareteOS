@@ -1,0 +1,11 @@
+# Pairs of "old_id new_id", one per line: old_id was installed under its
+# upstream Anatase branding by a system provisioned before the Yaguarete
+# rebrand reached this card, new_id is the app it was renamed to. Once
+# new_id is confirmed installed, yaguarete-flatpak-sync removes old_id --
+# otherwise both sit side by side as two entries for the same app.
+org.anatase.ArchiveManager org.yaguarete.ArchiveManager
+org.anatase.Calculator org.yaguarete.Calculator
+org.anatase.DiskUsageAnalyzer org.yaguarete.DiskUsageAnalyzer
+org.anatase.DocumentViewer org.yaguarete.DocumentViewer
+org.anatase.ImageViewer org.yaguarete.ImageViewer
+org.anatase.TextEditor org.yaguarete.TextEditor

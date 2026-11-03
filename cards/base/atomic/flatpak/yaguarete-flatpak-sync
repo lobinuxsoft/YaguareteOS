@@ -2,27 +2,47 @@
 set -euo pipefail
 
 list=/usr/share/yaguarete/flatpaks.list
+superseded=/usr/share/yaguarete/flatpaks-superseded.list
 remote=yaguarete
 
-[ -f "$list" ] || exit 0
-
-installed=$(/usr/bin/flatpak list --system --app --columns=application)
-
 status=0
-while IFS= read -r app_id; do
-    case "$app_id" in
-        ''|\#*) continue ;;
-    esac
 
-    if grep -qxF "$app_id" <<< "$installed"; then
-        continue
-    fi
+if [ -f "$list" ]; then
+    installed=$(/usr/bin/flatpak list --system --app --columns=application)
 
-    echo "Installing ${app_id} from ${remote}"
-    if ! /usr/bin/flatpak install --system -y --noninteractive "$remote" "$app_id"; then
-        echo "ERROR: failed to install ${app_id} from ${remote}" >&2
-        status=1
-    fi
-done < "$list"
+    while IFS= read -r app_id; do
+        case "$app_id" in
+            ''|\#*) continue ;;
+        esac
+
+        if grep -qxF "$app_id" <<< "$installed"; then
+            continue
+        fi
+
+        echo "Installing ${app_id} from ${remote}"
+        if ! /usr/bin/flatpak install --system -y --noninteractive "$remote" "$app_id"; then
+            echo "ERROR: failed to install ${app_id} from ${remote}" >&2
+            status=1
+        fi
+    done < "$list"
+fi
+
+if [ -f "$superseded" ]; then
+    installed=$(/usr/bin/flatpak list --system --app --columns=application)
+
+    while IFS=' ' read -r old_id new_id; do
+        case "$old_id" in
+            ''|\#*) continue ;;
+        esac
+
+        if grep -qxF "$old_id" <<< "$installed" && grep -qxF "$new_id" <<< "$installed"; then
+            echo "Removing superseded ${old_id} (replaced by ${new_id})"
+            if ! /usr/bin/flatpak uninstall --system -y --noninteractive "$old_id"; then
+                echo "ERROR: failed to remove superseded ${old_id}" >&2
+                status=1
+            fi
+        fi
+    done < "$superseded"
+fi
 
 exit "$status"

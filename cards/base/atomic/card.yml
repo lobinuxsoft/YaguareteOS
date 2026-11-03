@@ -101,6 +101,7 @@ files:
   - flatpak/anatase.flatpakrepo
   - flatpak/yaguarete.flatpakrepo
   - flatpak/yaguarete-flatpaks.list
+  - flatpak/yaguarete-flatpaks-superseded.list
   - flatpak/yaguarete-flatpak-sync
   - flatpak/yaguarete-flatpak-sync.service
   - flatpak/flathub.filter
@@ -231,6 +232,8 @@ postprocess: |
     # them. This syncs the full list on every boot, idempotently.
     install -Dm0644 /files/flatpak/yaguarete-flatpaks.list \
         /usr/share/yaguarete/flatpaks.list
+    install -Dm0644 /files/flatpak/yaguarete-flatpaks-superseded.list \
+        /usr/share/yaguarete/flatpaks-superseded.list
     install -Dm0755 /files/flatpak/yaguarete-flatpak-sync \
         /usr/libexec/yaguarete-flatpak-sync
     install -Dm0644 /files/flatpak/yaguarete-flatpak-sync.service \

@@ -32,6 +32,10 @@ build-deps:
   - binutils
   - tar
   - xz
+  # The placeholder spec still goes through rpmbuild.
+  - rpm-build
+  - redhat-rpm-config
+  - flatpak-rpm-macros
 
 # This card repacks QwenLM's own .deb (see postprocess below) and has
 # nothing to build from an RPM spec. ludos's FlatpakCard still requires a

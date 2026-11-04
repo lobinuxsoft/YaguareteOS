@@ -9,6 +9,13 @@ packages:
   - alsa-lib-devel
   - systemd-devel
   - vulkan-headers
+  # libdbus-sys <- audio_thread_priority <- cpal (Kóoch, Tatu, Yryvu)
+  - dbus-devel
+
+  # Windows cross-builds: Kóoch's Windows export, Tatu's mono-collector DLL
+  - mingw64-gcc
+  - mingw64-gcc-c++
+  - mingw64-winpthreads-static
 
   # The link is where a Rust build spends its time
   - mold

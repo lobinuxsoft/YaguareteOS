@@ -36,6 +36,10 @@ postprocess: |-
       [ -e "$f" ] || continue
       mv "$f" "${f/okularApplication_/org.kde.okular-}"
   done
+  # Only the app's own .desktop is exported; its per-format ones stay inside.
+  mimes="$(sed -n 's/^MimeType=//p' app/share/applications/*.desktop | tr ';' '\n' | sed '/^$/d' | sort -u | tr '\n' ';')"
+  sed -i "s|^MimeType=.*|MimeType=${mimes}|" app/share/applications/org.kde.okular.desktop
+  grep -q '^MimeType=.*application/pdf;' app/share/applications/org.kde.okular.desktop
 
 specs:
   - spec: kde/okular/okular.spec

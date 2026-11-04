@@ -239,6 +239,15 @@ postprocess: |
         /usr/lib/tmpfiles.d \
         /usr/libexec
 
+    # Plasma's defaults name the upstream apps; ours ship under org.yaguarete.*.
+    sed -i \
+        -e 's/=org\.kde\.ark\.desktop/=org.yaguarete.ArchiveManager.desktop/' \
+        -e 's/=org\.kde\.gwenview\.desktop/=org.yaguarete.ImageViewer.desktop/' \
+        -e 's/=org\.kde\.okular\.desktop/=org.yaguarete.DocumentViewer.desktop/' \
+        -e 's/=org\.kde\.kate\.desktop;org\.kde\.kwrite\.desktop/=org.yaguarete.TextEditor.desktop/' \
+        /usr/share/applications/kde-mimeapps.list
+    grep -q '=org.yaguarete.DocumentViewer.desktop' /usr/share/applications/kde-mimeapps.list
+
     # Enable weekly auto updates in Discover. In the future, Flatpaks will be
     # updated daily. See: https://bugs.kde.org/show_bug.cgi?id=454422
     cat > /etc/xdg/PlasmaDiscoverUpdates <<'EOF'

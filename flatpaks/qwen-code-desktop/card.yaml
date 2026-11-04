@@ -35,10 +35,13 @@ build-deps:
 
 # This card repacks QwenLM's own .deb (see postprocess below) and has
 # nothing to build from an RPM spec. ludos's FlatpakCard still requires a
-# non-empty `specs:`, so this builds an intentionally empty package that
-# nothing lists under `packages:` and nothing in `files:` ever references.
+# non-empty `specs:`, so this builds an intentionally empty package.
 specs:
   - spec: placeholder.spec
+    # ludos skips a spec that lists no packages, then fails with "has no specs".
+    packages:
+      x86_64:
+        - yaguarete-qwen-code-desktop-placeholder
 
 postprocess: |-
   set -eux

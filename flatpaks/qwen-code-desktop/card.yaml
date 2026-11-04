@@ -68,6 +68,9 @@ postprocess: |-
 
   mkdir -p app/lib/qwen-code-desktop
   cp -a "$extract_dir/usr/lib/Qwen Code Desktop/." app/lib/qwen-code-desktop/
+  # The .deb ships the binary in usr/bin; next to runtime/ Tauri resolves its
+  # resource dir to the exe's own directory.
+  install -Dm0755 "$extract_dir/usr/bin/qwen-code-desktop" app/lib/qwen-code-desktop/qwen-code-desktop
 
   mkdir -p app/share/icons
   cp -a "$extract_dir/usr/share/icons/hicolor" app/share/icons/hicolor
@@ -81,3 +84,4 @@ postprocess: |-
 
   install -Dm0755 files/yaguarete-qwen-code-desktop app/bin/yaguarete-qwen-code-desktop
   bash -n app/bin/yaguarete-qwen-code-desktop
+  test -x app/lib/qwen-code-desktop/qwen-code-desktop

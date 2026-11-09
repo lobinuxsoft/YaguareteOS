@@ -167,6 +167,7 @@ specs:
   - spec: kwin/kwin.spec
     files:
       - .gitignore
+      - "*.patch"
       - kwin.spec
       - macros.kwin.in
       - overrides.patch

@@ -19,6 +19,9 @@ packages:
   - librsvg2-devel
   - libxdo-devel
 
+  # Assembler for rav1d's SIMD (Kóoch video playback)
+  - nasm
+
   # Windows cross-builds: Kóoch's Windows export, Tatu's mono-collector DLL
   - mingw64-gcc
   - mingw64-gcc-c++

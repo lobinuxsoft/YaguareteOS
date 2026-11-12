@@ -60,7 +60,7 @@ Inherited from Anatase's own mechanism, evaluated selectively for YaguareteOS's 
  * Revive `hhd-vram` (GTT control) as a native HHD plugin — **done**, YaguareteOS already had this working before Bazzite dropped HHD
  * Ship a full C toolchain and the .NET SDK, for building games and GDExtensions on the system itself — **done** (`cards/base/devel`, `cards/base/dotnet`)
  * Pick which connected monitor Gamemode uses, from HHD's own UI — **done** (`hhd-output-select`), since neither Gamescope nor Steam's Big Picture expose that choice natively
- * Package official Claude Desktop as a flatpak (`org.yaguarete.ClaudeDesktop`) — **done**
+ * Ship official Claude Desktop on the host, not as a flatpak, so Claude Code sees the real shell, toolchains and keyring — **done** (`cards/base/claude-desktop`)
  * Evaluate TDP write correctness on Strix Point APUs vs. our own validated clamping logic
  * ARM/aarch64 image — Anatase already has the base pieces (cross-compile, boot chain, Steam ARM bootstrap); adoption gated on having ARM hardware to validate boot
  * Everything else Anatase tracks upstream (SLSA3, TPM attestation) — adopt as it lands, no divergence unless needed

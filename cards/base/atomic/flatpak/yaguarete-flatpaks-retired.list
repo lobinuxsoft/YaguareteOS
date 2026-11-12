@@ -1,0 +1,7 @@
+# App IDs yaguarete-flatpak-sync removes from systems that still have them,
+# one per line: apps YaguareteOS stopped shipping as flatpaks without a
+# flatpak replacement (unlike flatpaks-superseded.list).
+#
+# org.yaguarete.ClaudeDesktop: now on the host (cards/base/claude-desktop),
+# since Claude Code inside it needs the real host, not a sandbox.
+org.yaguarete.ClaudeDesktop

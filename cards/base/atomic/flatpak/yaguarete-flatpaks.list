@@ -6,7 +6,6 @@
 # first-boot setup screen (anaconda-webui), which owns when it gets
 # installed instead of a silent background sync.
 org.yaguarete.ArchiveManager
-org.yaguarete.ClaudeDesktop
 org.yaguarete.DiskUsageAnalyzer
 org.yaguarete.ImageViewer
 org.yaguarete.TextEditor

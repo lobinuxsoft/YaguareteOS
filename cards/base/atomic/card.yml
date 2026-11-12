@@ -102,6 +102,7 @@ files:
   - flatpak/yaguarete.flatpakrepo
   - flatpak/yaguarete-flatpaks.list
   - flatpak/yaguarete-flatpaks-superseded.list
+  - flatpak/yaguarete-flatpaks-retired.list
   - flatpak/yaguarete-flatpak-sync
   - flatpak/yaguarete-flatpak-sync.service
   - flatpak/flathub.filter
@@ -234,6 +235,8 @@ postprocess: |
         /usr/share/yaguarete/flatpaks.list
     install -Dm0644 /files/flatpak/yaguarete-flatpaks-superseded.list \
         /usr/share/yaguarete/flatpaks-superseded.list
+    install -Dm0644 /files/flatpak/yaguarete-flatpaks-retired.list \
+        /usr/share/yaguarete/flatpaks-retired.list
     install -Dm0755 /files/flatpak/yaguarete-flatpak-sync \
         /usr/libexec/yaguarete-flatpak-sync
     install -Dm0644 /files/flatpak/yaguarete-flatpak-sync.service \

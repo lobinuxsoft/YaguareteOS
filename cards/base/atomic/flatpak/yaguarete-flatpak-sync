@@ -3,6 +3,7 @@ set -euo pipefail
 
 list=/usr/share/yaguarete/flatpaks.list
 superseded=/usr/share/yaguarete/flatpaks-superseded.list
+retired=/usr/share/yaguarete/flatpaks-retired.list
 remote=yaguarete
 
 status=0
@@ -43,6 +44,24 @@ if [ -f "$superseded" ]; then
             fi
         fi
     done < "$superseded"
+fi
+
+if [ -f "$retired" ]; then
+    installed=$(/usr/bin/flatpak list --system --app --columns=application)
+
+    while IFS= read -r app_id; do
+        case "$app_id" in
+            ''|\#*) continue ;;
+        esac
+
+        if grep -qxF "$app_id" <<< "$installed"; then
+            echo "Removing retired ${app_id}"
+            if ! /usr/bin/flatpak uninstall --system -y --noninteractive "$app_id"; then
+                echo "ERROR: failed to remove retired ${app_id}" >&2
+                status=1
+            fi
+        fi
+    done < "$retired"
 fi
 
 exit "$status"

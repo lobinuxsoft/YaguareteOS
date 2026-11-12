@@ -52,6 +52,7 @@ cards:
   - cards/base/devel
   - cards/base/dotnet
   - cards/base/qwen-code
+  - cards/base/claude-desktop
   - cards/base/atomic
   - cards/base/scx
   - cards/drivers/nvidia/nvidia
@@ -83,7 +84,6 @@ runtime:
 
 flatpaks:
   - flatpaks/ark
-  - flatpaks/claude-desktop
   - flatpaks/filelight
   - flatpaks/gwenview
   - flatpaks/kate

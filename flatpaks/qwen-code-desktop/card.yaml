@@ -1,7 +1,7 @@
 version: 1
 
 # QwenLM/qwen-code's own Tauri GUI shell (Apache-2.0), same posture as
-# flatpaks/claude-desktop: relocate the official build under our branding.
+# flatpaks/steam: relocate the official build under our branding.
 # Unlike Claude Desktop, this .deb bundles its own node + the qwen CLI as a
 # self-contained sidecar (usr/lib/Qwen Code Desktop/runtime/qwen-code/) --
 # it does not depend on cards/base/qwen-code.yml's system `qwen`. Supports

@@ -46,6 +46,9 @@ packages:
   - unzip
   - zip
 
+  # Media CLI (ffmpeg, ffprobe); same -free libs the image already ships
+  - ffmpeg-free
+
   # Containers
   - flatpak
   - flatpak-spawn

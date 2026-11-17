@@ -85,6 +85,9 @@ flatpak:
     --filesystem=/var/lib/flatpak/exports/share:ro
     --filesystem=/var/lib/flatpak/app:ro
     --filesystem=/var/usrlocal/share/applications:ro
+    # Games size their dma-buf pools from udmabuf's limit; without it they
+    # fall back to host-pointer imports, which render wrong on RADV.
+    --filesystem=/sys/module/udmabuf:ro
     --system-talk-name=org.freedesktop.login1
     --system-talk-name=org.bluez
 

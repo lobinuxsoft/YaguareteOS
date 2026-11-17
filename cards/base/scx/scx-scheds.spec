@@ -8,7 +8,7 @@
 
 Name:           scx-scheds
 Version:        1.1.3
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Sched_ext Schedulers and Tools
 
 License:        GPL=2.0
@@ -107,7 +107,8 @@ BuildRequires:  jq
 BuildRequires:  jq-devel
 BuildRequires:  systemd
 BuildRequires:  bpftool
-BuildRequires:  protobuf-compiler
+# protobuf3-compiler (3.19 compat) also provides protobuf-compiler and is too old for perfetto protos
+BuildRequires:  protobuf-compiler >= 30
 BuildRequires:  libseccomp-devel
 BuildRequires: openssl-devel
 
@@ -319,6 +320,8 @@ sed -i \
     -e '/^\[build-dependencies.protoc-bin-vendored\]/,/^$/d' \
     vendor/perfetto_protos-%{rust_perfetto_protos_ver}/Cargo.toml
 sed -i 's/let protoc = &protoc_bin_vendored::protoc_bin_path().unwrap();/let protoc = std::path::Path::new("protoc");/' vendor/perfetto_protos-%{rust_perfetto_protos_ver}/build.rs
+# Fail on protoc errors instead of parsing an empty dependency file.
+sed -i 's/^        \.status()$/        .status()\n        .map(|s| assert!(s.success(), "protoc failed: {s}"))/' vendor/perfetto_protos-%{rust_perfetto_protos_ver}/build.rs
 # protoc emits a Makefile target before the dependency paths.
 sed -i \
     -e '/^    let files = deps$/,+3c\    let files = deps\

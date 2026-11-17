@@ -8,14 +8,14 @@
 
 Summary:   Xwayland
 Name:      xorg-x11-server-Xwayland
-Version:   24.1.13
+Version:   24.1.15
 Release:   1%{?gitdate:.%{gitdate}git%{shortcommit}}%{?dist}
 
 URL:       http://www.x.org
 %if 0%{?gitdate}
 Source0:   https://gitlab.freedesktop.org/xorg/%{pkgname}/-/archive/%{commit}/%{pkgname}-%{shortcommit}.tar.gz
 %else
-Source0:   https://src.fedoraproject.org/repo/pkgs/rpms/%{name}/%{pkgname}-%{version}.tar.xz/sha512/e06e58025b441892fdd17ac55fd5c7e137bffc941b76ad784dc008047c778c6ee2895fcc47b9e8c74b1d8372491e69c39933c4186aec4df55571614f8ba98e3c/%{pkgname}-%{version}.tar.xz
+Source0:   https://www.x.org/releases/individual/xserver/%{pkgname}-%{version}.tar.xz
 %endif
 Patch0:    overrides.patch
 
@@ -134,6 +134,25 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/*.desktop
 %{_libdir}/pkgconfig/xwayland.pc
 
 %changelog
+* Tue Nov 10 2026 Olivier Fourdan <ofourdan@redhat.com> - 24.1.15-1
+- Update to xwayland 24.1.15
+  CVE fix for:
+  CVE-2026-109092, CVE-2026-109093, CVE-2026-109904, CVE-2026-109094,
+  CVE-2026-109095, CVE-2026-109096, CVE-2026-109903
+
+* Tue Oct 27 2026 Olivier Fourdan <ofourdan@redhat.com> - 24.1.14-2
+- Backport a couple of fixups from upstream
+
+* Wed Oct 07 2026 Olivier Fourdan <ofourdan@redhat.com> - 24.1.14-1
+- Update to xwayland 24.1.14
+  CVE fix for: CVE-2026-88812, CVE-2026-93515, CVE-2026-93516
+               CVE-2026-93517, CVE-2026-93518, CVE-2026-93519,
+               CVE-2026-93520, CVE-2026-93521, CVE-2026-93522,
+               CVE-2026-93523, CVE-2026-93524, CVE-2026-93536
+
+* Fri Jul 17 2026 Fedora Release Engineering <releng@fedoraproject.org> - 24.1.13-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_45_Mass_Rebuild
+
 * Wed Jul 08 2026 Peter Hutterer <peter.hutterer@redhat.com> - 24.1.13-1
 - Update to xwayland 24.1.13
   Security fixes for: CVE-2026-55999, CVE-2026-56000

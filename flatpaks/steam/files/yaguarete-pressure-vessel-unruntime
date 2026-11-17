@@ -34,6 +34,16 @@ shift
 # cache. Add these paths in the payload so the client can still find its
 # libraries when a game container replaces Flatpak's shared linker cache.
 exec "$delegate" "${options[@]}" -- /bin/sh -c '
+    # The containerized client prefixes host paths with /run/host/root, but
+    # Flatpak shares paths at their original locations. Map the prefix to
+    # this sandbox so library checks and Game Mode writes reach those paths.
+    # Preserve any host-root mount supplied by Flatpak.
+    if [ "$(cat /run/host/container-manager 2>/dev/null)" = flatpak ] &&
+            [ ! -e /run/host/root ] && [ ! -L /run/host/root ]; then
+        ln -sT / /run/host/root ||
+            printf "yaguarete-steam: cannot create /run/host/root alias\n" >&2
+    fi
+
     # LD_LIBRARY_PATH takes precedence over the client libraries RUNPATH.
     # Keep bundled client libraries ahead of the added system directories.
     case ${1-} in

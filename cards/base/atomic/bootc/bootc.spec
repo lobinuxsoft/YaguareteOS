@@ -12,7 +12,15 @@
     %bcond_with rhsm
 %endif
 
-%global rust_minor %(rustc --version | cut -f2 -d" " | cut -f2 -d".")
+# kernel 5.14 (RHEL/CentOS 9) cannot mount an erofs image directly from a file
+# descriptor; composefs-ctl's rhel9 feature enables a loopback-device fallback.
+%if 0%{?rhel} == 9
+    %bcond_without rhel9
+%else
+    %bcond_with rhel9
+%endif
+
+%global rust_minor %(rustc --version 2>/dev/null | cut -f2 -d" " | cut -f2 -d".")
 
 # https://github.com/bootc-dev/bootc/issues/1640
 %if 0%{?fedora} || 0%{?rhel} >= 10 || 0%{?rust_minor} >= 89
@@ -23,7 +31,7 @@
 
 Name:           bootc
 # Ensure this local build overrides anything else.
-Version:        1.16.13
+Version:        1.17.4
 Release:        %{autorelease}
 Summary:        Bootable container system
 
@@ -45,11 +53,11 @@ Patch0:         overrides.patch
 ExcludeArch:    %{ix86}
 
 BuildRequires: libzstd-devel
-BuildRequires: make
-BuildRequires: ostree-devel
 # selinux-sys generates libselinux bindings with bindgen at build time.
 # bindgen requires libclang.
 BuildRequires: clang-devel
+BuildRequires: make
+BuildRequires: ostree-devel
 BuildRequires: openssl-devel
 BuildRequires: go-md2man
 %if 0%{?rhel}
@@ -88,7 +96,8 @@ Recommends: podman
 # The reinstall subpackage intentionally does not require bootc, as it pulls in many unnecessary dependencies
 
 %description -n system-reinstall-bootc
-This package provides a utility to simplify reinstalling the current system to a given bootc image.
+This package provides a utility to simplify reinstalling the current system
+to a given bootc image.
 
 %if %{with tests}
 %package tests
@@ -116,8 +125,8 @@ cat vendor-config.toml >> .cargo/config.toml
 rm vendor-config.toml
 %else
 # Container build: source already at _builddir (/src), nothing to extract
-# RPM's %mkbuilddir creates a subdirectory; symlink it back to the source.
-# F45+ RPM also creates rpmbuild.env in the subdir that %build will source,
+# RPM's %%mkbuilddir creates a subdirectory; symlink it back to the source.
+# F45+ RPM also creates rpmbuild.env in the subdir that %%build will source,
 # so preserve it before replacing the directory with a symlink.
 cd ..
 if [ -f %{name}-%{version}-build/rpmbuild.env ]; then
@@ -130,20 +139,32 @@ cd %{name}-%{version}-build
 
 %build
 export SYSTEM_REINSTALL_BOOTC_INSTALL_PODMAN_PATH=%{system_reinstall_bootc_install_podman_path}
-# Build this first to avoid feature skew
-make manpages
 
 # Build all binaries
 %if 0%{?container_build}
 # Container build: use cargo directly with cached dependencies to avoid RPM macro overhead
-cargo build -j%{_smp_build_ncpus} --release %{?with_rhsm:--features rhsm} --bins
+cargo build -j%{_smp_build_ncpus} --release %{?with_rhsm:--features rhsm} %{?with_rhel9:--features rhel9} --bins
 %else
 # Non-container build: use RPM macros for proper dependency tracking
 %if %new_cargo_macros
-    %cargo_build %{?with_rhsm:-f rhsm} -- --bins
+    # Note: %%cargo_build's own -f option only accepts a single value, so a
+    # second -f would silently clobber the first; pass extra features as
+    # plain --features args after -- instead, which cargo unions correctly.
+    %cargo_build -- %{?with_rhsm:--features rhsm} %{?with_rhel9:--features rhel9} --bins
 %else
-    %cargo_build %{?with_rhsm:--features rhsm} -- --bins
+    %cargo_build %{?with_rhsm:--features rhsm} %{?with_rhel9:--features rhel9} -- --bins
 %endif
+%endif
+
+# The generated CLI sections in the man page sources are kept in sync by CI,
+# so just convert them; this avoids building bootc a second time.
+# Outside of container builds, use the same cargo environment and profile as
+# %%cargo_build/%%cargo_test, so xtask doesn't invalidate their shared state
+# (target/release is a symlink to target/rpm, created by %%cargo_prep).
+%if 0%{?container_build}
+make manpages-no-sync
+%else
+make manpages-no-sync XTASK_PROFILE=rpm CARGO="%{__cargo}"
 %endif
 
 %if ! 0%{?container_build}
@@ -155,8 +176,10 @@ sed -i -e '/https:\/\//d' cargo-vendor.txt
 %endif
 
 %install
-# Pass CARGO_FEATURES explicitly to prevent auto-detection rebuild in install environment
-%make_install INSTALL="install -p -c" CARGO_FEATURES="%{?with_rhsm:rhsm}"
+# Everything was built in %%build; SKIP_BUILD=1 keeps make from invoking cargo
+# again (which would also overwrite the %%cargo_build output in target/rpm via
+# the target/release symlink created by %%cargo_prep).
+%make_install INSTALL="install -p -c" SKIP_BUILD=1
 %if %{with ostree_ext}
 make install-ostree-hooks DESTDIR=%{?buildroot}
 %endif
@@ -171,7 +194,7 @@ EOF
 chmod +x %{?buildroot}/%{system_reinstall_bootc_install_podman_path}
 # generate doc file list excluding directories; workaround for
 # https://github.com/coreos/rpm-ostree/issues/5420
-touch %{?buildroot}/%{_docdir}/bootc/baseimage/base/sysroot/.keepdir
+echo "Placeholder to preserve this directory, see https://github.com/coreos/rpm-ostree/issues/5420" > %{?buildroot}/%{_docdir}/bootc/baseimage/base/sysroot/.keepdir
 find %{?buildroot}/%{_docdir} ! -type d -printf '%{_docdir}/%%P\n' | sort > bootcdoclist.txt
 
 rm -f %{buildroot}/%{_datadir}/elvish/lib/bootc.elv
@@ -203,6 +226,7 @@ fi
 %endif
 %{_unitdir}/*
 %{_mandir}/man*/*bootc*
+%exclude %{_mandir}/man8/system-reinstall-bootc.8*
 %if 0%{?rhel} && 0%{?rhel} <= 9
 %{_datadir}/bash-completion/completions/bootc
 %{_datadir}/zsh/site-functions/_bootc
@@ -216,6 +240,7 @@ fi
 %files -n system-reinstall-bootc
 %{_bindir}/system-reinstall-bootc
 %{system_reinstall_bootc_install_podman_path}
+%{_mandir}/man8/system-reinstall-bootc.8*
 
 %if %{with tests}
 %files tests

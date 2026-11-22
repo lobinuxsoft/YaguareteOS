@@ -1,0 +1,12 @@
+{
+  "name": "yaguarete-firefox-mcp",
+  "version": "0.11.0",
+  "private": true,
+  "type": "module",
+  "description": "Runtime deps of the published @mozilla/firefox-mcp dist (the only modules it imports externally)",
+  "license": "MIT OR Apache-2.0",
+  "dependencies": {
+    "selenium-webdriver": "4.36.0",
+    "yargs": "17.7.2"
+  }
+}

@@ -52,6 +52,7 @@ cards:
   - cards/base/devel
   - cards/base/dotnet
   - cards/base/qwen-code
+  - cards/base/firefox-mcp
   - cards/base/claude-desktop
   - cards/base/atomic
   - cards/base/scx

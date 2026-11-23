@@ -28,6 +28,9 @@ packages:
   - libnsl.i686
   # Steam's 32-bit client loads libnm for Game Mode Wi-Fi control.
   - NetworkManager-libnm.i686
+  # SDL3's screensaver inhibit is a hard NEEDED in native Linux recomp builds
+  # (e.g. totk-pc-recomp); without it they fail at exec on libXss.so.1.
+  - libXScrnSaver
   # Mangohud lib32 deps
   - fmt.i686
   - spdlog.i686

@@ -14,13 +14,10 @@ version: 1
 
 packages:
   - nodejs
+  # npm runs in postprocess, which only sees `packages`, not `build-deps`.
+  - nodejs-npm
   - firefox
   - bubblewrap
-
-build-deps:
-  - nodejs-npm
-  - tar
-  - gzip
 
 files:
   # Pins (version + sha256) bumped by hand; check

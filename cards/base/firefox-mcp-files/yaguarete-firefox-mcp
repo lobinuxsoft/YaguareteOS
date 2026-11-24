@@ -44,6 +44,10 @@ data_dir="$HOME/.firefox-mcp"
 (umask 077 && mkdir -p "$data_dir/output")
 chmod 0700 "$data_dir"
 
+# Site allowlist + uBlock Origin. Seeded once, then the user's to edit.
+policies="$data_dir/policies.json"
+[[ -e "$policies" ]] || install -m0600 /usr/share/yaguarete-firefox-mcp/policies.json "$policies"
+
 # Telemetry and every background service that phones home, off explicitly
 # instead of trusting geckodriver's recommended prefs to keep doing it.
 prefs=(
@@ -88,6 +92,7 @@ prefs=(
     services.settings.server=data:,#remote-settings-dummy/v1
     signon.rememberSignons=false
     browser.formfill.enable=false
+    dom.security.https_only_mode=true
 )
 pref_args=()
 for p in "${prefs[@]}"; do
@@ -107,6 +112,10 @@ bwrap_args=(
     --ro-bind /etc /etc
     # /etc/resolv.conf links into /run under systemd-resolved; without it DNS fails.
     --ro-bind-try /run/systemd/resolve /run/systemd/resolve
+    # Firefox reads policies only from /etc/firefox/policies; /etc is read-only here.
+    --tmpfs /etc/firefox
+    --ro-bind-try /etc/firefox/pref /etc/firefox/pref
+    --ro-bind "$policies" /etc/firefox/policies/policies.json
     --proc /proc
     --dev /dev
     --tmpfs /dev/shm

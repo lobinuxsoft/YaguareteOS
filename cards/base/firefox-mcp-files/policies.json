@@ -1,0 +1,34 @@
+{
+  "policies": {
+    "WebsiteFilter": {
+      "Block": ["<all_urls>"],
+      "Exceptions": [
+        "*://*.linkedin.com/*",
+        "*://*.licdn.com/*",
+        "*://*.getonbrd.com/*",
+        "*://*.greenhouse.io/*",
+        "*://*.lever.co/*",
+        "*://*.workable.com/*",
+        "*://*.ashbyhq.com/*"
+      ]
+    },
+    "ExtensionSettings": {
+      "*": { "installation_mode": "blocked" },
+      "uBlock0@raymondhill.net": {
+        "installation_mode": "force_installed",
+        "install_url": "file:///usr/lib/yaguarete-firefox-mcp/ublock-origin.xpi"
+      }
+    },
+    "3rdparty": {
+      "Extensions": {
+        "uBlock0@raymondhill.net": {
+          "userSettings": [["autoUpdate", "false"]]
+        }
+      }
+    },
+    "DisableTelemetry": true,
+    "DisableFirefoxStudies": true,
+    "PasswordManagerEnabled": false,
+    "DontCheckDefaultBrowser": true
+  }
+}

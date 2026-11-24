@@ -7,6 +7,7 @@
 #
 # Usage from an MCP client: command `yaguarete-firefox-mcp`, no args.
 # YAGUARETE_FIREFOX_MCP_PRESET=slim|basic|developer widens the tool set.
+# YAGUARETE_FIREFOX_MCP_PERSIST=1 keeps the profile between sessions.
 set -euo pipefail
 
 readonly app_dir=/usr/lib/yaguarete-firefox-mcp
@@ -24,12 +25,28 @@ case "$preset" in
         ;;
 esac
 
+# PERSIST=1 keeps one profile in ~/.firefox-mcp across sessions, so a login
+# done by hand (e.g. LinkedIn) survives. Off by default: a fresh profile each run.
+persist_args=()
+case "${YAGUARETE_FIREFOX_MCP_PERSIST:-0}" in
+    1) persist_args=(--auto-profile) ;;
+    0) ;;
+    *)
+        echo "yaguarete-firefox-mcp: YAGUARETE_FIREFOX_MCP_PERSIST must be 0 or 1" >&2
+        exit 2
+        ;;
+esac
+
 : "${HOME:?HOME is not set}"
 : "${XDG_RUNTIME_DIR:?XDG_RUNTIME_DIR is not set}"
 
 data_dir="$HOME/.firefox-mcp"
 (umask 077 && mkdir -p "$data_dir/output")
 chmod 0700 "$data_dir"
+
+# Site allowlist + uBlock Origin. Seeded once, then the user's to edit.
+policies="$data_dir/policies.json"
+[[ -e "$policies" ]] || install -m0600 /usr/share/yaguarete-firefox-mcp/policies.json "$policies"
 
 # Telemetry and every background service that phones home, off explicitly
 # instead of trusting geckodriver's recommended prefs to keep doing it.
@@ -75,6 +92,7 @@ prefs=(
     services.settings.server=data:,#remote-settings-dummy/v1
     signon.rememberSignons=false
     browser.formfill.enable=false
+    dom.security.https_only_mode=true
 )
 pref_args=()
 for p in "${prefs[@]}"; do
@@ -92,6 +110,12 @@ bwrap_args=(
     --symlink usr/lib /lib
     --symlink usr/lib64 /lib64
     --ro-bind /etc /etc
+    # /etc/resolv.conf links into /run under systemd-resolved; without it DNS fails.
+    --ro-bind-try /run/systemd/resolve /run/systemd/resolve
+    # Firefox reads policies only from /etc/firefox/policies; /etc is read-only here.
+    --tmpfs /etc/firefox
+    --ro-bind-try /etc/firefox/pref /etc/firefox/pref
+    --ro-bind "$policies" /etc/firefox/policies/policies.json
     --proc /proc
     --dev /dev
     --tmpfs /dev/shm
@@ -136,4 +160,5 @@ exec /usr/bin/bwrap "${bwrap_args[@]}" -- \
     --firefox-path "$firefox_bin" \
     --tool-preset "$preset" \
     --disable-network-body-collection \
+    "${persist_args[@]}" \
     "${pref_args[@]}"

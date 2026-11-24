@@ -177,7 +177,8 @@ BuildRequires:  xtensor-devel
 %if 0%{?with_opencl} || 0%{?with_nvk} || 0%{?with_asahi} || 0%{?with_panfrost}
 BuildRequires:  clang-devel
 BuildRequires:  pkgconfig(SPIRV-Tools)
-BuildRequires:  pkgconfig(LLVMSPIRVLib)
+# spirv-llvm-translator22-devel also provides pkgconfig(LLVMSPIRVLib) and does not match llvm-devel
+BuildRequires:  spirv-llvm-translator-devel
 %endif
 %if 0%{?with_opencl} || 0%{?with_nvk}
 BuildRequires:  bindgen

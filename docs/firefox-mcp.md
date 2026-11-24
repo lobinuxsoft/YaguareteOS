@@ -13,9 +13,25 @@ No keys, tokens or cookies are needed or read. `YAGUARETE_FIREFOX_MCP_PRESET`
 (`slim` by default, `basic` or `developer`) widens the tool set; `basic` adds
 `evaluate_script`, downloads and extension install.
 
+`YAGUARETE_FIREFOX_MCP_PERSIST=1` keeps one profile in `~/.firefox-mcp/profile-*`
+between sessions, so a site you sign into by hand stays signed in:
+
+```json
+{ "mcpServers": { "firefox": { "command": "yaguarete-firefox-mcp",
+  "env": { "YAGUARETE_FIREFOX_MCP_PERSIST": "1" } } } }
+```
+
+Sign into that profile only the sites the agent needs: any page it visits
+can try prompt injection against the accounts signed in there. Passwords are
+never saved (`signon.rememberSignons=false`), session cookies are. Delete
+`~/.firefox-mcp/profile-*` to sign everything out. Files to upload (e.g. a
+CV) must live under `~/.firefox-mcp`; the sandbox sees nothing else in `$HOME`.
+
 ## What the sandbox gives
 
-- A fresh temporary Firefox profile per session: no logins, no saved passwords.
+- The image's Firefox RPM, never the user's Flatpak Firefox or its profile;
+  `-no-remote` keeps it from attaching to a running browser.
+- By default a fresh temporary profile per session: no logins, no saved passwords.
   Sign in by hand in the window if a task needs it; it is gone when the session ends.
 - `/usr` and `/etc` read-only, `$HOME` and `/tmp` empty and throwaway; only
   `~/.firefox-mcp` (0700) is writable. The caller's environment is cleared.
@@ -35,7 +51,6 @@ No keys, tokens or cookies are needed or read. `YAGUARETE_FIREFOX_MCP_PRESET`
   experimental tasks (not reachable over stdio) and a zod DoS on oversized
   client input. Fixed upstream only by a new firefox-mcp release.
 - **No request limits** beyond what the MCP SDK and Firefox enforce.
-- **Nested sandbox untested.** Firefox's own content sandbox needs a nested
-  user namespace inside bwrap; if the kernel refuses it, Firefox runs with a
-  weaker content sandbox.
+- **Persistent profile is a standing session.** With `PERSIST=1` the signed-in
+  accounts are reachable by every page the agent opens, across sessions.
 - **Upstream is pre-1.0** and moves fast (weekly releases); pins are bumped by hand.

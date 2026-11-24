@@ -7,6 +7,7 @@
 #
 # Usage from an MCP client: command `yaguarete-firefox-mcp`, no args.
 # YAGUARETE_FIREFOX_MCP_PRESET=slim|basic|developer widens the tool set.
+# YAGUARETE_FIREFOX_MCP_PERSIST=1 keeps the profile between sessions.
 set -euo pipefail
 
 readonly app_dir=/usr/lib/yaguarete-firefox-mcp
@@ -20,6 +21,18 @@ case "$preset" in
     slim | basic | developer) ;;
     *)
         echo "yaguarete-firefox-mcp: unsupported preset '$preset' (slim|basic|developer)" >&2
+        exit 2
+        ;;
+esac
+
+# PERSIST=1 keeps one profile in ~/.firefox-mcp across sessions, so a login
+# done by hand (e.g. LinkedIn) survives. Off by default: a fresh profile each run.
+persist_args=()
+case "${YAGUARETE_FIREFOX_MCP_PERSIST:-0}" in
+    1) persist_args=(--auto-profile) ;;
+    0) ;;
+    *)
+        echo "yaguarete-firefox-mcp: YAGUARETE_FIREFOX_MCP_PERSIST must be 0 or 1" >&2
         exit 2
         ;;
 esac
@@ -92,6 +105,8 @@ bwrap_args=(
     --symlink usr/lib /lib
     --symlink usr/lib64 /lib64
     --ro-bind /etc /etc
+    # /etc/resolv.conf links into /run under systemd-resolved; without it DNS fails.
+    --ro-bind-try /run/systemd/resolve /run/systemd/resolve
     --proc /proc
     --dev /dev
     --tmpfs /dev/shm
@@ -136,4 +151,5 @@ exec /usr/bin/bwrap "${bwrap_args[@]}" -- \
     --firefox-path "$firefox_bin" \
     --tool-preset "$preset" \
     --disable-network-body-collection \
+    "${persist_args[@]}" \
     "${pref_args[@]}"

@@ -1,0 +1,19 @@
+[Unit]
+Description=Refresh image caches after a YaguareteOS deployment change
+Documentation=https://gitlab.com/fedora/ostree/sig/-/work_items/103
+Documentation=https://gitlab.com/fedora/ostree/sig/-/work_items/62
+ConditionPathIsReadWrite=/var
+ConditionPathExists=/run/ostree-booted
+After=local-fs.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+StateDirectory=yaguarete/image-maintenance
+Environment=MAN_NO_LOCALE_WARNING=1
+ExecStart=/usr/libexec/yaguarete-image-maintenance
+Nice=19
+IOWeight=10
+
+[Install]
+WantedBy=multi-user.target

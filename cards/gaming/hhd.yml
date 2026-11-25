@@ -26,6 +26,7 @@ packages:
   - fpaste
 
 files:
+  - files/controllers.txt
   - files/hhd.conf
   - files/hhd-modprobe.conf
   - files/power-profiles-daemon.conf.in
@@ -79,6 +80,7 @@ postprocess: |
 
   # Add controller DB for hhd's external controller support
   install -Dm0644 /files/gamecontrollerdb.txt /usr/share/sdl/gamecontrollerdb.txt
+  cat /files/files/controllers.txt >> /usr/share/sdl/gamecontrollerdb.txt
 
   # hhd-ui branding: theme.tsx has no "yaguarete" case (falls back to the
   # generic gold theme), but `blood_orange` already exists with hue-rotates

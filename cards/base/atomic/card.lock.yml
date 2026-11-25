@@ -2,5 +2,5 @@ bootc:
   patch-sha: 7cde7bbe233ee45a40cff3d89d4f42b68a258d46
   upstream-sha: 8d8f11bc8454b4d58a9f67156b0133d30734c006
 flatpak:
-  patch-sha: 8726a5aef7b26dc9574dc0556b3b7e6bd4dd71ec
-  upstream-sha: ab5b6e63626bdcf17b01cc2316666dd05baee7be
+  patch-sha: a02d0ba48abe9aacc377de15699e5d8c024b5669
+  upstream-sha: 6d201a3ba875ef59cc3aec68ab3c2b269423cd79

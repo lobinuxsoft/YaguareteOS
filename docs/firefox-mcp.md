@@ -71,6 +71,9 @@ Delete the file to get the image default back on the next run.
   experimental tasks (not reachable over stdio) and a zod DoS on oversized
   client input. Fixed upstream only by a new firefox-mcp release.
 - **No request limits** beyond what the MCP SDK and Firefox enforce.
+- **A blocked page sticks for one navigation.** After `NS_ERROR_BLOCKED_BY_POLICY`,
+  the next `navigate_page` reports success but the tab stays on "Blocked Page".
+  Navigating again or `new_page` loads it; check `list_pages` before reading.
 - **Persistent profile is a standing session.** With `PERSIST=1` the signed-in
   accounts are reachable by every page the agent opens, across sessions.
 - **Upstream is pre-1.0** and moves fast (weekly releases); pins are bumped by hand.
